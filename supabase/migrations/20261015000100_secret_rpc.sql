@@ -7,7 +7,7 @@ create or replace function public.store_credential_secret(
   p_key           text
 )
 returns void
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, extensions
 as $$
 begin
   insert into public.credential_secrets (credential_id, file_name, file_cipher, fields_cipher)
@@ -24,7 +24,7 @@ $$;
 -- Called by the runner (service role) when a release needs a credential.
 create or replace function public.read_credential_secret(p_credential_id uuid, p_key text)
 returns table (file_name text, file_bytes bytea, fields_json text)
-language sql security definer set search_path = public
+language sql security definer set search_path = public, extensions
 as $$
   select file_name,
          case when file_cipher is null then null else pgp_sym_decrypt_bytea(file_cipher, p_key) end,
