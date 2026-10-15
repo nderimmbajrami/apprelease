@@ -44,7 +44,11 @@ class WorkflowConfig {
     if (workflows.isEmpty) return null;
 
     String? chosen;
-    for (final candidate in ['$platform-$track', platform, '$platform-workflow']) {
+    for (final candidate in [
+      '$platform-$track',
+      platform,
+      '$platform-workflow',
+    ]) {
       if (workflows.containsKey(candidate)) {
         chosen = candidate;
         break;
@@ -62,24 +66,37 @@ class WorkflowConfig {
   }
 
   static WorkflowConfig _parse(String id, Map<String, dynamic> raw) {
-    final env = ((raw['environment'] as Map?) ?? const {}).cast<String, dynamic>();
-    final versioning = ((raw['versioning'] as Map?) ?? const {}).cast<String, dynamic>();
+    final env = ((raw['environment'] as Map?) ?? const {})
+        .cast<String, dynamic>();
+    final versioning = ((raw['versioning'] as Map?) ?? const {})
+        .cast<String, dynamic>();
     return WorkflowConfig(
       id: id,
       name: (raw['name'] as String?) ?? id,
       flutter: '${env['flutter'] ?? 'stable'}',
-      androidSigning: [for (final s in (env['android_signing'] as List?) ?? const []) '$s'],
-      iosSigning: ((env['ios_signing'] as Map?) ?? const {}).cast<String, dynamic>(),
+      androidSigning: [
+        for (final s in (env['android_signing'] as List?) ?? const []) '$s',
+      ],
+      iosSigning: ((env['ios_signing'] as Map?) ?? const {})
+          .cast<String, dynamic>(),
       groups: [for (final g in (env['groups'] as List?) ?? const []) '$g'],
-      vars: {for (final e in ((env['vars'] as Map?) ?? const {}).entries) '${e.key}': '${e.value}'},
+      vars: {
+        for (final e in ((env['vars'] as Map?) ?? const {}).entries)
+          '${e.key}': '${e.value}',
+      },
       versioningSource: '${versioning['source'] ?? 'manual'}',
       scripts: [
         for (final s in (raw['scripts'] as List?) ?? const [])
           (name: '${(s as Map)['name'] ?? 'script'}', script: '${s['script']}'),
       ],
-      artifacts: [for (final a in (raw['artifacts'] as List?) ?? const []) '$a'],
-      publishing: ((raw['publishing'] as Map?) ?? const {}).cast<String, dynamic>(),
-      maxBuildDuration: Duration(minutes: (raw['max_build_duration'] as int?) ?? 60),
+      artifacts: [
+        for (final a in (raw['artifacts'] as List?) ?? const []) '$a',
+      ],
+      publishing: ((raw['publishing'] as Map?) ?? const {})
+          .cast<String, dynamic>(),
+      maxBuildDuration: Duration(
+        minutes: (raw['max_build_duration'] as int?) ?? 60,
+      ),
     );
   }
 }

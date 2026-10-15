@@ -32,11 +32,16 @@ class SigningFiles {
     return dir;
   }
 
-  Future<Map<String, dynamic>> _credential(Map<String, dynamic> release, String name) async {
+  Future<Map<String, dynamic>> _credential(
+    Map<String, dynamic> release,
+    String name,
+  ) async {
     final all = await api.credentials(release['team_id'] as String);
     return all.firstWhere(
       (c) => c['name'] == name,
-      orElse: () => throw StepFailed('Credential "$name" referenced in apprelease.yaml does not exist'),
+      orElse: () => throw StepFailed(
+        'Credential "$name" referenced in apprelease.yaml does not exist',
+      ),
     );
   }
 
@@ -47,10 +52,17 @@ class SigningFiles {
     required Map<String, String> env,
   }) async {
     if (workflow.androidSigning.isEmpty) {
-      await log('No android_signing in the workflow; the build signs itself or stays unsigned', stepId: stepId, level: 'warning');
+      await log(
+        'No android_signing in the workflow; the build signs itself or stays unsigned',
+        stepId: stepId,
+        level: 'warning',
+      );
       return;
     }
-    final credential = await _credential(release, workflow.androidSigning.first);
+    final credential = await _credential(
+      release,
+      workflow.androidSigning.first,
+    );
     final secret = await api.readSecret(credential['id'] as String, secretsKey);
     final dir = await _dir(env);
     final path = p.join(dir.path, secret.fileName ?? 'upload.keystore');
@@ -62,7 +74,10 @@ class SigningFiles {
     log
       ..mask(env['AR_KEYSTORE_PASSWORD']!)
       ..mask(env['AR_KEY_PASSWORD']!);
-    await log('Keystore ${credential['name']} written to \$AR_KEYSTORE_PATH', stepId: stepId);
+    await log(
+      'Keystore ${credential['name']} written to \$AR_KEYSTORE_PATH',
+      stepId: stepId,
+    );
   }
 
   /// `ios_signing:` → certificate + profile in a temporary keychain, and the
@@ -73,12 +88,15 @@ class SigningFiles {
     required Map<String, String> env,
   }) async {
     final signing = workflow.iosSigning;
-    if (signing.isEmpty) throw StepFailed('ios_signing is missing from the workflow');
+    if (signing.isEmpty) {
+      throw StepFailed('ios_signing is missing from the workflow');
+    }
 
     final all = await api.credentials(release['team_id'] as String);
     final key = all.firstWhere(
       (c) => c['kind'] == 'appStoreConnectKey',
-      orElse: () => throw StepFailed('No App Store Connect API key under Credentials'),
+      orElse: () =>
+          throw StepFailed('No App Store Connect API key under Credentials'),
     );
     final secret = await api.readSecret(key['id'] as String, secretsKey);
     final dir = await _dir(env);
@@ -121,10 +139,16 @@ class SigningFiles {
 </plist>
 ''');
     env['AR_EXPORT_OPTIONS'] = plist;
+    if (bundleIds.isNotEmpty) {
+      env['AR_BUNDLE_ID'] = bundleIds.first;
+    }
     // xcodebuild picks these up for cloud signing.
     env['AR_XCODE_AUTH_FLAGS'] =
         '-allowProvisioningUpdates -authenticationKeyPath $p8 -authenticationKeyID $keyId -authenticationKeyIssuerID ${secret.fields['issuerId']}';
-    await log('Signing files ready for ${bundleIds.join(', ')} · $distribution', stepId: stepId);
+    await log(
+      'Signing files ready for ${bundleIds.join(', ')} · $distribution',
+      stepId: stepId,
+    );
   }
 
   /// `groups: [google_play]` → the service account JSON as a variable the
@@ -140,7 +164,10 @@ class SigningFiles {
       if (match.isEmpty) continue;
       final credential = match.first;
       if (credential['kind'] != 'googlePlayServiceAccount') continue;
-      final secret = await api.readSecret(credential['id'] as String, secretsKey);
+      final secret = await api.readSecret(
+        credential['id'] as String,
+        secretsKey,
+      );
       final dir = await _dir(env);
       final path = p.join(dir.path, 'google-play.json');
       File(path).writeAsStringSync(secret.fields['json']!);
@@ -148,7 +175,10 @@ class SigningFiles {
       env['AR_GOOGLE_PLAY_JSON'] = path;
       final parsed = jsonDecode(secret.fields['json']!) as Map;
       log.mask('${parsed['private_key']}');
-      await log('Loaded group $group (${parsed['client_email']})', stepId: stepId);
+      await log(
+        'Loaded group $group (${parsed['client_email']})',
+        stepId: stepId,
+      );
     }
   }
 
@@ -158,7 +188,11 @@ class SigningFiles {
     if (path == null) return;
     final dir = Directory(path);
     if (dir.existsSync()) await dir.delete(recursive: true);
-    for (final key in ['AR_KEYSTORE_PASSWORD', 'AR_KEY_PASSWORD', 'GOOGLE_PLAY_SERVICE_ACCOUNT']) {
+    for (final key in [
+      'AR_KEYSTORE_PASSWORD',
+      'AR_KEY_PASSWORD',
+      'GOOGLE_PLAY_SERVICE_ACCOUNT',
+    ]) {
       env.remove(key);
     }
   }

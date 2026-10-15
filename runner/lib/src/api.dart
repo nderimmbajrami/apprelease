@@ -133,7 +133,10 @@ class SupabaseApi {
   }) async {
     final response = await _client.post(
       Uri.parse('$url/rest/v1/runners?on_conflict=id'),
-      headers: {..._headers, 'Prefer': 'resolution=merge-duplicates,return=minimal'},
+      headers: {
+        ..._headers,
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
       body: jsonEncode({
         'id': runnerId,
         'name': name,

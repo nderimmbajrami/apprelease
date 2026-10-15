@@ -22,7 +22,11 @@ class Checkout {
     if (dir.existsSync()) dir.deleteSync(recursive: true);
     dir.parent.createSync(recursive: true);
 
-    await log('\$ git clone --depth 1 --branch $branch ${_redact(repoUrl)} …', stepId: stepId, level: 'command');
+    await log(
+      '\$ git clone --depth 1 --branch $branch ${_redact(repoUrl)} …',
+      stepId: stepId,
+      level: 'command',
+    );
     final result = await Process.run('git', [
       'clone',
       '--depth',
@@ -40,7 +44,10 @@ class Checkout {
   }
 
   static Future<String> commit(Directory dir) async {
-    final result = await Process.run('git', ['rev-parse', 'HEAD'], workingDirectory: dir.path);
+    final result = await Process.run('git', [
+      'rev-parse',
+      'HEAD',
+    ], workingDirectory: dir.path);
     return (result.stdout as String).trim();
   }
 

@@ -21,3 +21,5 @@ export 'src/api.dart';
 export 'src/config.dart';
 export 'src/pipeline.dart';
 export 'src/runner.dart';
+export 'src/stores/app_store_connect.dart';
+export 'src/stores/google_play.dart';

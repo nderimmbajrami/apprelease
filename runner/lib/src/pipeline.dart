@@ -71,9 +71,10 @@ class Pipeline {
 
   String get releaseId => release['id'] as String;
   String get platform => release['platform'] as String;
-  late final List<Map<String, dynamic>> steps =
-      [for (final s in (release['release_steps'] as List? ?? const [])) (s as Map).cast<String, dynamic>()]
-        ..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
+  late final List<Map<String, dynamic>> steps = [
+    for (final s in (release['release_steps'] as List? ?? const []))
+      (s as Map).cast<String, dynamic>(),
+  ]..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
 
   /// Environment handed to every script. Grows as steps add to it.
   final env = <String, String>{'CI': 'true'};
@@ -83,7 +84,9 @@ class Pipeline {
 
   Future<void> run() async {
     final started = DateTime.now();
-    await log('Runner claimed release #${release['number']} · ${app['name']} · $platform');
+    await log(
+      'Runner claimed release #${release['number']} · ${app['name']} · $platform',
+    );
     try {
       await _step(0, _checkout);
       await _step(1, _toolchain);
@@ -131,7 +134,10 @@ class Pipeline {
 
   // ------------------------------------------------------------------ steps
 
-  Future<void> _step(int index, Future<void> Function(String stepId) body) async {
+  Future<void> _step(
+    int index,
+    Future<void> Function(String stepId) body,
+  ) async {
     if (await api.cancelRequested(releaseId)) throw Cancelled();
     final step = steps[index];
     final id = step['id'] as String;
@@ -190,19 +196,39 @@ class Pipeline {
     workflow = selected;
     env['AR_WORKFLOW'] = workflow.id;
     env.addAll(workflow.vars);
-    await log('apprelease.yaml found · workflow ${workflow.id}', stepId: stepId);
+    await log(
+      'apprelease.yaml found · workflow ${workflow.id}',
+      stepId: stepId,
+    );
   }
 
   Future<void> _toolchain(String stepId) async {
     if (workflow.flutter != 'stable' && workflow.flutter != 'fvm') {
-      await log('flutter version ${workflow.flutter} requested; using the installed one', stepId: stepId, level: 'warning');
+      await log(
+        'flutter version ${workflow.flutter} requested; using the installed one',
+        stepId: stepId,
+        level: 'warning',
+      );
     }
-    final version = await exec('flutter', ['--version', '--machine'], stepId: stepId, quiet: true);
+    final version = await exec(
+      'flutter',
+      ['--version', '--machine'],
+      stepId: stepId,
+      quiet: true,
+    );
     final parsed = jsonDecode(version) as Map;
     env['AR_FLUTTER_VERSION'] = '${parsed['frameworkVersion']}';
-    await log('Flutter ${parsed['frameworkVersion']} · ${parsed['channel']} · Dart ${parsed['dartSdkVersion']}', stepId: stepId);
+    await log(
+      'Flutter ${parsed['frameworkVersion']} · ${parsed['channel']} · Dart ${parsed['dartSdkVersion']}',
+      stepId: stepId,
+    );
     if (platform == 'ios') {
-      final xcode = await exec('xcodebuild', ['-version'], stepId: stepId, quiet: true);
+      final xcode = await exec(
+        'xcodebuild',
+        ['-version'],
+        stepId: stepId,
+        quiet: true,
+      );
       await log(xcode.trim().replaceAll('\n', ' · '), stepId: stepId);
     }
   }
@@ -211,58 +237,89 @@ class Pipeline {
       exec('flutter', ['pub', 'get'], stepId: stepId);
 
   Future<void> _versioning(String stepId) async {
-    final next = await Versioning(api: api, log: log, stepId: stepId, secretsKey: secretsKey).next(
-      source: workflow.versioningSource,
-      release: release,
-      app: app,
-      workflow: workflow,
-      env: env,
-    );
+    final next =
+        await Versioning(
+          api: api,
+          log: log,
+          stepId: stepId,
+          secretsKey: secretsKey,
+        ).next(
+          source: workflow.versioningSource,
+          release: release,
+          app: app,
+          workflow: workflow,
+          env: env,
+        );
     env['AR_BUILD_NUMBER'] = '$next';
     await api.updateRelease(releaseId, {'build_number': next});
     await log('AR_BUILD_NUMBER=$next', stepId: stepId, level: 'command');
   }
 
   Future<void> _iosSigning(String stepId) async {
-    await SigningFiles(api: api, log: log, stepId: stepId, secretsKey: secretsKey)
-        .prepareIos(release: release, workflow: workflow, env: env);
+    await SigningFiles(
+      api: api,
+      log: log,
+      stepId: stepId,
+      secretsKey: secretsKey,
+    ).prepareIos(release: release, workflow: workflow, env: env);
   }
 
   Future<void> _androidSigningCheck(String stepId) async {
     // The keystore was materialised before the build scripts ran (Gradle
     // needs it); this step only verifies the bundle is signed.
-    for (final artifact in artifacts.where((a) => a.endsWith('.aab') || a.endsWith('.apk'))) {
+    for (final artifact in artifacts.where(
+      (a) => a.endsWith('.aab') || a.endsWith('.apk'),
+    )) {
       await exec('jarsigner', ['-verify', artifact], stepId: stepId);
     }
   }
 
   Future<void> _buildScripts(String stepId) async {
     if (platform == 'android') {
-      await SigningFiles(api: api, log: log, stepId: stepId, secretsKey: secretsKey)
-          .prepareAndroid(release: release, workflow: workflow, env: env);
+      await SigningFiles(
+        api: api,
+        log: log,
+        stepId: stepId,
+        secretsKey: secretsKey,
+      ).prepareAndroid(release: release, workflow: workflow, env: env);
     }
-    await SigningFiles(api: api, log: log, stepId: stepId, secretsKey: secretsKey)
-        .loadGroups(release: release, workflow: workflow, env: env);
+    await SigningFiles(
+      api: api,
+      log: log,
+      stepId: stepId,
+      secretsKey: secretsKey,
+    ).loadGroups(release: release, workflow: workflow, env: env);
 
     for (final script in workflow.scripts) {
       await log('▶ ${script.name}', stepId: stepId, level: 'command');
-      await exec('bash', ['-e', '-o', 'pipefail', '-c', script.script], stepId: stepId);
+      await exec('bash', [
+        '-e',
+        '-o',
+        'pipefail',
+        '-c',
+        script.script,
+      ], stepId: stepId);
       if (await api.cancelRequested(releaseId)) throw Cancelled();
     }
     artifacts.addAll(await collectArtifacts(buildDir, workflow.artifacts));
     for (final artifact in artifacts) {
-      await log('artifact ${p.relative(artifact, from: buildDir.path)}', stepId: stepId);
+      await log(
+        'artifact ${p.relative(artifact, from: buildDir.path)}',
+        stepId: stepId,
+      );
     }
-    if (artifacts.isEmpty) throw StepFailed('No artifacts matched ${workflow.artifacts}');
+    if (artifacts.isEmpty) {
+      throw StepFailed('No artifacts matched ${workflow.artifacts}');
+    }
   }
 
   Future<void> _publish(String stepId) async {
-    await Publish(api: api, log: log, stepId: stepId, secretsKey: secretsKey).run(
-      release: release,
-      workflow: workflow,
-      env: env,
-      artifacts: artifacts,
-    );
+    await Publish(
+      api: api,
+      log: log,
+      stepId: stepId,
+      secretsKey: secretsKey,
+    ).run(release: release, workflow: workflow, env: env, artifacts: artifacts);
   }
 
   // ------------------------------------------------------------------ shell
@@ -274,7 +331,13 @@ class Pipeline {
     required String stepId,
     bool quiet = false,
   }) async {
-    if (!quiet) await log('\$ $executable ${arguments.join(' ')}', stepId: stepId, level: 'command');
+    if (!quiet) {
+      await log(
+        '\$ $executable ${arguments.join(' ')}',
+        stepId: stepId,
+        level: 'command',
+      );
+    }
     final process = await Process.start(
       executable,
       arguments,
@@ -289,7 +352,10 @@ class Pipeline {
           out.writeln(line);
           if (!quiet) await log(line, stepId: stepId, level: level);
         });
-    await Future.wait([pipe(process.stdout, 'info'), pipe(process.stderr, 'warning')]);
+    await Future.wait([
+      pipe(process.stdout, 'info'),
+      pipe(process.stderr, 'warning'),
+    ]);
     final code = await process.exitCode;
     if (code != 0) throw StepFailed('$executable exited with code $code');
     return out.toString();
@@ -297,7 +363,10 @@ class Pipeline {
 }
 
 /// Expands glob-ish patterns (`build/**/outputs/**/*.aab`) under [root].
-Future<List<String>> collectArtifacts(Directory root, List<String> patterns) async {
+Future<List<String>> collectArtifacts(
+  Directory root,
+  List<String> patterns,
+) async {
   final found = <String>[];
   await for (final entity in root.list(recursive: true, followLinks: false)) {
     if (entity is! File) continue;
@@ -311,6 +380,9 @@ Future<List<String>> collectArtifacts(Directory root, List<String> patterns) asy
   }
   return found;
 }
+
+/// Exposed for the tests.
+RegExp globToRegExpForTest(String glob) => _globToRegExp(glob);
 
 RegExp _globToRegExp(String glob) {
   final buffer = StringBuffer('^');
