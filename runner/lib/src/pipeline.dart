@@ -143,8 +143,14 @@ class Pipeline {
       });
       await log('$error', level: 'error');
     } finally {
-      // Whatever happened, the keys do not stay on disk.
+      // Whatever happened, neither the keys nor the source stay on disk.
       await SigningFiles.cleanUp(env);
+      try {
+        final dir = Directory(p.join(workspace.path, releaseId));
+        if (dir.existsSync()) await dir.delete(recursive: true);
+      } catch (error) {
+        stderr.writeln('could not remove checkout: $error');
+      }
     }
   }
 
