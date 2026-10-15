@@ -1,5 +1,7 @@
 # Supabase backend
 
+Project: `sghlhghffuwmfhrbkjfy` (eu-central-1).
+
 ```
 migrations/   schema, row level security, realtime, the claim/secret RPCs
 functions/    store-secret    · encrypts a credential's secret on the way in
@@ -26,9 +28,10 @@ functions/    store-secret    · encrypts a credential's secret on the way in
    supabase functions deploy delete-account
    ```
 
-4. *Authentication → Providers → Email*: decide whether to **confirm email**.
-   With confirmation on, `signUp` returns no session until the link is
-   clicked; the console then shows the sign-in screen, which is fine.
+4. Auth settings live in `config.toml` and are pushed with
+   `supabase config push`: the site URL and redirect list point at
+   publish.apprelease.store, and **email confirmation is off**, so a sign-up
+   returns a session straight away, which is what the console expects.
 
 5. Build the console with the project's URL and publishable key:
 
