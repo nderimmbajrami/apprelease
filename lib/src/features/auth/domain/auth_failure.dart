@@ -3,6 +3,8 @@ enum AuthFailure {
   invalidCredentials,
   emailAlreadyUsed,
   weakPassword,
+  invalidCode,
+  expiredCode,
   network,
   unknown,
 }

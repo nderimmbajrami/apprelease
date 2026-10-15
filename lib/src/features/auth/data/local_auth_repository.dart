@@ -29,9 +29,15 @@ class LocalAuthRepository implements AuthRepository {
   static const demoEmail = 'demo@apprelease.store';
   static const demoPassword = 'demo1234';
 
+  /// The confirmation code every demo sign-up accepts.
+  static const demoCode = '123456';
+
   final List<({AppUser user, String password})> _accounts;
   final _controller = StreamController<AppUser?>.broadcast();
   AppUser? _current;
+
+  /// Registrations waiting for their code.
+  final _pending = <String, ({String name, String password})>{};
 
   @override
   AppUser? get currentUser => _current;
@@ -58,7 +64,7 @@ class LocalAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUser> signUp({
+  Future<AppUser?> signUp({
     required String name,
     required String email,
     required String password,
@@ -67,17 +73,40 @@ class LocalAuthRepository implements AuthRepository {
     if (_accounts.any((a) => a.user.email == normalised)) {
       throw const AuthException(AuthFailure.emailAlreadyUsed);
     }
+    // Like the real backend with confirmation on: no session until the
+    // code from the mail is entered.
+    _pending[normalised] = (name: name.trim(), password: password);
+    return null;
+  }
+
+  @override
+  Future<AppUser> verifySignUpCode({
+    required String email,
+    required String code,
+  }) async {
+    final normalised = email.trim().toLowerCase();
+    final pending = _pending[normalised];
+    if (pending == null || code.trim() != demoCode) {
+      throw const AuthException(AuthFailure.invalidCode);
+    }
+    _pending.remove(normalised);
     final id = newId();
     final user = AppUser(
       id: id,
-      name: name.trim(),
+      name: pending.name,
       email: normalised,
       teamId: id,
     );
-    _accounts.add((user: user, password: password));
+    _accounts.add((user: user, password: pending.password));
     _set(user);
     return user;
   }
+
+  @override
+  Future<void> resendSignUpCode(String email) async {}
+
+  @override
+  Future<void> sendWelcomeMail() async {}
 
   @override
   Future<void> updateName(String name) async {

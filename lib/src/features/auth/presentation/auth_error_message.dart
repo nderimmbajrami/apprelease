@@ -11,6 +11,8 @@ String authErrorMessage(BuildContext context, Object error) {
       AuthFailure.invalidCredentials => l10n.invalidCredentials,
       AuthFailure.emailAlreadyUsed => l10n.emailAlreadyUsed,
       AuthFailure.weakPassword => l10n.weakPassword,
+      AuthFailure.invalidCode => l10n.invalidCode,
+      AuthFailure.expiredCode => l10n.expiredCode,
       AuthFailure.network => l10n.networkError,
       AuthFailure.unknown => error.detail ?? l10n.unknownError,
     };

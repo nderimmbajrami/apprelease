@@ -94,7 +94,7 @@ final class CredentialsStreamProvider
   }
 }
 
-String _$credentialsStreamHash() => r'eb4f26e074e530918c4bcabe7ee9a9fece2b7925';
+String _$credentialsStreamHash() => r'c9c10e72da737496e4d6bbcc69403f53d6b69ab9';
 
 /// The credentials of one kind, for the yaml generator and the forms.
 

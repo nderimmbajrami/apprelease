@@ -174,7 +174,7 @@ abstract class AppL10n {
   /// No description provided for @signUpExplain.
   ///
   /// In en, this message translates to:
-  /// **'Free plan, no credit card. You can add teammates later.'**
+  /// **'Free plan, no credit card. We email you a code to confirm the address.'**
   String get signUpExplain;
 
   /// No description provided for @demoHint.
@@ -1244,6 +1244,174 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Supabase'**
   String get backendSupabase;
+
+  /// No description provided for @enterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code'**
+  String get enterCode;
+
+  /// No description provided for @codeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a six-digit code to {email}. It is valid for one hour.'**
+  String codeSentTo(String email);
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get verificationCode;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code'**
+  String get resendCode;
+
+  /// No description provided for @resendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code in {seconds}s'**
+  String resendIn(int seconds);
+
+  /// No description provided for @changeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get changeEmail;
+
+  /// No description provided for @codeResent.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code is on its way'**
+  String get codeResent;
+
+  /// No description provided for @invalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is not right'**
+  String get invalidCode;
+
+  /// No description provided for @expiredCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code has expired. Request a new one.'**
+  String get expiredCode;
+
+  /// No description provided for @demoCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo: the code is 123456'**
+  String get demoCodeHint;
+
+  /// No description provided for @setupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your first release'**
+  String get setupTitle;
+
+  /// No description provided for @setupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.'**
+  String get setupSubtitle;
+
+  /// No description provided for @setupItemApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your application'**
+  String get setupItemApp;
+
+  /// No description provided for @setupItemAppBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Git URL of the Flutter project, the branch to build, and the package name or bundle identifier.'**
+  String get setupItemAppBody;
+
+  /// No description provided for @setupItemKeystore.
+  ///
+  /// In en, this message translates to:
+  /// **'Android upload keystore'**
+  String get setupItemKeystore;
+
+  /// No description provided for @setupItemKeystoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The .jks file plus its store password, key alias and key password. We never show it again, so keep your own copy.'**
+  String get setupItemKeystoreBody;
+
+  /// No description provided for @setupItemPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play service account'**
+  String get setupItemPlay;
+
+  /// No description provided for @setupItemPlayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A JSON key from Google Cloud, invited in Play Console with release permissions. Needed to upload and to read the build number.'**
+  String get setupItemPlayBody;
+
+  /// No description provided for @setupItemAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store Connect API key'**
+  String get setupItemAsc;
+
+  /// No description provided for @setupItemAscBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The .p8 file, its Key ID and the Issuer ID from App Store Connect → Users and Access → Integrations.'**
+  String get setupItemAscBody;
+
+  /// No description provided for @setupAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get setupAdd;
+
+  /// No description provided for @setupDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get setupDoneLabel;
+
+  /// No description provided for @setupFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the dashboard'**
+  String get setupFinish;
+
+  /// No description provided for @setupSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get setupSkip;
+
+  /// No description provided for @setupAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is in place. Open your application and start a release.'**
+  String get setupAllDone;
+
+  /// No description provided for @setupProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String setupProgress(int done, int total);
+
+  /// No description provided for @navSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup checklist'**
+  String get navSetup;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

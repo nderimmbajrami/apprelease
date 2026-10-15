@@ -9,6 +9,7 @@ class PreferencesService {
   const PreferencesService(this._prefs);
 
   static const _themeKey = 'theme_mode';
+  static const _setupKey = 'setup_dismissed';
 
   final SharedPreferences _prefs;
 
@@ -22,6 +23,12 @@ class PreferencesService {
 
   Future<void> writeThemeMode(ThemeMode mode) =>
       _prefs.setString(_themeKey, mode.name);
+
+  /// Whether the setup checklist was put away on this device.
+  bool readSetupDismissed() => _prefs.getBool(_setupKey) ?? false;
+
+  Future<void> writeSetupDismissed(bool value) =>
+      _prefs.setBool(_setupKey, value);
 }
 
 /// Overridden in `main()` once [SharedPreferences] has loaded.

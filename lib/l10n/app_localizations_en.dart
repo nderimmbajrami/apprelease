@@ -49,7 +49,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get signUpExplain =>
-      'Free plan, no credit card. You can add teammates later.';
+      'Free plan, no credit card. We email you a code to confirm the address.';
 
   @override
   String get demoHint => 'Demo: demo@apprelease.store / demo1234';
@@ -640,4 +640,100 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get backendSupabase => 'Supabase';
+
+  @override
+  String get enterCode => 'Enter the code';
+
+  @override
+  String codeSentTo(String email) {
+    return 'We sent a six-digit code to $email. It is valid for one hour.';
+  }
+
+  @override
+  String get verificationCode => 'Verification code';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get resendCode => 'Send a new code';
+
+  @override
+  String resendIn(int seconds) {
+    return 'Send a new code in ${seconds}s';
+  }
+
+  @override
+  String get changeEmail => 'Use a different email';
+
+  @override
+  String get codeResent => 'A new code is on its way';
+
+  @override
+  String get invalidCode => 'That code is not right';
+
+  @override
+  String get expiredCode => 'That code has expired. Request a new one.';
+
+  @override
+  String get demoCodeHint => 'Demo: the code is 123456';
+
+  @override
+  String get setupTitle => 'Set up your first release';
+
+  @override
+  String get setupSubtitle =>
+      'Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.';
+
+  @override
+  String get setupItemApp => 'Your application';
+
+  @override
+  String get setupItemAppBody =>
+      'The Git URL of the Flutter project, the branch to build, and the package name or bundle identifier.';
+
+  @override
+  String get setupItemKeystore => 'Android upload keystore';
+
+  @override
+  String get setupItemKeystoreBody =>
+      'The .jks file plus its store password, key alias and key password. We never show it again, so keep your own copy.';
+
+  @override
+  String get setupItemPlay => 'Google Play service account';
+
+  @override
+  String get setupItemPlayBody =>
+      'A JSON key from Google Cloud, invited in Play Console with release permissions. Needed to upload and to read the build number.';
+
+  @override
+  String get setupItemAsc => 'App Store Connect API key';
+
+  @override
+  String get setupItemAscBody =>
+      'The .p8 file, its Key ID and the Issuer ID from App Store Connect → Users and Access → Integrations.';
+
+  @override
+  String get setupAdd => 'Add';
+
+  @override
+  String get setupDoneLabel => 'Done';
+
+  @override
+  String get setupFinish => 'Go to the dashboard';
+
+  @override
+  String get setupSkip => 'Skip for now';
+
+  @override
+  String get setupAllDone =>
+      'Everything is in place. Open your application and start a release.';
+
+  @override
+  String setupProgress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String get navSetup => 'Setup checklist';
 }

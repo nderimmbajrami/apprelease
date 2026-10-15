@@ -60,51 +60,10 @@ class _PitchPane extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
 
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.paperDark, Color(0xFF111A33)],
-        ),
-      ),
+    return ColoredBox(
+      color: AppColors.ink,
       child: Stack(
         children: [
-          // A soft glow, like the hero on the website.
-          Positioned(
-            top: -120,
-            right: -80,
-            child: Container(
-              width: 420,
-              height: 420,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.indigo.withValues(alpha: .35),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -140,
-            left: -60,
-            child: Container(
-              width: 380,
-              height: 380,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.mintDark.withValues(alpha: .2),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(64, 56, 48, 56),
             child: Center(

@@ -94,7 +94,7 @@ final class ReleasesStreamProvider
   }
 }
 
-String _$releasesStreamHash() => r'52e7a12ea696eb51fed0445261d62dd99e0ef2c2';
+String _$releasesStreamHash() => r'506665358bec4fec367ad6d0cb34ffd72da8c597';
 
 /// The releases of one app, newest first.
 

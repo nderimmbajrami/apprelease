@@ -1,46 +1,42 @@
 import 'package:flutter/material.dart';
 
-/// The console's palette: the landing page's deep navy and indigo accent by
-/// night, white sheets on a cool grey ground by day. Only [AppTheme] reads
-/// these; widgets go through `Theme.of(context).colorScheme`.
+/// The console's palette, the same as the website: warm off-white paper,
+/// near-black ink, one green for "done" and "live". Flat; no gradients.
+/// Only [AppTheme] reads these; widgets go through `Theme.of(context)`.
 abstract final class AppColors {
   // ------------------------------------------------------------------ light
-  static const paper = Color(0xFFF5F7FB);
+  static const paper = Color(0xFFFAFAF7);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceMuted = Color(0xFFEEF2F8);
-  static const ink = Color(0xFF0F1B2D);
-  static const muted = Color(0xFF55657F);
-  static const line = Color(0xFFE1E7F0);
+  static const surfaceMuted = Color(0xFFF1F1EC);
+  static const ink = Color(0xFF111111);
+  static const muted = Color(0xFF4A4A46);
+  static const line = Color(0xFFE3E3DE);
 
-  /// The one colour that acts.
-  static const indigo = Color(0xFF4F6DF5);
-  static const indigoDeep = Color(0xFF3651C9);
-  static const indigoSoft = Color(0xFFE7ECFE);
+  /// The one colour that acts: buttons, the selected entry.
+  static const indigo = Color(0xFF111111);
+  static const indigoDeep = Color(0xFF000000);
+  static const indigoSoft = Color(0xFFF1F1EC);
 
-  static const mint = Color(0xFF0E9F6E);
-  static const amber = Color(0xFFB45309);
-  static const danger = Color(0xFFC0392B);
+  static const mint = Color(0xFF1D6B3F);
+  static const amber = Color(0xFF9A5B00);
+  static const danger = Color(0xFFB3261E);
 
   // ------------------------------------------------------------------- dark
-  static const paperDark = Color(0xFF070B14);
-  static const surfaceDark = Color(0xFF0F172A);
-  static const surfaceMutedDark = Color(0xFF162036);
-  static const inkDark = Color(0xFFE9EEF8);
-  static const mutedDark = Color(0xFF93A0B8);
-  static const lineDark = Color(0xFF1F2A40);
-  static const indigoDark = Color(0xFF7B93FF);
-  static const indigoSoftDark = Color(0xFF1C2747);
-  static const mintDark = Color(0xFF34D399);
-  static const amberDark = Color(0xFFFBBF24);
+  static const paperDark = Color(0xFF121210);
+  static const surfaceDark = Color(0xFF1A1A17);
+  static const surfaceMutedDark = Color(0xFF24241F);
+  static const inkDark = Color(0xFFECECE7);
+  static const mutedDark = Color(0xFFA3A39C);
+  static const lineDark = Color(0xFF2E2E29);
+  static const indigoDark = Color(0xFFECECE7);
+  static const indigoSoftDark = Color(0xFF2E2E29);
+  static const mintDark = Color(0xFF4CAF7D);
+  static const amberDark = Color(0xFFE0A24A);
   static const dangerDark = Color(0xFFF07167);
 
-  /// Step and release states, both brightnesses.
   static const running = indigo;
   static const runningDark = indigoDark;
 
-  /// Card shadow — barely there, but it lifts the cards off the page.
-  static const cardShadow = [
-    BoxShadow(color: Color(0x0A0F1B2D), blurRadius: 2, offset: Offset(0, 1)),
-    BoxShadow(color: Color(0x120F1B2D), blurRadius: 20, offset: Offset(0, 8)),
-  ];
+  /// Card shadow: none. Borders do the work.
+  static const cardShadow = <BoxShadow>[];
 }

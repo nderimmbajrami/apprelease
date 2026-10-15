@@ -189,7 +189,7 @@
     var buttons = toggle.querySelectorAll('button');
     function cycle(mode) {
       buttons.forEach(function (b) { b.classList.toggle('is-active', b.dataset.mode === mode); });
-      document.querySelectorAll('[data-monthly]').forEach(function (el) {
+      document.querySelectorAll('[data-yearly]').forEach(function (el) {
         el.textContent = mode === 'yearly' ? el.dataset.yearly : el.dataset.monthly;
       });
       document.querySelectorAll('[data-cycle-note]').forEach(function (el) {

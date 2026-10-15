@@ -8,6 +8,71 @@ part of 'auth_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// True from the moment a registration completes until the setup checklist
+/// has been shown once. The router reads it to send a new account there
+/// instead of to the dashboard.
+
+@ProviderFor(FreshSignUp)
+final freshSignUpProvider = FreshSignUpProvider._();
+
+/// True from the moment a registration completes until the setup checklist
+/// has been shown once. The router reads it to send a new account there
+/// instead of to the dashboard.
+final class FreshSignUpProvider extends $NotifierProvider<FreshSignUp, bool> {
+  /// True from the moment a registration completes until the setup checklist
+  /// has been shown once. The router reads it to send a new account there
+  /// instead of to the dashboard.
+  FreshSignUpProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'freshSignUpProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$freshSignUpHash();
+
+  @$internal
+  @override
+  FreshSignUp create() => FreshSignUp();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$freshSignUpHash() => r'72acfe33412fb242bc0fa2fceab72b1d857df6ee';
+
+/// True from the moment a registration completes until the setup checklist
+/// has been shown once. The router reads it to send a new account there
+/// instead of to the dashboard.
+
+abstract class _$FreshSignUp extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 /// Drives the sign-in / sign-up forms. State is the in-flight request, not the
 /// session — the session lives in [authStateChangesProvider].
 
@@ -39,7 +104,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'2c5f9b0f26b4ac17fd65961d725dcd232b3bc9ee';
+String _$authControllerHash() => r'c4d8356920d0a994c262d428e3d8c212674b569e';
 
 /// Drives the sign-in / sign-up forms. State is the in-flight request, not the
 /// session — the session lives in [authStateChangesProvider].

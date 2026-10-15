@@ -92,7 +92,7 @@ final class AppsStreamProvider
   }
 }
 
-String _$appsStreamHash() => r'bec53305d16ca26241f860ee467348e010ad4875';
+String _$appsStreamHash() => r'392afc2ffee1b38d230678928298d899b673e570';
 
 /// One app by id, or null while the list loads or when it is gone.
 

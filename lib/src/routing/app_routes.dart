@@ -4,6 +4,7 @@ enum AppRoute {
   signUp('/sign-up'),
 
   home('/'),
+  setup('/setup'),
   apps('/apps'),
   appNew('new'),
   appDetail(':appId'),

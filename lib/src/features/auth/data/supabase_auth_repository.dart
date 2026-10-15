@@ -76,7 +76,7 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AppUser> signUp({
+  Future<AppUser?> signUp({
     required String name,
     required String email,
     required String password,
@@ -89,14 +89,51 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       final user = response.user;
       if (user == null) throw const AuthException(AuthFailure.unknown);
-      // A trigger creates the profile and the team; the name travels in the
-      // metadata so it is there from the first row.
+      // With confirmation on there is no session yet: the code that was
+      // mailed has to come back first. A trigger already made the profile
+      // and the team.
+      if (response.session == null) return null;
       final loaded = await _load(user);
       _emit(loaded);
       return loaded;
     } on supabase.AuthException catch (error) {
       throw AuthException(_map(error), error.message);
     }
+  }
+
+  @override
+  Future<AppUser> verifySignUpCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await _client.auth.verifyOTP(
+        type: OtpType.signup,
+        email: email.trim(),
+        token: code.trim(),
+      );
+      final user = response.user;
+      if (user == null) throw const AuthException(AuthFailure.invalidCode);
+      final loaded = await _load(user);
+      _emit(loaded);
+      return loaded;
+    } on supabase.AuthException catch (error) {
+      throw AuthException(_map(error), error.message);
+    }
+  }
+
+  @override
+  Future<void> resendSignUpCode(String email) async {
+    try {
+      await _client.auth.resend(type: OtpType.signup, email: email.trim());
+    } on supabase.AuthException catch (error) {
+      throw AuthException(_map(error), error.message);
+    }
+  }
+
+  @override
+  Future<void> sendWelcomeMail() async {
+    await _client.functions.invoke('notify-signup');
   }
 
   @override
@@ -135,6 +172,10 @@ class SupabaseAuthRepository implements AuthRepository {
     }
     if (message.contains('already registered')) {
       return AuthFailure.emailAlreadyUsed;
+    }
+    if (message.contains('expired')) return AuthFailure.expiredCode;
+    if (message.contains('token') || message.contains('otp')) {
+      return AuthFailure.invalidCode;
     }
     if (message.contains('password')) return AuthFailure.weakPassword;
     if (message.contains('network') || message.contains('socket')) {

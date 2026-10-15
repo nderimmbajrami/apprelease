@@ -7,10 +7,12 @@ import '../features/apps/presentation/add_app_screen.dart';
 import '../features/apps/presentation/app_detail_screen.dart';
 import '../features/apps/presentation/apps_screen.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/sign_in_screen.dart';
 import '../features/auth/presentation/sign_up_screen.dart';
 import '../features/credentials/presentation/credentials_screen.dart';
 import '../features/home/presentation/dashboard_screen.dart';
+import '../features/onboarding/presentation/setup_screen.dart';
 import '../features/releases/presentation/release_detail_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'app_routes.dart';
@@ -56,7 +58,12 @@ GoRouter goRouter(Ref ref) {
           location == AppRoute.signIn.path || location == AppRoute.signUp.path;
 
       if (user == null) return isOnAuthScreen ? null : AppRoute.signIn.path;
-      if (isOnAuthScreen) return AppRoute.home.path;
+      if (isOnAuthScreen) {
+        // A brand new account is asked for what a release needs first.
+        return ref.read(freshSignUpProvider)
+            ? AppRoute.setup.path
+            : AppRoute.home.path;
+      }
       return null;
     },
     routes: [
@@ -78,6 +85,11 @@ GoRouter goRouter(Ref ref) {
             path: AppRoute.home.path,
             name: AppRoute.home.name,
             builder: (context, state) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: AppRoute.setup.path,
+            name: AppRoute.setup.name,
+            builder: (context, state) => const SetupScreen(),
           ),
           GoRoute(
             path: AppRoute.apps.path,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_spacing.dart';
 
-/// The AppRelease mark: an upward arrow on a deep tile, same as the website.
+/// The AppRelease mark: a white arrow on a black tile, same as the website.
 class BrandMark extends StatelessWidget {
   const BrandMark({this.size = 36, super.key});
 
@@ -14,21 +14,13 @@ class BrandMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1222),
-        borderRadius: BorderRadius.circular(size / 4),
-        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+        color: const Color(0xFF111111),
+        borderRadius: BorderRadius.circular(size / 4.2),
       ),
-      child: ShaderMask(
-        shaderCallback: (rect) => const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF5B7CFA), Color(0xFF9B6BFF), Color(0xFF34D399)],
-        ).createShader(rect),
-        child: Icon(
-          Icons.arrow_upward_rounded,
-          size: size * .62,
-          color: Colors.white,
-        ),
+      child: Icon(
+        Icons.arrow_upward_rounded,
+        size: size * .62,
+        color: Colors.white,
       ),
     );
   }
@@ -40,7 +32,7 @@ class BrandLockup extends StatelessWidget {
 
   final double size;
 
-  /// White text, for the dark pitch pane.
+  /// White text, for the dark pane.
   final bool light;
 
   @override

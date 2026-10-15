@@ -2,7 +2,6 @@
   "@@locale": "en",
   "appTitle": "AppRelease",
   "appTagline": "Ship your Flutter app to both stores.",
-
   "signIn": "Sign in",
   "signUp": "Create account",
   "signOut": "Sign out",
@@ -14,7 +13,7 @@
   "welcomeBack": "Welcome back",
   "signInExplain": "Sign in to the release console.",
   "signUpTitle": "Create your account",
-  "signUpExplain": "Free plan, no credit card. You can add teammates later.",
+  "signUpExplain": "Free plan, no credit card. We email you a code to confirm the address.",
   "demoHint": "Demo: demo@apprelease.store / demo1234",
   "fillDemo": "Fill demo account",
   "authPitch": "Build, sign and publish Flutter apps to Google Play and the App Store from one apprelease.yaml.",
@@ -22,7 +21,6 @@
   "authPoint2": "Build numbers taken straight from the store",
   "authPoint3": "Live logs, release history, email when it is done",
   "authFooterNote": "Flutter first. React Native next.",
-
   "invalidCredentials": "Wrong email or password",
   "emailAlreadyUsed": "This email is already registered",
   "weakPassword": "Choose a longer password",
@@ -48,14 +46,12 @@
   "notFoundMessage": "The address may have changed, or it never existed.",
   "backHome": "Back to the dashboard",
   "openDocs": "Docs",
-
   "navDashboard": "Dashboard",
   "navApps": "Applications",
   "navCredentials": "Credentials",
   "navSettings": "Settings",
   "sectionBuild": "Build",
   "sectionTeam": "Team",
-
   "dashboardTitle": "Dashboard",
   "dashboardSubtitle": "What shipped, what is shipping, what failed.",
   "statApps": "Applications",
@@ -73,18 +69,28 @@
   "stepAddCredentialsBody": "Upload the Android keystore and the App Store Connect API key.",
   "stepRelease": "Start a release",
   "stepReleaseBody": "Pick a platform, a track and a version. Watch the log live.",
-
   "appsTitle": "Applications",
   "appsSubtitle": "{count, plural, =0{No applications yet} =1{1 application} other{{count} applications}}",
-  "@appsSubtitle": {"placeholders": {"count": {"type": "int"}}},
+  "@appsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "addApplication": "Add application",
   "noAppsTitle": "No applications yet",
   "noAppsMessage": "Connect the repository that holds your Flutter project. AppRelease scans it for apprelease.yaml.",
   "lastRelease": "Last release",
   "never": "never",
   "releasesCount": "{count, plural, =0{no releases} =1{1 release} other{{count} releases}}",
-  "@releasesCount": {"placeholders": {"count": {"type": "int"}}},
-
+  "@releasesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "newAppTitle": "Add application",
   "newAppStepRepo": "Repository",
   "newAppStepDetails": "Details",
@@ -108,23 +114,33 @@
   "finishAddApp": "Finish: Add application",
   "appAdded": "Application added",
   "pickAtLeastOnePlatform": "Choose at least one platform",
-
   "tabReleases": "Releases",
   "tabConfig": "Config",
   "tabSettings": "Settings",
   "startRelease": "Start release",
   "noReleasesForApp": "This application has not been released yet.",
   "releaseNumber": "Release #{number}",
-  "@releaseNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@releaseNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "configExplain": "Commit this file as apprelease.yaml in the root of the repository. It is generated from the application's settings and the credentials you have added.",
   "configMissingCredentials": "Add credentials to fill in the signing and publishing sections.",
   "regenerate": "Regenerate",
   "appSettingsExplain": "The runner reads these when a release starts.",
   "deleteApp": "Delete application",
   "deleteAppConfirm": "Delete {name}? Its releases and logs are deleted with it. Credentials stay.",
-  "@deleteAppConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "@deleteAppConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "appSaved": "Saved",
-
   "releaseTitle": "Release",
   "releaseTarget": "Platform",
   "releaseTrack": "Track",
@@ -132,21 +148,32 @@
   "releaseBuildNumber": "Build number",
   "releaseBuildNumberHint": "Left empty, the next number is taken from the store.",
   "releaseExplain": "The runner checks out {branch}, builds, signs and uploads. You can watch the log while it runs.",
-  "@releaseExplain": {"placeholders": {"branch": {"type": "String"}}},
+  "@releaseExplain": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
   "releaseQueued": "Release queued",
   "cancelRelease": "Cancel release",
   "rerunRelease": "Run again",
   "releaseLog": "Log",
   "releaseSteps": "Steps",
   "releaseStartedBy": "Started by {name}",
-  "@releaseStartedBy": {"placeholders": {"name": {"type": "String"}}},
+  "@releaseStartedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "releaseCommit": "Commit",
   "releaseDuration": "Duration",
   "releaseArtifacts": "Artifacts",
   "waitingForRunner": "Waiting for a runner…",
   "logEmpty": "The log appears here as soon as the runner starts.",
   "downloadLog": "Download log",
-
   "statusQueued": "Queued",
   "statusRunning": "Running",
   "statusSucceeded": "Published",
@@ -157,14 +184,12 @@
   "stepSucceeded": "Done",
   "stepFailed": "Failed",
   "stepSkipped": "Skipped",
-
   "trackInternal": "Internal testing",
   "trackAlpha": "Closed testing (alpha)",
   "trackBeta": "Open testing (beta)",
   "trackProduction": "Production",
   "trackTestflight": "TestFlight",
   "trackAppStore": "App Store review",
-
   "credentialsTitle": "Credentials",
   "credentialsSubtitle": "Signing keys and store access. Encrypted at rest, decrypted only on the runner.",
   "addCredential": "Add credential",
@@ -180,7 +205,16 @@
   "credentialNameHint": "Used in apprelease.yaml, e.g. upload_keystore",
   "chooseFile": "Choose file",
   "fileChosen": "{name} · {size}",
-  "@fileChosen": {"placeholders": {"name": {"type": "String"}, "size": {"type": "String"}}},
+  "@fileChosen": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "keystorePassword": "Keystore password",
   "keyAlias": "Key alias",
   "keyPassword": "Key password",
@@ -192,12 +226,23 @@
   "credentialAdded": "Credential added",
   "deleteCredential": "Delete credential",
   "deleteCredentialConfirm": "Delete {name}? Workflows that reference it will fail until it is replaced.",
-  "@deleteCredentialConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "@deleteCredentialConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "addedOn": "Added {date}",
-  "@addedOn": {"placeholders": {"date": {"type": "String"}}},
+  "@addedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "fileRequired": "Choose a file",
   "invalidJson": "This is not valid JSON",
-
   "settingsTitle": "Settings",
   "settingsSubtitle": "Your account and how the console looks.",
   "profile": "Profile",
@@ -212,5 +257,57 @@
   "profileSaved": "Profile saved",
   "backendLabel": "Backend",
   "backendLocal": "Demo data (in memory)",
-  "backendSupabase": "Supabase"
+  "backendSupabase": "Supabase",
+  "enterCode": "Enter the code",
+  "codeSentTo": "We sent a six-digit code to {email}. It is valid for one hour.",
+  "@codeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "verificationCode": "Verification code",
+  "verify": "Verify",
+  "resendCode": "Send a new code",
+  "resendIn": "Send a new code in {seconds}s",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "changeEmail": "Use a different email",
+  "codeResent": "A new code is on its way",
+  "invalidCode": "That code is not right",
+  "expiredCode": "That code has expired. Request a new one.",
+  "demoCodeHint": "Demo: the code is 123456",
+  "setupTitle": "Set up your first release",
+  "setupSubtitle": "Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.",
+  "setupItemApp": "Your application",
+  "setupItemAppBody": "The Git URL of the Flutter project, the branch to build, and the package name or bundle identifier.",
+  "setupItemKeystore": "Android upload keystore",
+  "setupItemKeystoreBody": "The .jks file plus its store password, key alias and key password. We never show it again, so keep your own copy.",
+  "setupItemPlay": "Google Play service account",
+  "setupItemPlayBody": "A JSON key from Google Cloud, invited in Play Console with release permissions. Needed to upload and to read the build number.",
+  "setupItemAsc": "App Store Connect API key",
+  "setupItemAscBody": "The .p8 file, its Key ID and the Issuer ID from App Store Connect → Users and Access → Integrations.",
+  "setupAdd": "Add",
+  "setupDoneLabel": "Done",
+  "setupFinish": "Go to the dashboard",
+  "setupSkip": "Skip for now",
+  "setupAllDone": "Everything is in place. Open your application and start a release.",
+  "setupProgress": "{done} of {total} done",
+  "@setupProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "navSetup": "Setup checklist"
 }

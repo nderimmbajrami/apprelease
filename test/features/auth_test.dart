@@ -35,6 +35,22 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Create account'));
     await tester.pumpAndSettle();
 
+    // The address has to be confirmed with the mailed code first.
+    expect(find.text('Enter the code'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, '000000');
+    await tester.tap(find.widgetWithText(FilledButton, 'Verify'));
+    await tester.pumpAndSettle();
+    expect(find.text('That code is not right'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, '123456');
+    await tester.tap(find.widgetWithText(FilledButton, 'Verify'));
+    await tester.pumpAndSettle();
+
+    // A new account lands on the checklist, then on an empty dashboard.
+    expect(find.text('Set up your first release'), findsOneWidget);
+    expect(find.text('0 of 4 done'), findsOneWidget);
+    await tester.tap(find.text('Skip for now'));
+    await tester.pumpAndSettle();
     expect(find.text('Getting started'), findsOneWidget);
     expect(find.text('No releases yet'), findsOneWidget);
   });

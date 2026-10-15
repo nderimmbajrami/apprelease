@@ -16,11 +16,26 @@ abstract interface class AuthRepository {
 
   Future<AppUser> signIn({required String email, required String password});
 
-  Future<AppUser> signUp({
+  /// Registration. Returns null when the backend wants the address
+  /// confirmed first; the screen then asks for the code that was mailed.
+  Future<AppUser?> signUp({
     required String name,
     required String email,
     required String password,
   });
+
+  /// Completes a sign-up with the six-digit code from the confirmation mail.
+  Future<AppUser> verifySignUpCode({
+    required String email,
+    required String code,
+  });
+
+  /// Mails the confirmation code once more.
+  Future<void> resendSignUpCode(String email);
+
+  /// Greets a brand new account and tells the team. The backend sends it
+  /// once, whichever path asked.
+  Future<void> sendWelcomeMail();
 
   Future<void> updateName(String name);
 
