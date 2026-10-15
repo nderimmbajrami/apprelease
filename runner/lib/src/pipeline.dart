@@ -78,6 +78,10 @@ class Pipeline {
 
   /// Environment handed to every script. Grows as steps add to it.
   final env = <String, String>{'CI': 'true'};
+
+  /// Steps that reached a final state, so a failure later does not mark
+  /// them as skipped.
+  final _finished = <String>{};
   late Directory buildDir;
   late WorkflowConfig workflow;
   final artifacts = <String>[];
@@ -159,11 +163,13 @@ class Pipeline {
     });
     try {
       await body(id);
+      _finished.add(id);
       await api.updateStep(id, {
         'status': 'succeeded',
         'finished_at': DateTime.now().toUtc().toIso8601String(),
       });
     } catch (_) {
+      _finished.add(id);
       await api.updateStep(id, {
         'status': 'failed',
         'finished_at': DateTime.now().toUtc().toIso8601String(),
@@ -174,8 +180,9 @@ class Pipeline {
 
   Future<void> _skipRemaining() async {
     for (final step in steps) {
-      if (step['status'] == 'pending' || step['status'] == 'running') {
-        await api.updateStep(step['id'] as String, {'status': 'skipped'});
+      final id = step['id'] as String;
+      if (!_finished.contains(id)) {
+        await api.updateStep(id, {'status': 'skipped'});
       }
     }
   }
