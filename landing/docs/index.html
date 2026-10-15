@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AppRelease Documentation</title>
+<meta name="description" content="Learn how to use AppRelease to build, sign and publish your Flutter app to Google Play and the App Store.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/">
+<meta property="og:title" content="AppRelease Documentation">
+<meta property="og:description" content="Learn how to use AppRelease to build, sign and publish your Flutter app to Google Play and the App Store.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261015">
+<link rel="stylesheet" href="/docs.css?v=20261015">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/#product" data-nav="product">Product</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/#product">Product</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/" class="is-active">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/">Android code signing</a>
+<a href="/docs/ios-signing/">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><h1>AppRelease Documentation</h1>
+<p class="lead">Learn how to use AppRelease to build, sign and publish your mobile apps.</p>
+<div class="docs-cards">
+ <a class="docs-card" href="/docs/flutter/"><h3>Quick start</h3><p>From an empty account to a build on TestFlight and Google Play.</p><ul><li>Flutter</li><li>React Native <small>(soon)</small></li></ul></a>
+ <a class="docs-card" href="/docs/yaml/"><h3>apprelease.yaml</h3><p>Every key in the configuration file, with defaults and examples.</p><ul><li>Workflows and environment</li><li>Scripts and artifacts</li><li>Publishing</li></ul></a>
+ <a class="docs-card" href="/docs/android-signing/"><h3>Android</h3><p>Keystores, Gradle signing and Google Play.</p><ul><li>Android code signing</li><li>Google Play publishing</li></ul></a>
+ <a class="docs-card" href="/docs/ios-signing/"><h3>iOS</h3><p>App Store Connect API keys, automatic signing and TestFlight.</p><ul><li>iOS code signing</li><li>App Store Connect publishing</li></ul></a>
+</div>
+<h2 id="how-it-fits">How the pieces fit together</h2>
+<p>AppRelease has three parts. The <strong>console</strong> at <a href="https://publish.apprelease.store">publish.apprelease.store</a> is where apps, credentials and releases live. The <strong>runner</strong> is the machine that checks out your code, builds and uploads. And <strong>apprelease.yaml</strong> in your repository tells the runner what to do.</p>
+<p>A release starts in the console (or from a push, once triggers are on). The runner claims it, fetches the credentials the workflow names, runs the scripts, publishes the artifacts and streams the log back. When it is done you get an email.</p>
+<div class="note note-tip"><b>Coming from Codemagic?</b> The file structure is deliberately similar. Rename <code>codemagic.yaml</code>, swap <code>CM_</code> variables for <code>AR_</code> and check the <a href="/docs/yaml/">reference</a> for the few keys that differ.</div>
+<section class="docs-help">
+ <h2>Getting help and support</h2>
+ <p><strong>Email</strong> — <a href="mailto:support@apprelease.store">support@apprelease.store</a>, answered within a business day.<br><strong>In the console</strong> — every failed release has a "Send to support" button that attaches the log.</p>
+</section>
+</article></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/#product">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261015"></script>
+</body>
+</html>

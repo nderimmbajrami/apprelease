@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Android code signing – AppRelease Docs</title>
+<meta name="description" content="Sign Android apps on AppRelease: generate a keystore, upload it, reference it in apprelease.yaml and wire it into Gradle.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/android-signing/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/android-signing/">
+<meta property="og:title" content="Android code signing – AppRelease Docs">
+<meta property="og:description" content="Sign Android apps on AppRelease: generate a keystore, upload it, reference it in apprelease.yaml and wire it into Gradle.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261015">
+<link rel="stylesheet" href="/docs.css?v=20261015">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/#product" data-nav="product">Product</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/#product">Product</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/" class="is-active">Android code signing</a>
+<a href="/docs/ios-signing/">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><nav class="crumbs" aria-label="Breadcrumb"><a href="/docs/">Docs</a> <span>›</span> <span>Code signing</span> <span>›</span> <span>Android</span></nav><h1>Android code signing</h1>
+<p class="lead">Every Android app is signed with a key before it reaches Google Play. AppRelease keeps the keystore for you and hands it to the build.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>You upload the keystore once, with its passwords, under a <strong>reference name</strong>. A workflow lists that name under <code>android_signing</code>. Before the scripts run, the runner writes the keystore to a temporary path and exports four environment variables; your Gradle file reads them. When the build ends, the file is deleted.</p>
+<h2 id="upload-key-vs-app-signing-key">Upload key vs app signing key</h2>
+<p>With <strong>Play App Signing</strong> (the default for every app created since 2021), Google holds the key that signs what users install, and you sign uploads with a separate <strong>upload key</strong>. That upload key is what you give AppRelease. If you lose it, Google can reset it; if you lose the app signing key of an app that opted out of Play App Signing, nobody can.</p>
+<h2 id="generating-a-keystore">Generating a keystore</h2>
+<div class="code"><pre data-lang="bash"><code>keytool <span class="k">-genkey</span> <span class="k">-v</span> <span class="k">-keystore</span> upload.keystore <span class="k">-storetype</span> JKS \
+        <span class="k">-keyalg</span> RSA <span class="k">-keysize</span> 2048 <span class="k">-validity</span> 10000 <span class="k">-alias</span> upload</code></pre></div>
+<p>Keytool asks for a keystore password, then for a key password, then for your name and organisation. The values do not matter to the stores; the passwords do.</p>
+<h2 id="uploading">Uploading the keystore</h2>
+<ol class="docs-steps">
+ <li>Open <strong>Team settings</strong> → <strong>Code signing identities</strong> → <strong>Android keystores</strong>.</li>
+ <li>Drop the <code>.keystore</code> or <code>.jks</code> file into the box.</li>
+ <li>Enter the keystore password, the key alias and the key password. AppRelease checks them against the file before saving.</li>
+ <li>Choose a reference name, for example <code>upload_keystore</code>.</li>
+ <li>Click <strong>Add keystore</strong>.</li>
+</ol>
+<div class="note note-warn"><b>Keep your own copy.</b> The uploaded keystore cannot be downloaded. Store the file and the passwords in a password manager; every future release has to be signed with the same key.</div>
+<h2 id="referencing">Referencing it in apprelease.yaml</h2>
+<div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
+  <span class="k">android-workflow</span>:
+    <span class="k">environment</span>:
+      <span class="k">android_signing</span>:
+        - upload_keystore</code></pre></div>
+<table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+ <tr><td><code>AR_KEYSTORE_PATH</code></td><td>Absolute path of the keystore on the runner</td></tr>
+ <tr><td><code>AR_KEYSTORE_PASSWORD</code></td><td>Keystore password</td></tr>
+ <tr><td><code>AR_KEY_ALIAS</code></td><td>Key alias</td></tr>
+ <tr><td><code>AR_KEY_PASSWORD</code></td><td>Key alias password</td></tr>
+</tbody></table>
+<h2 id="gradle">Wiring it into Gradle</h2>
+<p>Flutter's template reads <code>key.properties</code>; keep that for local builds and add the CI branch:</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">build.gradle.kts</button><button role="tab" aria-selected="false">build.gradle</button></div>
+ <div class="tabs-pane is-active" role="tabpanel"><div class="code"><pre data-lang="kotlin"><code><span class="k">android</span> {
+    <span class="k">signingConfigs</span> {
+        create(<span class="s">&quot;<span class="k">release</span>&quot;</span>) {
+            <span class="k">if</span> (<span class="k">System</span>.<span class="k">getenv</span>(<span class="s">&quot;CI&quot;</span>) != null) {
+                <span class="k">storeFile</span> = <span class="k">file</span>(<span class="k">System</span>.<span class="k">getenv</span>(<span class="s">&quot;AR_KEYSTORE_PATH&quot;</span>))
+                <span class="k">storePassword</span> = <span class="k">System</span>.<span class="k">getenv</span>(<span class="s">&quot;AR_KEYSTORE_PASSWORD&quot;</span>)
+                <span class="k">keyAlias</span> = <span class="k">System</span>.<span class="k">getenv</span>(<span class="s">&quot;AR_KEY_ALIAS&quot;</span>)
+                <span class="k">keyPassword</span> = <span class="k">System</span>.<span class="k">getenv</span>(<span class="s">&quot;AR_KEY_PASSWORD&quot;</span>)
+            } <span class="k">else</span> {
+                <span class="k">keyAlias</span> = keystoreProperties[<span class="s">&quot;<span class="k">keyAlias</span>&quot;</span>] as String?
+                <span class="k">keyPassword</span> = keystoreProperties[<span class="s">&quot;<span class="k">keyPassword</span>&quot;</span>] as String?
+                <span class="k">storeFile</span> = (keystoreProperties[<span class="s">&quot;<span class="k">storeFile</span>&quot;</span>] as String?)?.let { <span class="k">file</span>(it) }
+                <span class="k">storePassword</span> = keystoreProperties[<span class="s">&quot;<span class="k">storePassword</span>&quot;</span>] as String?
+            }
+        }
+    }
+    <span class="k">buildTypes</span> {
+        getByName(<span class="s">&quot;<span class="k">release</span>&quot;</span>) {
+            <span class="k">signingConfig</span> = <span class="k">signingConfigs</span>.getByName(<span class="s">&quot;<span class="k">release</span>&quot;</span>)
+        }
+    }
+}</code></pre></div></div>
+ <div class="tabs-pane" role="tabpanel"><div class="code"><pre data-lang="groovy"><code><span class="k">android</span> {
+    <span class="k">signingConfigs</span> {
+        <span class="k">release</span> {
+            <span class="k">if</span> (<span class="k">System</span>.<span class="k">getenv</span>()[<span class="s">&quot;CI&quot;</span>]) {
+                <span class="k">storeFile</span> <span class="k">file</span>(<span class="k">System</span>.<span class="k">getenv</span>()[<span class="s">&quot;AR_KEYSTORE_PATH&quot;</span>])
+                <span class="k">storePassword</span> <span class="k">System</span>.<span class="k">getenv</span>()[<span class="s">&quot;AR_KEYSTORE_PASSWORD&quot;</span>]
+                <span class="k">keyAlias</span> <span class="k">System</span>.<span class="k">getenv</span>()[<span class="s">&quot;AR_KEY_ALIAS&quot;</span>]
+                <span class="k">keyPassword</span> <span class="k">System</span>.<span class="k">getenv</span>()[<span class="s">&quot;AR_KEY_PASSWORD&quot;</span>]
+            } <span class="k">else</span> {
+                <span class="k">keyAlias</span> keystoreProperties[&#x27;<span class="k">keyAlias</span>&#x27;]
+                <span class="k">keyPassword</span> keystoreProperties[&#x27;<span class="k">keyPassword</span>&#x27;]
+                <span class="k">storeFile</span> keystoreProperties[&#x27;<span class="k">storeFile</span>&#x27;] ? <span class="k">file</span>(keystoreProperties[&#x27;<span class="k">storeFile</span>&#x27;]) : null
+                <span class="k">storePassword</span> keystoreProperties[&#x27;<span class="k">storePassword</span>&#x27;]
+            }
+        }
+    }
+    <span class="k">buildTypes</span> {
+        <span class="k">release</span> {
+            <span class="k">signingConfig</span> <span class="k">signingConfigs</span>.<span class="k">release</span>
+        }
+    }
+}</code></pre></div></div>
+</div>
+<h2 id="checking-the-signature">Checking the signature</h2>
+<p>If Google Play rejects an upload with "your Android App Bundle is signed with the wrong key", compare fingerprints. The one Google expects is shown under <strong>Setup</strong> → <strong>App signing</strong> → <strong>Upload key certificate</strong>; the one you used:</p>
+<div class="code"><pre data-lang="bash"><code>keytool <span class="k">-list</span> <span class="k">-v</span> <span class="k">-keystore</span> upload.keystore <span class="k">-alias</span> upload | grep SHA1</code></pre></div>
+<div class="docs-next">
+ <a href="/docs/flutter/"><small>Previous</small><b>Flutter quick start</b></a>
+ <a class="next" href="/docs/google-play/"><small>Next</small><b>Google Play publishing</b></a>
+</div>
+</article><aside class="docs-toc"><h4>On this page</h4><ol></ol></aside></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/#product">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261015"></script>
+</body>
+</html>

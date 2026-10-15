@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iOS code signing – AppRelease Docs</title>
+<meta name="description" content="Sign iOS apps on AppRelease with an App Store Connect API key: automatic certificates and provisioning profiles, or your own files.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/ios-signing/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/ios-signing/">
+<meta property="og:title" content="iOS code signing – AppRelease Docs">
+<meta property="og:description" content="Sign iOS apps on AppRelease with an App Store Connect API key: automatic certificates and provisioning profiles, or your own files.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261015">
+<link rel="stylesheet" href="/docs.css?v=20261015">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/#product" data-nav="product">Product</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/#product">Product</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/">Android code signing</a>
+<a href="/docs/ios-signing/" class="is-active">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><nav class="crumbs" aria-label="Breadcrumb"><a href="/docs/">Docs</a> <span>›</span> <span>Code signing</span> <span>›</span> <span>iOS</span></nav><h1>iOS code signing</h1>
+<p class="lead">iOS builds are signed with a distribution certificate and a provisioning profile. With an App Store Connect API key, AppRelease takes care of both.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+ <li>An <a href="https://developer.apple.com/programs/">Apple Developer Program</a> membership.</li>
+ <li>The app's bundle identifier registered under <strong>Certificates, Identifiers &amp; Profiles</strong> → <strong>Identifiers</strong>.</li>
+ <li>An App Store Connect API key with <code>App Manager</code> access (steps below).</li>
+</ul>
+<h2 id="api-key">Creating the App Store Connect API key</h2>
+<ol class="docs-steps">
+ <li>Log in to <a href="https://appstoreconnect.apple.com/">App Store Connect</a> and go to <strong>Users and Access</strong> → <strong>Integrations</strong> → <strong>App Store Connect API</strong>.</li>
+ <li>Click <strong>+</strong> next to Active keys.</li>
+ <li>Name the key (for example "AppRelease") and choose the <code>App Manager</code> role.</li>
+ <li>Click <strong>Generate</strong>, then <strong>Download API Key</strong>. The <code>.p8</code> file can only be downloaded once.</li>
+ <li>Note the <strong>Issuer ID</strong> above the table and the <strong>Key ID</strong> in the row.</li>
+</ol>
+<h2 id="adding-the-key">Adding the key to AppRelease</h2>
+<ol class="docs-steps">
+ <li>Open <strong>Team settings</strong> → <strong>Integrations</strong> → <strong>Apple Developer Portal</strong>.</li>
+ <li>Click <strong>Add key</strong>, give it a name, paste the Issuer ID and Key ID, and upload the <code>.p8</code> file.</li>
+ <li>Click <strong>Save</strong>. AppRelease makes one test call to App Store Connect to confirm the key works.</li>
+</ol>
+<h2 id="automatic-signing">Automatic signing</h2>
+<p>Before the scripts run, the runner asks App Store Connect for a distribution certificate (creating one if there is none that AppRelease holds the private key for) and for a provisioning profile matching the bundle identifier and distribution type. Both are installed into a temporary keychain that is deleted when the build ends.</p>
+<div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
+  <span class="k">ios-workflow</span>:
+    <span class="k">environment</span>:
+      <span class="k">ios_signing</span>:
+        <span class="k">distribution_type</span>: app_store  <span class="c"> # app_store | ad_hoc | development</span>
+        <span class="k">bundle_identifier</span>: com.example.app</code></pre></div>
+<p>Apps with more than one target (an extension, a watch app) list every identifier:</p>
+<div class="code"><pre data-lang="yaml"><code>      <span class="k">ios_signing</span>:
+        <span class="k">distribution_type</span>: app_store
+        <span class="k">bundle_identifier</span>:
+          - com.example.app
+          - com.example.app.widget</code></pre></div>
+<h2 id="manual-signing">Manual signing</h2>
+<p>If you already manage certificates yourself, upload the <code>.p12</code> (with its password) and the <code>.mobileprovision</code> under <strong>Code signing identities</strong> → <strong>iOS</strong> and reference them by name:</p>
+<div class="code"><pre data-lang="yaml"><code>      <span class="k">ios_signing</span>:
+        <span class="k">provisioning_profiles</span>:
+          - app_store_profile
+        <span class="k">certificates</span>:
+          - distribution_cert</code></pre></div>
+<h2 id="export-options">Export options</h2>
+<p>Either way the runner writes an export options plist and exposes it as <code>AR_EXPORT_OPTIONS</code>. Pass it to the build:</p>
+<div class="code"><pre data-lang="bash"><code>flutter build ipa <span class="k">--release</span> <span class="k">--export-options-plist</span>=<span class=<span class="s">"v"</span>>$AR_EXPORT_OPTIONS</span></code></pre></div>
+<p>The runner also sets <code>AR_CERTIFICATE_NAME</code>, <code>AR_PROVISIONING_PROFILE</code> and <code>AR_TEAM_ID</code>, should a custom Xcode step need them.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Message</th><th>Usually means</th></tr></thead><tbody>
+ <tr><td>No profiles for 'com.example.app' were found</td><td>The bundle identifier in <code>ios_signing</code> does not match the one in Xcode, or is not registered in the developer portal.</td></tr>
+ <tr><td>Provisioning profile doesn't include signing certificate</td><td>Manual signing with a profile made for a different certificate. Regenerate the profile, or switch to automatic signing.</td></tr>
+ <tr><td>Authentication credentials are missing or invalid</td><td>The API key was revoked, or Issuer ID and Key ID were swapped.</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/flutter/"><small>Previous</small><b>Flutter quick start</b></a>
+ <a class="next" href="/docs/app-store/"><small>Next</small><b>App Store Connect publishing</b></a>
+</div>
+</article><aside class="docs-toc"><h4>On this page</h4><ol></ol></aside></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/#product">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261015"></script>
+</body>
+</html>

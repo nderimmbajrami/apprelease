@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>apprelease.yaml reference – AppRelease Docs</title>
+<meta name="description" content="Every key in apprelease.yaml: workflows, environment, versioning, triggering, scripts, artifacts, publishing, and the environment variables the runner sets.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/yaml/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/yaml/">
+<meta property="og:title" content="apprelease.yaml reference – AppRelease Docs">
+<meta property="og:description" content="Every key in apprelease.yaml: workflows, environment, versioning, triggering, scripts, artifacts, publishing, and the environment variables the runner sets.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261015">
+<link rel="stylesheet" href="/docs.css?v=20261015">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/#product" data-nav="product">Product</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/#product">Product</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/">Android code signing</a>
+<a href="/docs/ios-signing/">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/" class="is-active">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><nav class="crumbs" aria-label="Breadcrumb"><a href="/docs/">Docs</a> <span>›</span> <span>Reference</span> <span>›</span> <span>apprelease.yaml</span></nav><h1>apprelease.yaml</h1>
+<p class="lead">The configuration file, key by key. It lives in the root of the repository.</p>
+<h2 id="structure">Structure</h2>
+<div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
+  &lt;workflow-id&gt;:
+    <span class="k">name</span>: Human readable name
+    <span class="k">max_build_duration</span>: <span class="n">60</span>       <span class="c"> # minutes, default 60, max 120</span>
+    <span class="k">instance_type</span>: mac_m2        <span class="c"> # mac_m2 | linux_x2</span>
+    <span class="k">environment</span>: { ... }
+    <span class="k">versioning</span>: { ... }
+    <span class="k">triggering</span>: { ... }
+    <span class="k">cache</span>: { ... }
+    <span class="k">scripts</span>: [ ... ]
+    <span class="k">artifacts</span>: [ ... ]
+    <span class="k">publishing</span>: { ... }</code></pre></div>
+<h2 id="environment">environment</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">environment</span>:
+      <span class="k">flutter</span>: stable            <span class="c"> # stable | beta | master | 3.41.2 | fvm</span>
+      <span class="k">xcode</span>: latest              <span class="c"> # latest | 26.0</span>
+      <span class="k">cocoapods</span>: default
+      <span class="k">java</span>: <span class="n">17</span>
+      <span class="k">groups</span>:                    <span class="c"> # variable groups defined in the console</span>
+        - google_play
+      <span class="k">vars</span>:                      <span class="c"> # plain variables, visible in the log</span>
+        <span class="k">PACKAGE_NAME</span>: <span class="s">&quot;com.example.app&quot;</span>
+      <span class="k">android_signing</span>:
+        - upload_keystore
+      <span class="k">ios_signing</span>:
+        <span class="k">distribution_type</span>: app_store
+        <span class="k">bundle_identifier</span>: com.example.app</code></pre></div>
+<table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
+ <tr><td><code>flutter</code></td><td>Channel, version or <code>fvm</code>. Omit to use the runner's preinstalled version.</td></tr>
+ <tr><td><code>xcode</code></td><td>macOS runners only. <code>latest</code> or a version.</td></tr>
+ <tr><td><code>groups</code></td><td>Variable groups from the app's <strong>Environment variables</strong> page. Secrets are masked in logs.</td></tr>
+ <tr><td><code>vars</code></td><td>Inline variables. Never put secrets here; the file is in your repository.</td></tr>
+ <tr><td><code>android_signing</code></td><td>Keystore reference names. See <a href="/docs/android-signing/">Android code signing</a>.</td></tr>
+ <tr><td><code>ios_signing</code></td><td>Automatic or manual signing. See <a href="/docs/ios-signing/">iOS code signing</a>.</td></tr>
+</tbody></table>
+<h2 id="versioning">versioning</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">versioning</span>:
+      <span class="k">source</span>: google_play        <span class="c"> # google_play | app_store_connect | manual</span>
+      <span class="k">tracks</span>: [internal, production]  <span class="c"> # google_play only; default: all tracks</span>
+      <span class="k">offset</span>: <span class="n">0</span>                  <span class="c"> # added to the fetched number; default 0</span></code></pre></div>
+<p>Sets <code>AR_BUILD_NUMBER</code> to one more than the highest build number found. With <code>manual</code>, it is the release's own sequence number.</p>
+<h2 id="triggering">triggering</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">triggering</span>:
+      <span class="k">events</span>:
+        - push
+        - tag
+      <span class="k">branch_patterns</span>:
+        - <span class="k">pattern</span>: main
+          <span class="k">include</span>: <span class="n">true</span>
+          <span class="k">source</span>: <span class="n">true</span>
+      <span class="k">tag_patterns</span>:
+        - <span class="k">pattern</span>: <span class="s">&quot;v*&quot;</span>
+          <span class="k">include</span>: <span class="n">true</span>
+      <span class="k">cancel_previous_builds</span>: <span class="n">true</span></code></pre></div>
+<p>Requires the repository webhook, which the console shows under the app's <strong>Settings</strong> → <strong>Webhooks</strong>. Without a <code>triggering</code> section, releases start only by hand.</p>
+<h2 id="cache">cache</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">cache</span>:
+      <span class="k">cache_paths</span>:
+        - <span class="v">$HOME</span>/.pub-cache
+        - <span class="v">$HOME</span>/.gradle/caches
+        - <span class="v">$AR_BUILD_DIR</span>/ios/Pods</code></pre></div>
+<h2 id="scripts">scripts</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">scripts</span>:
+      - <span class="k">name</span>: Get packages
+        <span class="k">script</span>: flutter pub get
+      - <span class="k">name</span>: Test
+        <span class="k">script</span>: flutter test
+        <span class="k">ignore_failure</span>: <span class="n">false</span>    <span class="c"> # default</span>
+      - <span class="k">name</span>: Build
+        <span class="k">script</span>: |
+          flutter build appbundle --release \
+            --build-number=<span class="v">$AR_BUILD_NUMBER</span>
+        <span class="k">working_directory</span>: .     <span class="c"> # relative to AR_BUILD_DIR</span></code></pre></div>
+<p>Scripts run in order with <code>bash -e</code>. The first failure stops the workflow unless <code>ignore_failure</code> is set. Everything they print goes to the live log; secrets are masked.</p>
+<h2 id="artifacts">artifacts</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">artifacts</span>:
+      - build/**/outputs/**/*.aab
+      - build/ios/ipa/*.ipa
+      - flutter_drive.log</code></pre></div>
+<p>Glob patterns relative to <code>AR_BUILD_DIR</code>. Matching files are kept for the plan's retention period and are what the publishing steps upload.</p>
+<h2 id="publishing">publishing</h2>
+<div class="code"><pre data-lang="yaml"><code>    <span class="k">publishing</span>:
+      <span class="k">email</span>:
+        <span class="k">recipients</span>: [team@example.com]
+        <span class="k">notify</span>: { success: <span class="n">true</span>, failure: <span class="n">true</span> }
+      <span class="k">google_play</span>:
+        <span class="k">credentials</span>: <span class="v">$GOOGLE_PLAY_SERVICE_ACCOUNT</span>
+        <span class="k">track</span>: internal
+      <span class="k">app_store_connect</span>:
+        <span class="k">auth</span>: integration
+        <span class="k">submit_to_testflight</span>: <span class="n">true</span>
+      <span class="k">scripts</span>:                    <span class="c"> # runs after publishing, success or not</span>
+        - <span class="k">name</span>: Notify
+          <span class="k">script</span>: curl -X POST <span class="s">&quot;<span class="v">$WEBHOOK</span>&quot;</span> -d <span class="s">&quot;status=<span class="v">$AR_BUILD_STATUS</span>&quot;</span></code></pre></div>
+<p>See <a href="/docs/google-play/">Google Play</a> and <a href="/docs/app-store/">App Store Connect</a> for every key.</p>
+<h2 id="environment-variables">Environment variables</h2>
+<p>Set by the runner before the first script.</p>
+<table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+ <tr><td><code>CI</code></td><td><code>true</code></td></tr>
+ <tr><td><code>AR_BUILD_DIR</code></td><td>Absolute path of the checked-out repository</td></tr>
+ <tr><td><code>AR_BUILD_ID</code></td><td>Id of the release in AppRelease</td></tr>
+ <tr><td><code>AR_BUILD_NUMBER</code></td><td>Next build number, see <a href="#versioning">versioning</a></td></tr>
+ <tr><td><code>AR_BUILD_STATUS</code></td><td><code>success</code> or <code>failure</code>, in post-publishing scripts</td></tr>
+ <tr><td><code>AR_WORKFLOW</code></td><td>Workflow id</td></tr>
+ <tr><td><code>AR_BRANCH</code></td><td>Branch name</td></tr>
+ <tr><td><code>AR_TAG</code></td><td>Tag name, if the release was started by a tag</td></tr>
+ <tr><td><code>AR_COMMIT</code></td><td>Full commit SHA</td></tr>
+ <tr><td><code>AR_COMMIT_SHORT</code></td><td>First seven characters</td></tr>
+ <tr><td><code>AR_FLUTTER_VERSION</code></td><td>The Flutter version that was installed</td></tr>
+ <tr><td><code>AR_KEYSTORE_PATH</code> …</td><td>Android signing, see <a href="/docs/android-signing/#referencing">Android code signing</a></td></tr>
+ <tr><td><code>AR_EXPORT_OPTIONS</code> …</td><td>iOS signing, see <a href="/docs/ios-signing/#export-options">iOS code signing</a></td></tr>
+ <tr><td><code>AR_ARTIFACT_DIR</code></td><td>Where collected artifacts are copied</td></tr>
+</tbody></table>
+<h2 id="from-codemagic">Coming from codemagic.yaml</h2>
+<table><thead><tr><th>Codemagic</th><th>AppRelease</th></tr></thead><tbody>
+ <tr><td><code>CM_BUILD_DIR</code>, <code>CM_*</code></td><td><code>AR_BUILD_DIR</code>, <code>AR_*</code></td></tr>
+ <tr><td><code>instance_type: mac_mini_m2</code></td><td><code>instance_type: mac_m2</code></td></tr>
+ <tr><td><code>google-play get-latest-build-number</code> script</td><td><code>versioning: source: google_play</code></td></tr>
+ <tr><td><code>app-store-connect get-latest-build-number</code> script</td><td><code>versioning: source: app_store_connect</code></td></tr>
+ <tr><td><code>app_store_connect: auth: integration</code></td><td>same</td></tr>
+ <tr><td><code>ios_signing</code>, <code>android_signing</code></td><td>same</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/app-store/"><small>Previous</small><b>App Store Connect publishing</b></a>
+ <a class="next" href="/docs/flutter/"><small>Start here</small><b>Flutter quick start</b></a>
+</div>
+</article><aside class="docs-toc"><h4>On this page</h4><ol></ol></aside></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/#product">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261015"></script>
+</body>
+</html>

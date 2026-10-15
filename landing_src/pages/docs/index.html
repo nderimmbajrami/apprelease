@@ -1,0 +1,25 @@
+---
+title: AppRelease Documentation
+description: Learn how to use AppRelease to build, sign and publish your Flutter app to Google Play and the App Store.
+path: /docs/
+nav: docs
+layout: docs
+toc: false
+priority: 0.9
+---
+<h1>AppRelease Documentation</h1>
+<p class="lead">Learn how to use AppRelease to build, sign and publish your mobile apps.</p>
+<div class="docs-cards">
+ <a class="docs-card" href="/docs/flutter/"><h3>Quick start</h3><p>From an empty account to a build on TestFlight and Google Play.</p><ul><li>Flutter</li><li>React Native <small>(soon)</small></li></ul></a>
+ <a class="docs-card" href="/docs/yaml/"><h3>apprelease.yaml</h3><p>Every key in the configuration file, with defaults and examples.</p><ul><li>Workflows and environment</li><li>Scripts and artifacts</li><li>Publishing</li></ul></a>
+ <a class="docs-card" href="/docs/android-signing/"><h3>Android</h3><p>Keystores, Gradle signing and Google Play.</p><ul><li>Android code signing</li><li>Google Play publishing</li></ul></a>
+ <a class="docs-card" href="/docs/ios-signing/"><h3>iOS</h3><p>App Store Connect API keys, automatic signing and TestFlight.</p><ul><li>iOS code signing</li><li>App Store Connect publishing</li></ul></a>
+</div>
+<h2 id="how-it-fits">How the pieces fit together</h2>
+<p>AppRelease has three parts. The <strong>console</strong> at <a href="{{app}}">publish.apprelease.store</a> is where apps, credentials and releases live. The <strong>runner</strong> is the machine that checks out your code, builds and uploads. And <strong>apprelease.yaml</strong> in your repository tells the runner what to do.</p>
+<p>A release starts in the console (or from a push, once triggers are on). The runner claims it, fetches the credentials the workflow names, runs the scripts, publishes the artifacts and streams the log back. When it is done you get an email.</p>
+<div class="note note-tip"><b>Coming from Codemagic?</b> The file structure is deliberately similar. Rename <code>codemagic.yaml</code>, swap <code>CM_</code> variables for <code>AR_</code> and check the <a href="/docs/yaml/">reference</a> for the few keys that differ.</div>
+<section class="docs-help">
+ <h2>Getting help and support</h2>
+ <p><strong>Email</strong> — <a href="mailto:support@apprelease.store">support@apprelease.store</a>, answered within a business day.<br><strong>In the console</strong> — every failed release has a "Send to support" button that attaches the log.</p>
+</section>

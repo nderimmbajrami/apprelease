@@ -1,0 +1,206 @@
+---
+title: AppRelease – Ship your Flutter app to Google Play and the App Store
+description: AppRelease builds, signs and publishes Flutter apps to Google Play and the App Store from one apprelease.yaml. Managed code signing, store-based versioning, live logs. Flutter first, React Native next.
+path: /
+nav: product
+priority: 1.0
+---
+<section class="hero">
+ <div class="wrap hero-inner">
+  <div class="hero-text">
+   <a class="pill reveal" href="/docs/flutter/"><b>NEW</b> Flutter quick start is live <span aria-hidden="true">→</span></a>
+   <h1 class="reveal" data-delay="1">Release your Flutter app <span class="grad">to both stores.</span></h1>
+   <p class="lead reveal" data-delay="2">One <code>apprelease.yaml</code>. We build, sign and ship your app to Google Play and the App Store, with the next build number taken straight from the store.</p>
+   <div class="hero-actions reveal" data-delay="3">
+    <a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Get started free</a>
+    <a class="btn btn-ghost btn-lg" href="/docs/flutter/">Read the docs</a>
+   </div>
+   <div class="hero-foot reveal" data-delay="4">
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No credit card</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Flutter first, React Native next</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Keys never leave the build machine</span>
+   </div>
+  </div>
+  <div class="console reveal" data-delay="2" data-console aria-hidden="true">
+   <div class="console-bar">
+    <div class="console-dots"><i></i><i></i><i></i></div>
+    <span class="console-title">Android · production</span>
+    <span class="console-status">BUILDING</span>
+   </div>
+   <div class="console-body"></div>
+   <div class="console-foot">
+    <span class="chip">flutter <b>3.41.2</b></span>
+    <span class="chip">runner <b>mac-m2</b></span>
+    <span class="chip">config <b>apprelease.yaml</b></span>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="strip">
+ <div class="wrap strip-inner">
+  <div class="strip-item reveal"><b>2 stores</b><span>Google Play and the App Store</span></div>
+  <div class="strip-item reveal" data-delay="1"><b>1 file</b><span>apprelease.yaml, committed with your code</span></div>
+  <div class="strip-item reveal" data-delay="2"><b>0 Macs</b><span>to keep updated for Xcode</span></div>
+  <div class="strip-item reveal" data-delay="3"><b>~6 min</b><span>from push to TestFlight</span></div>
+ </div>
+</section>
+
+<section class="section" id="product">
+ <div class="wrap">
+  <header class="section-head reveal">
+   <p class="kicker">How it works</p>
+   <h2>Three steps. Then it runs itself.</h2>
+   <p class="lead">You connect the repository and hand over the signing material once. From then on every release is one click, or one push.</p>
+  </header>
+  <ol class="steps">
+   <li class="step reveal"><h3>Connect the repository</h3><p>GitHub, GitLab, Bitbucket or any Git URL. AppRelease scans the branch for <code>apprelease.yaml</code> and shows the workflows it finds.</p></li>
+   <li class="step reveal" data-delay="1"><h3>Add signing credentials</h3><p>Upload the Android keystore, the Google Play service account and the App Store Connect API key. They are encrypted at rest and only ever decrypted on the runner.</p></li>
+   <li class="step reveal" data-delay="2"><h3>Release</h3><p>Pick a workflow, a track and a version. Watch the log live. When it is green, the build is on Google Play or TestFlight, and you get an email.</p></li>
+  </ol>
+ </div>
+</section>
+
+<section class="section section-alt" id="features">
+ <div class="wrap">
+  <header class="section-head reveal">
+   <p class="kicker">What you get</p>
+   <h2>Everything between <code>git push</code> and the store listing.</h2>
+  </header>
+  <div class="grid grid-3">
+   <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Managed code signing</h3><p>Keystores, provisioning profiles and certificates are fetched for the build and wiped afterwards. Automatic signing through the App Store Connect API, or bring your own files.</p></article>
+   <article class="card reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16M8 15l4-6 4 3 4-7"/></svg></div><h3>Store-based versioning</h3><p>Before each build the latest build number is read from Google Play or App Store Connect and incremented. No more "this version has already been used".</p></article>
+   <article class="card reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><h3>Tracks and TestFlight</h3><p>Internal, alpha, beta or production on Google Play. TestFlight groups or a full App Store submission on iOS. Draft submissions for new apps.</p></article>
+   <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></div><h3>Live logs</h3><p>Every step streams its output as it runs. A failed build tells you which command failed and shows the lines around it, not a 40 MB archive.</p></article>
+   <article class="card reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Release history</h3><p>Which commit became which build on which track, who started it and how long it took. Artifacts stay downloadable for 30 days.</p></article>
+   <article class="card reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></div><h3>Notifications</h3><p>An email when a release is live or when it fails, with the link to the log. Slack and webhooks are on the way.</p></article>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="config">
+ <div class="wrap split">
+  <header class="section-head reveal">
+   <p class="kicker">apprelease.yaml</p>
+   <h2>Configuration that lives with your code.</h2>
+   <p class="lead">A short file in the root of the repository describes the workflow: which Flutter, how to sign, what to build, where to publish. It is reviewed in pull requests like everything else.</p>
+   <ul class="checks">
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span><b>One workflow per store</b>, or one file per branch.</span></li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span><b>Secrets by reference</b>: the file names a credential, never contains it.</span></li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg><span><b>Plain shell scripts</b> in between, so nothing is hidden behind a plugin.</span></li>
+   </ul>
+   <p style="margin-top:22px"><a class="text-link" href="/docs/yaml/">Full YAML reference</a></p>
+  </header>
+  <div class="code reveal" data-delay="1" data-tabs>
+   <div class="code-tabs" role="tablist">
+    <button role="tab" aria-selected="true">Android</button>
+    <button role="tab" aria-selected="false">iOS</button>
+   </div>
+   <div class="code-pane is-active" role="tabpanel">
+<pre data-lang="yaml">
+workflows:
+  android-production:
+    name: Android · production
+    environment:
+      flutter: stable
+      android_signing:
+        - upload_keystore
+      groups:
+        - google_play
+    versioning:
+      source: google_play   # next build number comes from the store
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build app bundle
+        script: |
+          flutter build appbundle --release \
+            --build-number=$AR_BUILD_NUMBER
+    artifacts:
+      - build/**/outputs/**/*.aab
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: internal
+      email:
+        recipients:
+          - team@example.com
+</pre>
+   </div>
+   <div class="code-pane" role="tabpanel">
+<pre data-lang="yaml">
+workflows:
+  ios-testflight:
+    name: iOS · TestFlight
+    environment:
+      flutter: stable
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.example.app
+    versioning:
+      source: app_store_connect
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build ipa
+        script: |
+          flutter build ipa --release \
+            --build-number=$AR_BUILD_NUMBER \
+            --export-options-plist=$AR_EXPORT_OPTIONS
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Beta testers
+</pre>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="section section-alt" id="pricing">
+ <div class="wrap">
+  <header class="section-head center reveal">
+   <p class="kicker">Pricing</p>
+   <h2>Start free. Pay when you ship often.</h2>
+   <p class="lead">Early-access pricing while React Native support is being finished. Existing plans keep their price.</p>
+  </header>
+  <div class="center reveal"><div class="toggle" data-cycle><button type="button" data-mode="monthly" class="is-active">Monthly</button><button type="button" data-mode="yearly">Yearly <em>2 months free</em></button></div></div>
+  <div class="plans">
+   <article class="plan reveal"><div class="plan-name">Free</div><div class="plan-price">€0</div><p class="plan-note">For a side project or a first look.</p><ul><li>1 app, 1 runner</li><li>10 releases a month</li><li>Google Play and TestFlight</li><li>Logs kept for 7 days</li></ul><a class="btn btn-ghost" href="{{app}}/#/sign-up">Start free</a></article>
+   <article class="plan is-featured reveal" data-delay="1"><span class="plan-flag">MOST TEAMS</span><div class="plan-name">Pro</div><div class="plan-price"><span data-monthly data-yearly="€24" data-monthly="€29">€29</span><small> / month</small></div><p class="plan-note" data-cycle-note data-note-monthly="Per team, billed monthly." data-note-yearly="Per team, €290 billed yearly.">Per team, billed monthly.</p><ul><li>Unlimited apps</li><li>200 releases a month</li><li>Store-based versioning</li><li>Logs and artifacts kept 30 days</li><li>Email support</li></ul><a class="btn btn-primary" href="{{app}}/#/sign-up">Start 14-day trial</a></article>
+   <article class="plan reveal" data-delay="2"><div class="plan-name">Scale</div><div class="plan-price"><span data-monthly data-yearly="€66" data-monthly="€79">€79</span><small> / month</small></div><p class="plan-note" data-cycle-note data-note-monthly="Per team, billed monthly." data-note-yearly="Per team, €790 billed yearly.">Per team, billed monthly.</p><ul><li>Everything in Pro</li><li>Unlimited releases</li><li>Concurrent builds</li><li>Your own runner machines</li><li>Priority support</li></ul><a class="btn btn-ghost" href="/contact/">Talk to us</a></article>
+  </div>
+  <p class="quiet center" style="margin-top:22px">Prices exclude VAT. <a href="/pricing/">All the details →</a></p>
+ </div>
+</section>
+
+<section class="section" id="faq">
+ <div class="wrap">
+  <header class="section-head center reveal">
+   <p class="kicker">Questions</p>
+   <h2>The ones we get most.</h2>
+  </header>
+  <div class="faq reveal">
+   <details><summary>Do I need a Mac for the iOS build?</summary><div class="answer"><p>No. iOS builds run on AppRelease's macOS runners with a current Xcode. On the Scale plan you can also register your own Mac as a runner, which is handy if you have one standing around already.</p></div></details>
+   <details><summary>Where are my keys stored?</summary><div class="answer"><p>Keystores, API keys and service accounts are encrypted before they are written to the database. The runner decrypts them into a temporary directory for the duration of one build and removes them when the build ends, whether it passed or failed.</p></div></details>
+   <details><summary>Is this only for Flutter?</summary><div class="answer"><p>Today, yes. The workflows are plain shell scripts, so a React Native or native project builds fine already; what is missing is the guided setup and the quick start. React Native is the next guide we publish.</p></div></details>
+   <details><summary>How is this different from Codemagic or Bitrise?</summary><div class="answer"><p>It does less, on purpose. AppRelease is the release step only: sign, version, build, upload. There is no test matrix, no plugin marketplace, no YAML dialect to learn beyond one page. If you need a full CI, keep it, and let AppRelease do the publishing.</p></div></details>
+  </div>
+  <p class="center" style="margin-top:28px"><a class="text-link" href="/faq/">More questions and answers</a></p>
+ </div>
+</section>
+
+<section class="section" style="padding-top:0">
+ <div class="wrap">
+  <div class="cta-band reveal">
+   <h2>Your next release, in six minutes.</h2>
+   <p class="lead">Connect a repository, add your credentials, press release. The free plan does not expire.</p>
+   <div class="hero-actions"><a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Get started free</a><a class="btn btn-ghost btn-lg" href="/docs/flutter/">Flutter quick start</a></div>
+  </div>
+ </div>
+</section>

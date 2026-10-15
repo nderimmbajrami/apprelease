@@ -1,0 +1,154 @@
+---
+title: apprelease.yaml reference – AppRelease Docs
+description: Every key in apprelease.yaml: workflows, environment, versioning, triggering, scripts, artifacts, publishing, and the environment variables the runner sets.
+path: /docs/yaml/
+nav: docs
+layout: docs
+crumbs: Reference > apprelease.yaml
+priority: 0.8
+---
+<h1>apprelease.yaml</h1>
+<p class="lead">The configuration file, key by key. It lives in the root of the repository.</p>
+<h2 id="structure">Structure</h2>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  <workflow-id>:
+    name: Human readable name
+    max_build_duration: 60        # minutes, default 60, max 120
+    instance_type: mac_m2         # mac_m2 | linux_x2
+    environment: { ... }
+    versioning: { ... }
+    triggering: { ... }
+    cache: { ... }
+    scripts: [ ... ]
+    artifacts: [ ... ]
+    publishing: { ... }
+</pre></div>
+<h2 id="environment">environment</h2>
+<div class="code"><pre data-lang="yaml">
+    environment:
+      flutter: stable             # stable | beta | master | 3.41.2 | fvm
+      xcode: latest               # latest | 26.0
+      cocoapods: default
+      java: 17
+      groups:                     # variable groups defined in the console
+        - google_play
+      vars:                       # plain variables, visible in the log
+        PACKAGE_NAME: "com.example.app"
+      android_signing:
+        - upload_keystore
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.example.app
+</pre></div>
+<table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
+ <tr><td><code>flutter</code></td><td>Channel, version or <code>fvm</code>. Omit to use the runner's preinstalled version.</td></tr>
+ <tr><td><code>xcode</code></td><td>macOS runners only. <code>latest</code> or a version.</td></tr>
+ <tr><td><code>groups</code></td><td>Variable groups from the app's <strong>Environment variables</strong> page. Secrets are masked in logs.</td></tr>
+ <tr><td><code>vars</code></td><td>Inline variables. Never put secrets here; the file is in your repository.</td></tr>
+ <tr><td><code>android_signing</code></td><td>Keystore reference names. See <a href="/docs/android-signing/">Android code signing</a>.</td></tr>
+ <tr><td><code>ios_signing</code></td><td>Automatic or manual signing. See <a href="/docs/ios-signing/">iOS code signing</a>.</td></tr>
+</tbody></table>
+<h2 id="versioning">versioning</h2>
+<div class="code"><pre data-lang="yaml">
+    versioning:
+      source: google_play         # google_play | app_store_connect | manual
+      tracks: [internal, production]   # google_play only; default: all tracks
+      offset: 0                   # added to the fetched number; default 0
+</pre></div>
+<p>Sets <code>AR_BUILD_NUMBER</code> to one more than the highest build number found. With <code>manual</code>, it is the release's own sequence number.</p>
+<h2 id="triggering">triggering</h2>
+<div class="code"><pre data-lang="yaml">
+    triggering:
+      events:
+        - push
+        - tag
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: "v*"
+          include: true
+      cancel_previous_builds: true
+</pre></div>
+<p>Requires the repository webhook, which the console shows under the app's <strong>Settings</strong> → <strong>Webhooks</strong>. Without a <code>triggering</code> section, releases start only by hand.</p>
+<h2 id="cache">cache</h2>
+<div class="code"><pre data-lang="yaml">
+    cache:
+      cache_paths:
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
+        - $AR_BUILD_DIR/ios/Pods
+</pre></div>
+<h2 id="scripts">scripts</h2>
+<div class="code"><pre data-lang="yaml">
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Test
+        script: flutter test
+        ignore_failure: false     # default
+      - name: Build
+        script: |
+          flutter build appbundle --release \
+            --build-number=$AR_BUILD_NUMBER
+        working_directory: .      # relative to AR_BUILD_DIR
+</pre></div>
+<p>Scripts run in order with <code>bash -e</code>. The first failure stops the workflow unless <code>ignore_failure</code> is set. Everything they print goes to the live log; secrets are masked.</p>
+<h2 id="artifacts">artifacts</h2>
+<div class="code"><pre data-lang="yaml">
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/ios/ipa/*.ipa
+      - flutter_drive.log
+</pre></div>
+<p>Glob patterns relative to <code>AR_BUILD_DIR</code>. Matching files are kept for the plan's retention period and are what the publishing steps upload.</p>
+<h2 id="publishing">publishing</h2>
+<div class="code"><pre data-lang="yaml">
+    publishing:
+      email:
+        recipients: [team@example.com]
+        notify: { success: true, failure: true }
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: internal
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      scripts:                     # runs after publishing, success or not
+        - name: Notify
+          script: curl -X POST "$WEBHOOK" -d "status=$AR_BUILD_STATUS"
+</pre></div>
+<p>See <a href="/docs/google-play/">Google Play</a> and <a href="/docs/app-store/">App Store Connect</a> for every key.</p>
+<h2 id="environment-variables">Environment variables</h2>
+<p>Set by the runner before the first script.</p>
+<table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+ <tr><td><code>CI</code></td><td><code>true</code></td></tr>
+ <tr><td><code>AR_BUILD_DIR</code></td><td>Absolute path of the checked-out repository</td></tr>
+ <tr><td><code>AR_BUILD_ID</code></td><td>Id of the release in AppRelease</td></tr>
+ <tr><td><code>AR_BUILD_NUMBER</code></td><td>Next build number, see <a href="#versioning">versioning</a></td></tr>
+ <tr><td><code>AR_BUILD_STATUS</code></td><td><code>success</code> or <code>failure</code>, in post-publishing scripts</td></tr>
+ <tr><td><code>AR_WORKFLOW</code></td><td>Workflow id</td></tr>
+ <tr><td><code>AR_BRANCH</code></td><td>Branch name</td></tr>
+ <tr><td><code>AR_TAG</code></td><td>Tag name, if the release was started by a tag</td></tr>
+ <tr><td><code>AR_COMMIT</code></td><td>Full commit SHA</td></tr>
+ <tr><td><code>AR_COMMIT_SHORT</code></td><td>First seven characters</td></tr>
+ <tr><td><code>AR_FLUTTER_VERSION</code></td><td>The Flutter version that was installed</td></tr>
+ <tr><td><code>AR_KEYSTORE_PATH</code> …</td><td>Android signing, see <a href="/docs/android-signing/#referencing">Android code signing</a></td></tr>
+ <tr><td><code>AR_EXPORT_OPTIONS</code> …</td><td>iOS signing, see <a href="/docs/ios-signing/#export-options">iOS code signing</a></td></tr>
+ <tr><td><code>AR_ARTIFACT_DIR</code></td><td>Where collected artifacts are copied</td></tr>
+</tbody></table>
+<h2 id="from-codemagic">Coming from codemagic.yaml</h2>
+<table><thead><tr><th>Codemagic</th><th>AppRelease</th></tr></thead><tbody>
+ <tr><td><code>CM_BUILD_DIR</code>, <code>CM_*</code></td><td><code>AR_BUILD_DIR</code>, <code>AR_*</code></td></tr>
+ <tr><td><code>instance_type: mac_mini_m2</code></td><td><code>instance_type: mac_m2</code></td></tr>
+ <tr><td><code>google-play get-latest-build-number</code> script</td><td><code>versioning: source: google_play</code></td></tr>
+ <tr><td><code>app-store-connect get-latest-build-number</code> script</td><td><code>versioning: source: app_store_connect</code></td></tr>
+ <tr><td><code>app_store_connect: auth: integration</code></td><td>same</td></tr>
+ <tr><td><code>ios_signing</code>, <code>android_signing</code></td><td>same</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/app-store/"><small>Previous</small><b>App Store Connect publishing</b></a>
+ <a class="next" href="/docs/flutter/"><small>Start here</small><b>Flutter quick start</b></a>
+</div>

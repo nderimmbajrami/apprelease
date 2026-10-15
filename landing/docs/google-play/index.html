@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Google Play publishing – AppRelease Docs</title>
+<meta name="description" content="Publish Android app bundles to Google Play tracks from AppRelease with a service account.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/google-play/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/google-play/">
+<meta property="og:title" content="Google Play publishing – AppRelease Docs">
+<meta property="og:description" content="Publish Android app bundles to Google Play tracks from AppRelease with a service account.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261015">
+<link rel="stylesheet" href="/docs.css?v=20261015">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/#product" data-nav="product">Product</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/#product">Product</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/">Android code signing</a>
+<a href="/docs/ios-signing/">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/" class="is-active">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><nav class="crumbs" aria-label="Breadcrumb"><a href="/docs/">Docs</a> <span>›</span> <span>Publishing</span> <span>›</span> <span>Google Play</span></nav><h1>Google Play publishing</h1>
+<p class="lead">AppRelease uploads the app bundle to a Google Play track with a service account you create once in Google Cloud.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+ <li>The app exists in <a href="https://play.google.com/console">Google Play Console</a> and the <strong>first</strong> bundle was uploaded by hand. Google requires that; every bundle after it can go through AppRelease.</li>
+ <li>The bundle is signed with the upload key (see <a href="/docs/android-signing/">Android code signing</a>).</li>
+</ul>
+<h2 id="service-account">Creating a service account</h2>
+<ol class="docs-steps">
+ <li>In the <a href="https://console.cloud.google.com/">Google Cloud Console</a>, choose or create a project and open <strong>IAM &amp; Admin</strong> → <strong>Service accounts</strong>.</li>
+ <li>Click <strong>Create service account</strong>, name it (for example "apprelease-publisher") and finish without granting project roles.</li>
+ <li>Open the account, go to <strong>Keys</strong> → <strong>Add key</strong> → <strong>Create new key</strong> → <strong>JSON</strong>. The file downloads once.</li>
+ <li>In Google Play Console, open <strong>Users and permissions</strong> → <strong>Invite new users</strong>, enter the service account's email address and grant it <strong>Release to production, exclude devices, and use Play App Signing</strong> and <strong>Release apps to testing tracks</strong> for the app. Admin is not needed.</li>
+</ol>
+<div class="note">It can take a few minutes, sometimes longer, before Google Play accepts calls from a freshly invited account. A "The current user has insufficient permissions" error on the first release is usually just that.</div>
+<h2 id="storing-the-key">Storing the key in AppRelease</h2>
+<ol class="docs-steps">
+ <li>Open the app in the console → <strong>Environment variables</strong>.</li>
+ <li>Variable name <code>GOOGLE_PLAY_SERVICE_ACCOUNT</code>, value: the entire contents of the JSON file.</li>
+ <li>Group name <code>google_play</code>. Click to create the group.</li>
+ <li>Make sure <strong>Secret</strong> is checked, then <strong>Add</strong>.</li>
+</ol>
+<h2 id="yaml">Configuration</h2>
+<div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
+  <span class="k">android-workflow</span>:
+    <span class="k">environment</span>:
+      <span class="k">groups</span>:
+        - google_play
+    <span class="k">publishing</span>:
+      <span class="k">google_play</span>:
+        <span class="k">credentials</span>: <span class="v">$GOOGLE_PLAY_SERVICE_ACCOUNT</span>
+        <span class="k">track</span>: internal           <span class="c"> # internal | alpha | beta | production | a custom track</span>
+        <span class="k">submit_as_draft</span>: <span class="n">false</span>    <span class="c"> # true while the app is still in draft</span>
+        <span class="k">rollout_fraction</span>: <span class="n">0.1</span>     <span class="c"> # optional staged rollout on production</span>
+        <span class="k">in_app_update_priority</span>: <span class="n">0</span> <span class="c"> # optional, 0–5</span>
+        <span class="k">changes_not_sent_for_review</span>: <span class="n">false</span></code></pre></div>
+<table><thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody>
+ <tr><td><code>credentials</code></td><td>—</td><td>The service account JSON, by variable reference.</td></tr>
+ <tr><td><code>track</code></td><td><code>internal</code></td><td>Where the release lands.</td></tr>
+ <tr><td><code>submit_as_draft</code></td><td><code>false</code></td><td>Required while the app has never been published.</td></tr>
+ <tr><td><code>rollout_fraction</code></td><td>—</td><td>Staged rollout, 0.01–0.99. Omit for 100 %.</td></tr>
+ <tr><td><code>in_app_update_priority</code></td><td><code>0</code></td><td>Priority shown to the in-app updates API.</td></tr>
+ <tr><td><code>changes_not_sent_for_review</code></td><td><code>false</code></td><td>Upload without sending the change for review.</td></tr>
+</tbody></table>
+<h2 id="release-notes">Release notes</h2>
+<p>Put a <code>release_notes.txt</code>, or <code>release_notes_en-US.txt</code> and friends, in the repository root. They are attached to the track release in the matching languages.</p>
+<h2 id="common-errors">Common errors</h2>
+<table><thead><tr><th>Message</th><th>Usually means</th></tr></thead><tbody>
+ <tr><td>Version code 57 has already been used</td><td>Use <code>versioning: source: google_play</code> so the build number comes from the store.</td></tr>
+ <tr><td>Only releases with status draft may be created on draft app</td><td>Add <code>submit_as_draft: true</code>.</td></tr>
+ <tr><td>The Android App Bundle was signed with the wrong key</td><td>The keystore is not the upload key. See <a href="/docs/android-signing/#checking-the-signature">checking the signature</a>.</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/android-signing/"><small>Previous</small><b>Android code signing</b></a>
+ <a class="next" href="/docs/app-store/"><small>Next</small><b>App Store Connect publishing</b></a>
+</div>
+</article><aside class="docs-toc"><h4>On this page</h4><ol></ol></aside></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/#product">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261015"></script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+---
+title: Flutter apps – AppRelease Docs
+description: How to build and publish a Flutter app with apprelease.yaml: adding the app, Flutter version, Android and iOS code signing, build scripts, versioning and publishing to Google Play and App Store Connect.
+path: /docs/flutter/
+nav: docs
+layout: docs
+crumbs: Quick start guides > Flutter apps
+priority: 0.9
+---
+<h1>Flutter apps</h1>
+<p class="lead">How to build and publish a Flutter app with <code>apprelease.yaml</code>.</p>
+<p>This guide walks through every step needed to build and publish a Flutter app with AppRelease: adding the app, picking a Flutter version, code signing, build scripts, versioning and publishing to Google Play and App Store Connect.</p>
+<p>You can find a complete project showing these steps in the <a href="https://github.com/apprelease/samples">sample projects repository</a>.</p>
+
+<h2 id="adding-the-app">Adding the app to AppRelease</h2>
+<p>The apps you have on AppRelease are listed on the <strong>Applications</strong> page. Click <strong>Add application</strong> to add a new one.</p>
+<ol class="docs-steps">
+ <li>If you belong to more than one team, choose the team the app belongs to.</li>
+ <li>Enter the repository address. A public HTTPS URL works as is; for a private repository paste a deploy token or let AppRelease generate an SSH key you add to the repository.</li>
+ <li>Choose the default branch and the project type (<strong>Flutter</strong>).</li>
+ <li>Click <strong>Finish: Add application</strong>.</li>
+</ol>
+
+<h2 id="creating-apprelease-yaml">Creating apprelease.yaml</h2>
+<p><code>apprelease.yaml</code> is the configuration file that describes how to build, sign and publish the app. It lives in the root of the repository and is committed like any other file, so a change to the release process is reviewed in a pull request.</p>
+<div class="note"><b>Tip</b> The console can generate a first <code>apprelease.yaml</code> from the app's settings: open the app, go to <strong>Config</strong> and click <strong>Generate</strong>. Commit the result and adjust from there.</div>
+<p>If you prefer to write the file from scratch, start with this minimal configuration:</p>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  sample-workflow:
+    name: AppRelease sample workflow
+    max_build_duration: 60
+    instance_type: mac_m2
+</pre></div>
+<div class="note"><b>Tip</b> You can have more than one workflow in the same file. If you build for both Android and iOS, enter both:</div>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  android-workflow:
+    name: Android workflow
+    # ......
+  ios-workflow:
+    name: iOS workflow
+    # ......
+</pre></div>
+<p>After committing, open the app in the console, pick the branch and click <strong>Check for configuration file</strong>. The workflows found in the file appear as buttons. Different branches can carry different files.</p>
+
+<h2 id="setting-the-flutter-version">Setting the Flutter version</h2>
+<p>The <code>environment</code> section chooses the Flutter channel or version the build uses. If nothing is specified, the version preinstalled on the runner is used.</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Channel or version</button><button role="tab" aria-selected="false">FVM</button></div>
+ <div class="tabs-pane is-active" role="tabpanel">
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  sample-workflow:
+    environment:
+      flutter: stable
+</pre></div>
+  <div class="note"><b>Note</b> Possible values are <code>stable</code>, <code>beta</code> and <code>master</code>, or a specific version such as <code>3.41.2</code>.</div>
+ </div>
+ <div class="tabs-pane" role="tabpanel">
+  <p>If the project uses <a href="https://fvm.app">Flutter Version Management</a>, set <code>flutter: fvm</code>. The runner reads <code>.fvmrc</code> (or <code>.fvm/fvm_config.json</code>) and installs that version.</p>
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  sample-workflow:
+    environment:
+      flutter: fvm
+</pre></div>
+ </div>
+</div>
+
+<h2 id="code-signing">Code signing</h2>
+<p>All applications have to be digitally signed before they can be published, to confirm their author and guarantee the code has not been altered since it was signed.</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Android</button><button role="tab" aria-selected="false">iOS</button></div>
+ <div class="tabs-pane is-active" role="tabpanel">
+  <h3 id="generating-a-keystore">Generating a keystore</h3>
+  <p>Create a keystore for signing release builds with the Java <code>keytool</code> utility:</p>
+  <div class="code"><pre data-lang="bash">
+keytool -genkey -v -keystore apprelease.keystore -storetype JKS \
+        -keyalg RSA -keysize 2048 -validity 10000 -alias apprelease
+</pre></div>
+  <p>Keytool asks for a password for the keystore and the key alias, and for some information about you and your organisation. Note the <strong>keystore password</strong>, the <strong>key alias</strong> and the <strong>key password</strong>; you need them in the next step.</p>
+  <h3 id="uploading-a-keystore">Uploading a keystore</h3>
+  <ol class="docs-steps">
+   <li>Open <strong>Team settings</strong> → <strong>Code signing identities</strong>.</li>
+   <li>Open the <strong>Android keystores</strong> tab.</li>
+   <li>Upload the keystore file by clicking <strong>Choose a file</strong> or by dragging it into the box.</li>
+   <li>Enter the keystore password, the key alias and the key password.</li>
+   <li>Enter a <strong>reference name</strong> for the keystore. This is the name used in <code>apprelease.yaml</code>.</li>
+   <li>Click <strong>Add keystore</strong>.</li>
+  </ol>
+  <p>For each keystore, its common name, issuer and expiry date are shown.</p>
+  <div class="note note-warn"><b>Note</b> An uploaded keystore cannot be downloaded again. Keep your own copy somewhere safe: every future Google Play release has to be signed with the same key. Keep the file private and never commit it to the repository.</div>
+  <h3 id="referencing-keystores">Referencing keystores in apprelease.yaml</h3>
+  <p>To have AppRelease fetch the keystore during the build, list its reference name under <code>android_signing</code> in the <code>environment</code> section:</p>
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  android-workflow:
+    name: Android workflow
+    # ....
+    environment:
+      android_signing:
+        - keystore_reference
+</pre></div>
+  <p>These environment variables are set by AppRelease for the build:</p>
+  <table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+   <tr><td><code>AR_KEYSTORE_PATH</code></td><td>Where the keystore was written on the runner</td></tr>
+   <tr><td><code>AR_KEYSTORE_PASSWORD</code></td><td>Keystore password</td></tr>
+   <tr><td><code>AR_KEY_ALIAS</code></td><td>Key alias</td></tr>
+   <tr><td><code>AR_KEY_PASSWORD</code></td><td>Key alias password</td></tr>
+  </tbody></table>
+  <h3 id="signing-with-gradle">Signing Android apps using Gradle</h3>
+  <p>To sign the app, modify <code>android/app/build.gradle</code> or <code>android/app/build.gradle.kts</code>:</p>
+  <div class="tabs" data-tabs>
+   <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">build.gradle</button><button role="tab" aria-selected="false">build.gradle.kts</button></div>
+   <div class="tabs-pane is-active" role="tabpanel"><div class="code"><pre data-lang="groovy">
+...
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+        release {
+            if (System.getenv()["CI"]) { // CI=true is exported by AppRelease
+                storeFile file(System.getenv()["AR_KEYSTORE_PATH"])
+                storePassword System.getenv()["AR_KEYSTORE_PASSWORD"]
+                keyAlias System.getenv()["AR_KEY_ALIAS"]
+                keyPassword System.getenv()["AR_KEY_PASSWORD"]
+            } else {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            ...
+            signingConfig signingConfigs.release
+        }
+    }
+}
+...
+</pre></div></div>
+   <div class="tabs-pane" role="tabpanel"><div class="code"><pre data-lang="kotlin">
+...
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+        create("release") {
+            if (System.getenv("CI") != null) { // CI=true is exported by AppRelease
+                storeFile = file(System.getenv("AR_KEYSTORE_PATH"))
+                storePassword = System.getenv("AR_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("AR_KEY_ALIAS")
+                keyPassword = System.getenv("AR_KEY_PASSWORD")
+            } else {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            ...
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+...
+</pre></div></div>
+  </div>
+ </div>
+ <div class="tabs-pane" role="tabpanel">
+  <h3 id="creating-the-api-key">Creating the App Store Connect API key</h3>
+  <p>Signing iOS applications requires <a href="https://developer.apple.com/programs/">Apple Developer Program</a> membership.</p>
+  <p>It is recommended to create a dedicated App Store Connect API key for AppRelease in <a href="https://appstoreconnect.apple.com/">App Store Connect</a>:</p>
+  <ol class="docs-steps">
+   <li>Log in to App Store Connect and go to <strong>Users and Access</strong> → <strong>Integrations</strong> → <strong>App Store Connect API</strong>.</li>
+   <li>Click the <strong>+</strong> sign to generate a new API key.</li>
+   <li>Enter a name for the key and choose an access level. <code>App Manager</code> is enough to sign, upload and submit.</li>
+   <li>Click <strong>Generate</strong>.</li>
+   <li>As soon as the key is generated it appears in the list of active keys. Click <strong>Download API Key</strong> to save the private key (<code>.p8</code>). It can only be downloaded once.</li>
+  </ol>
+  <div class="note">Take note of the <b>Issuer ID</b> above the table and the <b>Key ID</b> of the generated key; both are needed in the next step.</div>
+  <h3 id="adding-the-api-key">Adding the App Store Connect API key to AppRelease</h3>
+  <ol class="docs-steps">
+   <li>Open <strong>Team settings</strong> → <strong>Integrations</strong> → <strong>Apple Developer Portal</strong>.</li>
+   <li>Click <strong>Add key</strong> and enter a <strong>name</strong> for the key. This is the name used in <code>apprelease.yaml</code>.</li>
+   <li>Enter the <strong>Issuer ID</strong> and the <strong>Key ID</strong>.</li>
+   <li>Upload the <code>.p8</code> file.</li>
+   <li>Click <strong>Save</strong>.</li>
+  </ol>
+  <h3 id="automatic-vs-manual">Automatic vs manual code signing</h3>
+  <p>With the API key in place, <strong>automatic signing</strong> is the simplest option: AppRelease creates or fetches the distribution certificate and the provisioning profile for the bundle identifier before the build. Add this to the <code>environment</code> section:</p>
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  ios-workflow:
+    name: iOS workflow
+    # ....
+    environment:
+      ios_signing:
+        distribution_type: app_store   # app_store | ad_hoc | development
+        bundle_identifier: com.example.app
+</pre></div>
+  <p>For <strong>manual signing</strong>, upload a certificate (<code>.p12</code>) and a provisioning profile under <strong>Code signing identities</strong> → <strong>iOS</strong> and reference them instead:</p>
+  <div class="code"><pre data-lang="yaml">
+    environment:
+      ios_signing:
+        provisioning_profiles:
+          - profile_reference
+        certificates:
+          - certificate_reference
+</pre></div>
+  <p>Either way, the runner writes an export options plist and exposes its path as <code>AR_EXPORT_OPTIONS</code> for the build command.</p>
+ </div>
+</div>
+
+<h2 id="configure-scripts">Configure scripts to build the app</h2>
+<p>Add scripts to prepare the environment and start the build. Each script has a name shown in the log and a shell snippet. In this step you also declare the <strong>artifacts</strong> you are interested in; they are available for download when the build finishes and are what the publishing step uploads.</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Android</button><button role="tab" aria-selected="false">iOS</button></div>
+ <div class="tabs-pane is-active" role="tabpanel">
+  <div class="code"><pre data-lang="yaml">
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$AR_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+      - name: Build AAB with Flutter
+        script: |
+          flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+</pre></div>
+  <div class="note"><b>Note</b> To build an <code>.apk</code> instead, replace the build command with <code>flutter build apk --release</code> and the artifact pattern with <code>build/**/outputs/**/*.apk</code>.</div>
+ </div>
+ <div class="tabs-pane" role="tabpanel">
+  <div class="code"><pre data-lang="yaml">
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+      - name: Build ipa with Flutter
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=$AR_EXPORT_OPTIONS
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+</pre></div>
+ </div>
+</div>
+
+<h2 id="build-versioning">Build versioning</h2>
+<p>Every artifact uploaded to Google Play or App Store Connect must carry a build number higher than the last one. AppRelease automates this: with a <code>versioning</code> section, the latest build number is fetched from the store before the scripts run and the next one is exposed as <code>AR_BUILD_NUMBER</code>.</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Android</button><button role="tab" aria-selected="false">iOS</button></div>
+ <div class="tabs-pane is-active" role="tabpanel">
+  <p>Google Play is queried with the service account used for publishing, so set that up first (see <a href="/docs/google-play/">Google Play publishing</a>). Then:</p>
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  android-workflow:
+    # ....
+    environment:
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.example.app"
+    versioning:
+      source: google_play
+      tracks: [internal, alpha, beta, production]
+    scripts:
+      - name: Build AAB with Flutter
+        script: |
+          flutter build appbundle --release \
+            --build-name=1.0.$AR_BUILD_NUMBER \
+            --build-number=$AR_BUILD_NUMBER
+</pre></div>
+ </div>
+ <div class="tabs-pane" role="tabpanel">
+  <p>App Store Connect is queried with the API key named in <code>ios_signing</code> or <code>publishing</code>:</p>
+  <div class="code"><pre data-lang="yaml">
+workflows:
+  ios-workflow:
+    # ....
+    versioning:
+      source: app_store_connect
+    scripts:
+      - name: Build ipa with Flutter
+        script: |
+          flutter build ipa --release \
+            --build-name=1.0.$AR_BUILD_NUMBER \
+            --build-number=$AR_BUILD_NUMBER \
+            --export-options-plist=$AR_EXPORT_OPTIONS
+</pre></div>
+ </div>
+</div>
+<div class="note"><b>Note</b> With <code>source: manual</code>, or no <code>versioning</code> section, <code>AR_BUILD_NUMBER</code> is the number of the release in AppRelease (1, 2, 3 …). Set the version yourself in the build command if that is not what you want.</div>
+
+<h2 id="publishing">Publishing</h2>
+<p>AppRelease publishes to Google Play, App Store Connect (TestFlight and App Store) and by email. For the full set of options see <a href="/docs/google-play/">Google Play</a> and <a href="/docs/app-store/">App Store Connect</a>.</p>
+<h3 id="email-publishing">Email publishing</h3>
+<p>If the build finishes successfully, the release notes (if any) and the artifacts are sent to the recipients. If the build fails, an email with a link to the log is sent instead. Set <code>success</code> or <code>failure</code> to <code>false</code> to turn one of them off.</p>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  sample-workflow:
+    environment:
+      # ...
+    scripts:
+      # ...
+    publishing:
+      email:
+        recipients:
+          - user_1@example.com
+          - user_2@example.com
+        notify:
+          success: true
+          failure: false
+</pre></div>
+<h3 id="publishing-to-stores">Publishing to Google Play and App Store</h3>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Android</button><button role="tab" aria-selected="false">iOS</button></div>
+ <div class="tabs-pane is-active" role="tabpanel">
+  <p>Publishing to Google Play requires a service account in Google Play Console whose JSON key is stored as a secret environment variable, as described in <a href="/docs/google-play/">Google Play publishing</a>. Then you only need to provide the credentials and the track. If the app is still in <code>draft</code> status, include <code>submit_as_draft: true</code> or promote the app in Google Play first.</p>
+  <div class="code"><pre data-lang="yaml">
+    publishing:
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: internal
+        submit_as_draft: true
+</pre></div>
+ </div>
+ <div class="tabs-pane" role="tabpanel">
+  <p>Publishing to App Store Connect uses the API key added under <strong>Integrations</strong>. <code>submit_to_testflight</code> uploads the build and, optionally, adds it to beta groups; <code>submit_to_app_store</code> also creates the App Store version and submits it for review.</p>
+  <div class="code"><pre data-lang="yaml">
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Beta testers
+        submit_to_app_store: false
+</pre></div>
+ </div>
+</div>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>Having followed the steps above, you now have a working <code>apprelease.yaml</code> that builds, signs, versions and publishes the app. Save the file, commit it, open the app in the console and start a release to see it in action.</p>
+<p>Your final <code>apprelease.yaml</code> should look something like this:</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">Android</button><button role="tab" aria-selected="false">iOS</button></div>
+ <div class="tabs-pane is-active" role="tabpanel"><div class="code"><pre data-lang="yaml">
+workflows:
+  android-workflow:
+    name: Android workflow
+    max_build_duration: 60
+    environment:
+      android_signing:
+        - keystore_reference
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.example.app"
+        GOOGLE_PLAY_TRACK: internal
+      flutter: stable
+    versioning:
+      source: google_play
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$AR_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+      - name: Build AAB with Flutter
+        script: |
+          flutter build appbundle --release \
+            --build-name=1.0.$AR_BUILD_NUMBER \
+            --build-number=$AR_BUILD_NUMBER
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - user_1@example.com
+        notify:
+          success: true
+          failure: false
+      google_play:
+        credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
+        track: $GOOGLE_PLAY_TRACK
+        submit_as_draft: true
+</pre></div></div>
+ <div class="tabs-pane" role="tabpanel"><div class="code"><pre data-lang="yaml">
+workflows:
+  ios-workflow:
+    name: iOS workflow
+    max_build_duration: 90
+    instance_type: mac_m2
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.example.app
+      flutter: stable
+      xcode: latest
+    versioning:
+      source: app_store_connect
+    scripts:
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+      - name: Build ipa with Flutter
+        script: |
+          flutter build ipa --release \
+            --build-name=1.0.$AR_BUILD_NUMBER \
+            --build-number=$AR_BUILD_NUMBER \
+            --export-options-plist=$AR_EXPORT_OPTIONS
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - user_1@example.com
+        notify:
+          success: true
+          failure: false
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Beta testers
+        submit_to_app_store: false
+</pre></div></div>
+</div>
+
+<h2 id="next-steps">Next steps</h2>
+<p>This basic workflow is a complete release pipeline, but it is not the end of the road.</p>
+<p>Add a <code>flutter test</code> step before the build so a red test never reaches the store. Look at <a href="/docs/yaml/#triggering">triggering</a> to start a release on every push to a branch or on a tag, and at <a href="/docs/yaml/#environment-variables">environment variables</a> for everything the runner exposes to your scripts.</p>
+<div class="docs-next">
+ <a href="/docs/android-signing/"><small>Deep dive</small><b>Android code signing</b></a>
+ <a class="next" href="/docs/yaml/"><small>Reference</small><b>apprelease.yaml</b></a>
+</div>
+<section class="docs-help">
+ <h2>Getting help and support</h2>
+ <p><strong>Email</strong> — <a href="mailto:support@apprelease.store">support@apprelease.store</a>, answered within a business day.<br><strong>In the console</strong> — every failed release has a "Send to support" button that attaches the log.</p>
+</section>

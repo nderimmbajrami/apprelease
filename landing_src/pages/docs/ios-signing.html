@@ -1,0 +1,74 @@
+---
+title: iOS code signing – AppRelease Docs
+description: Sign iOS apps on AppRelease with an App Store Connect API key: automatic certificates and provisioning profiles, or your own files.
+path: /docs/ios-signing/
+nav: docs
+layout: docs
+crumbs: Code signing > iOS
+priority: 0.7
+---
+<h1>iOS code signing</h1>
+<p class="lead">iOS builds are signed with a distribution certificate and a provisioning profile. With an App Store Connect API key, AppRelease takes care of both.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+ <li>An <a href="https://developer.apple.com/programs/">Apple Developer Program</a> membership.</li>
+ <li>The app's bundle identifier registered under <strong>Certificates, Identifiers &amp; Profiles</strong> → <strong>Identifiers</strong>.</li>
+ <li>An App Store Connect API key with <code>App Manager</code> access (steps below).</li>
+</ul>
+<h2 id="api-key">Creating the App Store Connect API key</h2>
+<ol class="docs-steps">
+ <li>Log in to <a href="https://appstoreconnect.apple.com/">App Store Connect</a> and go to <strong>Users and Access</strong> → <strong>Integrations</strong> → <strong>App Store Connect API</strong>.</li>
+ <li>Click <strong>+</strong> next to Active keys.</li>
+ <li>Name the key (for example "AppRelease") and choose the <code>App Manager</code> role.</li>
+ <li>Click <strong>Generate</strong>, then <strong>Download API Key</strong>. The <code>.p8</code> file can only be downloaded once.</li>
+ <li>Note the <strong>Issuer ID</strong> above the table and the <strong>Key ID</strong> in the row.</li>
+</ol>
+<h2 id="adding-the-key">Adding the key to AppRelease</h2>
+<ol class="docs-steps">
+ <li>Open <strong>Team settings</strong> → <strong>Integrations</strong> → <strong>Apple Developer Portal</strong>.</li>
+ <li>Click <strong>Add key</strong>, give it a name, paste the Issuer ID and Key ID, and upload the <code>.p8</code> file.</li>
+ <li>Click <strong>Save</strong>. AppRelease makes one test call to App Store Connect to confirm the key works.</li>
+</ol>
+<h2 id="automatic-signing">Automatic signing</h2>
+<p>Before the scripts run, the runner asks App Store Connect for a distribution certificate (creating one if there is none that AppRelease holds the private key for) and for a provisioning profile matching the bundle identifier and distribution type. Both are installed into a temporary keychain that is deleted when the build ends.</p>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  ios-workflow:
+    environment:
+      ios_signing:
+        distribution_type: app_store   # app_store | ad_hoc | development
+        bundle_identifier: com.example.app
+</pre></div>
+<p>Apps with more than one target (an extension, a watch app) list every identifier:</p>
+<div class="code"><pre data-lang="yaml">
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier:
+          - com.example.app
+          - com.example.app.widget
+</pre></div>
+<h2 id="manual-signing">Manual signing</h2>
+<p>If you already manage certificates yourself, upload the <code>.p12</code> (with its password) and the <code>.mobileprovision</code> under <strong>Code signing identities</strong> → <strong>iOS</strong> and reference them by name:</p>
+<div class="code"><pre data-lang="yaml">
+      ios_signing:
+        provisioning_profiles:
+          - app_store_profile
+        certificates:
+          - distribution_cert
+</pre></div>
+<h2 id="export-options">Export options</h2>
+<p>Either way the runner writes an export options plist and exposes it as <code>AR_EXPORT_OPTIONS</code>. Pass it to the build:</p>
+<div class="code"><pre data-lang="bash">
+flutter build ipa --release --export-options-plist=$AR_EXPORT_OPTIONS
+</pre></div>
+<p>The runner also sets <code>AR_CERTIFICATE_NAME</code>, <code>AR_PROVISIONING_PROFILE</code> and <code>AR_TEAM_ID</code>, should a custom Xcode step need them.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table><thead><tr><th>Message</th><th>Usually means</th></tr></thead><tbody>
+ <tr><td>No profiles for 'com.example.app' were found</td><td>The bundle identifier in <code>ios_signing</code> does not match the one in Xcode, or is not registered in the developer portal.</td></tr>
+ <tr><td>Provisioning profile doesn't include signing certificate</td><td>Manual signing with a profile made for a different certificate. Regenerate the profile, or switch to automatic signing.</td></tr>
+ <tr><td>Authentication credentials are missing or invalid</td><td>The API key was revoked, or Issuer ID and Key ID were swapped.</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/flutter/"><small>Previous</small><b>Flutter quick start</b></a>
+ <a class="next" href="/docs/app-store/"><small>Next</small><b>App Store Connect publishing</b></a>
+</div>

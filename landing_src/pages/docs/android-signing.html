@@ -1,0 +1,106 @@
+---
+title: Android code signing – AppRelease Docs
+description: Sign Android apps on AppRelease: generate a keystore, upload it, reference it in apprelease.yaml and wire it into Gradle.
+path: /docs/android-signing/
+nav: docs
+layout: docs
+crumbs: Code signing > Android
+priority: 0.7
+---
+<h1>Android code signing</h1>
+<p class="lead">Every Android app is signed with a key before it reaches Google Play. AppRelease keeps the keystore for you and hands it to the build.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>You upload the keystore once, with its passwords, under a <strong>reference name</strong>. A workflow lists that name under <code>android_signing</code>. Before the scripts run, the runner writes the keystore to a temporary path and exports four environment variables; your Gradle file reads them. When the build ends, the file is deleted.</p>
+<h2 id="upload-key-vs-app-signing-key">Upload key vs app signing key</h2>
+<p>With <strong>Play App Signing</strong> (the default for every app created since 2021), Google holds the key that signs what users install, and you sign uploads with a separate <strong>upload key</strong>. That upload key is what you give AppRelease. If you lose it, Google can reset it; if you lose the app signing key of an app that opted out of Play App Signing, nobody can.</p>
+<h2 id="generating-a-keystore">Generating a keystore</h2>
+<div class="code"><pre data-lang="bash">
+keytool -genkey -v -keystore upload.keystore -storetype JKS \
+        -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+</pre></div>
+<p>Keytool asks for a keystore password, then for a key password, then for your name and organisation. The values do not matter to the stores; the passwords do.</p>
+<h2 id="uploading">Uploading the keystore</h2>
+<ol class="docs-steps">
+ <li>Open <strong>Team settings</strong> → <strong>Code signing identities</strong> → <strong>Android keystores</strong>.</li>
+ <li>Drop the <code>.keystore</code> or <code>.jks</code> file into the box.</li>
+ <li>Enter the keystore password, the key alias and the key password. AppRelease checks them against the file before saving.</li>
+ <li>Choose a reference name, for example <code>upload_keystore</code>.</li>
+ <li>Click <strong>Add keystore</strong>.</li>
+</ol>
+<div class="note note-warn"><b>Keep your own copy.</b> The uploaded keystore cannot be downloaded. Store the file and the passwords in a password manager; every future release has to be signed with the same key.</div>
+<h2 id="referencing">Referencing it in apprelease.yaml</h2>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  android-workflow:
+    environment:
+      android_signing:
+        - upload_keystore
+</pre></div>
+<table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+ <tr><td><code>AR_KEYSTORE_PATH</code></td><td>Absolute path of the keystore on the runner</td></tr>
+ <tr><td><code>AR_KEYSTORE_PASSWORD</code></td><td>Keystore password</td></tr>
+ <tr><td><code>AR_KEY_ALIAS</code></td><td>Key alias</td></tr>
+ <tr><td><code>AR_KEY_PASSWORD</code></td><td>Key alias password</td></tr>
+</tbody></table>
+<h2 id="gradle">Wiring it into Gradle</h2>
+<p>Flutter's template reads <code>key.properties</code>; keep that for local builds and add the CI branch:</p>
+<div class="tabs" data-tabs>
+ <div class="tabs-bar" role="tablist"><button role="tab" aria-selected="true">build.gradle.kts</button><button role="tab" aria-selected="false">build.gradle</button></div>
+ <div class="tabs-pane is-active" role="tabpanel"><div class="code"><pre data-lang="kotlin">
+android {
+    signingConfigs {
+        create("release") {
+            if (System.getenv("CI") != null) {
+                storeFile = file(System.getenv("AR_KEYSTORE_PATH"))
+                storePassword = System.getenv("AR_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("AR_KEY_ALIAS")
+                keyPassword = System.getenv("AR_KEY_PASSWORD")
+            } else {
+                keyAlias = keystoreProperties["keyAlias"] as String?
+                keyPassword = keystoreProperties["keyPassword"] as String?
+                storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+                storePassword = keystoreProperties["storePassword"] as String?
+            }
+        }
+    }
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+}
+</pre></div></div>
+ <div class="tabs-pane" role="tabpanel"><div class="code"><pre data-lang="groovy">
+android {
+    signingConfigs {
+        release {
+            if (System.getenv()["CI"]) {
+                storeFile file(System.getenv()["AR_KEYSTORE_PATH"])
+                storePassword System.getenv()["AR_KEYSTORE_PASSWORD"]
+                keyAlias System.getenv()["AR_KEY_ALIAS"]
+                keyPassword System.getenv()["AR_KEY_PASSWORD"]
+            } else {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+}
+</pre></div></div>
+</div>
+<h2 id="checking-the-signature">Checking the signature</h2>
+<p>If Google Play rejects an upload with "your Android App Bundle is signed with the wrong key", compare fingerprints. The one Google expects is shown under <strong>Setup</strong> → <strong>App signing</strong> → <strong>Upload key certificate</strong>; the one you used:</p>
+<div class="code"><pre data-lang="bash">
+keytool -list -v -keystore upload.keystore -alias upload | grep SHA1
+</pre></div>
+<div class="docs-next">
+ <a href="/docs/flutter/"><small>Previous</small><b>Flutter quick start</b></a>
+ <a class="next" href="/docs/google-play/"><small>Next</small><b>Google Play publishing</b></a>
+</div>

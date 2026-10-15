@@ -1,0 +1,60 @@
+---
+title: App Store Connect publishing – AppRelease Docs
+description: Upload iOS builds to TestFlight and submit them to the App Store from AppRelease.
+path: /docs/app-store/
+nav: docs
+layout: docs
+crumbs: Publishing > App Store Connect
+priority: 0.7
+---
+<h1>App Store Connect publishing</h1>
+<p class="lead">AppRelease uploads the <code>.ipa</code> to App Store Connect, waits for processing, and can add it to TestFlight groups or submit it for App Store review.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+ <li>An App Store Connect API key added under <strong>Integrations</strong> (see <a href="/docs/ios-signing/#api-key">iOS code signing</a>).</li>
+ <li>The app created in App Store Connect with the same bundle identifier.</li>
+ <li>A build signed for <code>app_store</code> distribution.</li>
+</ul>
+<h2 id="yaml">Configuration</h2>
+<div class="code"><pre data-lang="yaml">
+workflows:
+  ios-workflow:
+    publishing:
+      app_store_connect:
+        auth: integration              # the key from Team settings → Integrations
+        submit_to_testflight: true
+        beta_groups:                   # optional
+          - Beta testers
+          - QA
+        expire_previous_builds: false  # optional
+        submit_to_app_store: false
+        release_type: AFTER_APPROVAL   # MANUAL | AFTER_APPROVAL | SCHEDULED
+        copyright: 2026 Example Ltd
+</pre></div>
+<table><thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead><tbody>
+ <tr><td><code>auth</code></td><td><code>integration</code></td><td>Use the team's API key. Alternatively give <code>api_key</code>, <code>key_id</code>, <code>issuer_id</code> as variable references.</td></tr>
+ <tr><td><code>submit_to_testflight</code></td><td><code>false</code></td><td>Upload and wait for processing.</td></tr>
+ <tr><td><code>beta_groups</code></td><td>—</td><td>External or internal groups to add the build to. External groups trigger beta review.</td></tr>
+ <tr><td><code>expire_previous_builds</code></td><td><code>false</code></td><td>Expire older TestFlight builds of the same version.</td></tr>
+ <tr><td><code>submit_to_app_store</code></td><td><code>false</code></td><td>Create (or reuse) the App Store version and submit for review.</td></tr>
+ <tr><td><code>release_type</code></td><td><code>MANUAL</code></td><td>How the version is released after approval.</td></tr>
+</tbody></table>
+<h2 id="what-the-step-does">What the publishing step does</h2>
+<ol class="docs-steps">
+ <li>Validates the <code>.ipa</code> and uploads it with the API key.</li>
+ <li>Polls App Store Connect until the build has finished processing (usually 2–10 minutes).</li>
+ <li>Sets the "What to test" text from <code>release_notes.txt</code> if present.</li>
+ <li>Adds the build to the named beta groups.</li>
+ <li>If <code>submit_to_app_store</code> is on, creates the version, attaches the build and submits.</li>
+</ol>
+<div class="note"><b>Export compliance.</b> If the app does not use non-exempt encryption, add <code>ITSAppUsesNonExemptEncryption = NO</code> to <code>Info.plist</code>. Otherwise every TestFlight build waits for a manual answer in App Store Connect.</div>
+<h2 id="common-errors">Common errors</h2>
+<table><thead><tr><th>Message</th><th>Usually means</th></tr></thead><tbody>
+ <tr><td>The bundle version must be higher than the previously uploaded version</td><td>Use <code>versioning: source: app_store_connect</code>.</td></tr>
+ <tr><td>Missing Compliance</td><td>Set <code>ITSAppUsesNonExemptEncryption</code> in <code>Info.plist</code>.</td></tr>
+ <tr><td>Invalid Provisioning Profile</td><td>The build was signed for ad hoc or development. Use <code>distribution_type: app_store</code>.</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/ios-signing/"><small>Previous</small><b>iOS code signing</b></a>
+ <a class="next" href="/docs/yaml/"><small>Next</small><b>apprelease.yaml reference</b></a>
+</div>
