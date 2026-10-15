@@ -750,4 +750,53 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get runnerOnline => 'A runner is online';
+
+  @override
+  String get triggersTitle => 'Release on push';
+
+  @override
+  String get triggersExplain =>
+      'Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.';
+
+  @override
+  String get triggerEnabled => 'Release automatically on push';
+
+  @override
+  String get triggerBranch => 'Branch';
+
+  @override
+  String get triggerPlatforms => 'Platforms to release';
+
+  @override
+  String get triggerTrackAndroid => 'Android track on push';
+
+  @override
+  String get triggerTrackIos => 'iOS destination on push';
+
+  @override
+  String get triggerTags => 'A tag like v1.2.0 releases to production';
+
+  @override
+  String get triggerTagsBody =>
+      'Pushing a version tag queues a production release on Google Play and an App Store review submission, with the version from the tag.';
+
+  @override
+  String get webhookTitle => 'Connect GitHub';
+
+  @override
+  String get webhookHow =>
+      'In the repository on GitHub open Settings → Webhooks → Add webhook. Payload URL and secret as below, content type application/json, event: just the push event.';
+
+  @override
+  String get webhookUrl => 'Payload URL';
+
+  @override
+  String get webhookSecret => 'Secret';
+
+  @override
+  String get webhookLocalNote =>
+      'Webhooks need the live backend; in the demo nothing is posted.';
+
+  @override
+  String get versionAuto => 'from pubspec';
 }

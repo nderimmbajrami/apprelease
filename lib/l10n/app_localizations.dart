@@ -1436,6 +1436,96 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'A runner is online'**
   String get runnerOnline;
+
+  /// No description provided for @triggersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Release on push'**
+  String get triggersTitle;
+
+  /// No description provided for @triggersExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.'**
+  String get triggersExplain;
+
+  /// No description provided for @triggerEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Release automatically on push'**
+  String get triggerEnabled;
+
+  /// No description provided for @triggerBranch.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get triggerBranch;
+
+  /// No description provided for @triggerPlatforms.
+  ///
+  /// In en, this message translates to:
+  /// **'Platforms to release'**
+  String get triggerPlatforms;
+
+  /// No description provided for @triggerTrackAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Android track on push'**
+  String get triggerTrackAndroid;
+
+  /// No description provided for @triggerTrackIos.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS destination on push'**
+  String get triggerTrackIos;
+
+  /// No description provided for @triggerTags.
+  ///
+  /// In en, this message translates to:
+  /// **'A tag like v1.2.0 releases to production'**
+  String get triggerTags;
+
+  /// No description provided for @triggerTagsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pushing a version tag queues a production release on Google Play and an App Store review submission, with the version from the tag.'**
+  String get triggerTagsBody;
+
+  /// No description provided for @webhookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect GitHub'**
+  String get webhookTitle;
+
+  /// No description provided for @webhookHow.
+  ///
+  /// In en, this message translates to:
+  /// **'In the repository on GitHub open Settings → Webhooks → Add webhook. Payload URL and secret as below, content type application/json, event: just the push event.'**
+  String get webhookHow;
+
+  /// No description provided for @webhookUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Payload URL'**
+  String get webhookUrl;
+
+  /// No description provided for @webhookSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret'**
+  String get webhookSecret;
+
+  /// No description provided for @webhookLocalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Webhooks need the live backend; in the demo nothing is posted.'**
+  String get webhookLocalNote;
+
+  /// No description provided for @versionAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'from pubspec'**
+  String get versionAuto;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

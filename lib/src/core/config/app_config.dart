@@ -33,6 +33,10 @@ abstract final class AppConfig {
   static const siteUrl = 'https://apprelease.store';
   static const docsUrl = '$siteUrl/docs/';
 
+  /// Where GitHub posts push events for an app.
+  static String webhookUrl(String appId) =>
+      '$supabaseUrl/functions/v1/github-webhook?app=$appId';
+
   static bool get isSupabaseEnabled =>
       useSupabase && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 }

@@ -150,9 +150,14 @@ class Release {
   /// Why it failed, in one line.
   final String? errorMessage;
 
+  /// Pushed releases carry this until the runner has read pubspec.yaml.
+  static const autoVersion = 'auto';
+
   /// `1.4.0 (57)` or `1.4.0` while the number is unknown.
-  String get versionLabel =>
-      buildNumber == null ? versionName : '$versionName ($buildNumber)';
+  String get versionLabel {
+    final name = versionName == autoVersion ? '…' : versionName;
+    return buildNumber == null ? name : '$name ($buildNumber)';
+  }
 
   Duration? get duration => startedAt == null
       ? null

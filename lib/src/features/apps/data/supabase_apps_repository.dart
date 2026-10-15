@@ -78,6 +78,17 @@ class SupabaseAppsRepository implements AppsRepository {
     lastReleaseAt: row['last_release_at'] == null
         ? null
         : DateTime.parse(row['last_release_at'] as String),
+    triggerEnabled: (row['trigger_enabled'] as bool?) ?? false,
+    triggerBranch: (row['trigger_branch'] as String?) ?? 'main',
+    triggerPlatforms: {
+      for (final p in (row['trigger_platforms'] as List?) ?? const ['android'])
+        Platform.values.byName(p as String),
+    },
+    triggerTrackAndroid:
+        (row['trigger_track_android'] as String?) ?? 'internal',
+    triggerTrackIos: (row['trigger_track_ios'] as String?) ?? 'testflight',
+    triggerTags: (row['trigger_tags'] as bool?) ?? false,
+    webhookSecret: (row['webhook_secret'] as String?) ?? '',
   );
 
   static Map<String, dynamic> _toRow(AppProject app) => {
@@ -91,5 +102,11 @@ class SupabaseAppsRepository implements AppsRepository {
     'android_package_name': app.androidPackageName,
     'ios_bundle_id': app.iosBundleId,
     'flutter_version': app.flutterVersion,
+    'trigger_enabled': app.triggerEnabled,
+    'trigger_branch': app.triggerBranch,
+    'trigger_platforms': [for (final p in app.triggerPlatforms) p.name],
+    'trigger_track_android': app.triggerTrackAndroid,
+    'trigger_track_ios': app.triggerTrackIos,
+    'trigger_tags': app.triggerTags,
   };
 }

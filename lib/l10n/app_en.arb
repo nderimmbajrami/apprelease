@@ -313,5 +313,20 @@
   "noRunnerTitle": "No build machine is online",
   "noRunnerBody": "A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:",
   "noRunnerFoot": "The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.",
-  "runnerOnline": "A runner is online"
+  "runnerOnline": "A runner is online",
+  "triggersTitle": "Release on push",
+  "triggersExplain": "Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.",
+  "triggerEnabled": "Release automatically on push",
+  "triggerBranch": "Branch",
+  "triggerPlatforms": "Platforms to release",
+  "triggerTrackAndroid": "Android track on push",
+  "triggerTrackIos": "iOS destination on push",
+  "triggerTags": "A tag like v1.2.0 releases to production",
+  "triggerTagsBody": "Pushing a version tag queues a production release on Google Play and an App Store review submission, with the version from the tag.",
+  "webhookTitle": "Connect GitHub",
+  "webhookHow": "In the repository on GitHub open Settings → Webhooks → Add webhook. Payload URL and secret as below, content type application/json, event: just the push event.",
+  "webhookUrl": "Payload URL",
+  "webhookSecret": "Secret",
+  "webhookLocalNote": "Webhooks need the live backend; in the demo nothing is posted.",
+  "versionAuto": "from pubspec"
 }

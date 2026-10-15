@@ -19,6 +19,7 @@ class LocalAppsRepository implements AppsRepository {
     createdAt: DateTime.now().subtract(const Duration(days: 12)),
     releaseCount: 2,
     lastReleaseAt: DateTime.now().subtract(const Duration(hours: 20)),
+    webhookSecret: 'demo-secret-not-for-real-use',
   );
 
   final InMemoryTable<AppProject> _table;

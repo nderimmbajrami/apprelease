@@ -208,6 +208,25 @@ class Pipeline {
     env['AR_COMMIT_SHORT'] = commit.substring(0, 7);
     await api.updateRelease(releaseId, {'commit': commit.substring(0, 7)});
 
+    // A pushed release has no version yet; pubspec.yaml knows it.
+    if (release['version_name'] == 'auto') {
+      final pubspec = File(p.join(buildDir.path, 'pubspec.yaml'));
+      final match = pubspec.existsSync()
+          ? RegExp(
+              r'^version:\s*(\d+\.\d+\.\d+)',
+              multiLine: true,
+            ).firstMatch(pubspec.readAsStringSync())
+          : null;
+      final version = match?.group(1) ?? '0.0.0';
+      release['version_name'] = version;
+      await api.updateRelease(releaseId, {'version_name': version});
+      await log('Version $version from pubspec.yaml', stepId: stepId);
+    }
+    if (env['AR_BRANCH']!.startsWith('v') &&
+        RegExp(r'^v?\d+\.\d+\.\d+').hasMatch(env['AR_BRANCH']!)) {
+      env['AR_TAG'] = env['AR_BRANCH']!;
+    }
+
     final file = File(p.join(buildDir.path, 'apprelease.yaml'));
     if (!file.existsSync()) {
       throw StepFailed('apprelease.yaml not found in the repository root');
