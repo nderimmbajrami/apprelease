@@ -114,6 +114,31 @@ class SupabaseReleasesRepository implements ReleasesRepository {
     _touch();
   }
 
+  /// Runners heartbeat every 20 seconds; two minutes of silence counts as
+  /// gone. Re-checked every 30 seconds on top of the realtime events, so a
+  /// machine that simply stopped is noticed too.
+  @override
+  Stream<bool> watchRunnerOnline() {
+    final ticks = Stream<void>.periodic(const Duration(seconds: 30));
+    return watchQuery(
+      client: _client,
+      tables: const ['runners'],
+      refresh: ticks,
+      fetch: () async {
+        final since = DateTime.now()
+            .toUtc()
+            .subtract(const Duration(minutes: 2))
+            .toIso8601String();
+        final rows = await _client
+            .from('runners')
+            .select('id')
+            .gte('last_seen_at', since)
+            .limit(1);
+        return rows.isNotEmpty;
+      },
+    );
+  }
+
   @override
   Future<void> deleteReleasesOfApp(String appId) async {
     // Cascades through release_steps and release_logs.

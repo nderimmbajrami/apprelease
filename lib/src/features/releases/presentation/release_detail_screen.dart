@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,6 +71,7 @@ class _ReleaseView extends ConsumerWidget {
     final isCompact = context.isCompact;
     final log = ref.watch(releaseLogProvider(release.id));
     final app = ref.watch(appByIdProvider(release.appId));
+    final runnerOnline = ref.watch(runnerOnlineProvider).value ?? true;
 
     final steps = AppCard(
       child: Column(
@@ -174,6 +176,10 @@ class _ReleaseView extends ConsumerWidget {
               ),
           ],
         ),
+        if (release.status == ReleaseStatus.queued && !runnerOnline) ...[
+          const SizedBox(height: Gap.lg),
+          const _NoRunnerCard(),
+        ],
         if (release.errorMessage != null) ...[
           const SizedBox(height: Gap.lg),
           AppCard(
@@ -210,6 +216,75 @@ class _ReleaseView extends ConsumerWidget {
             ],
           ),
       ],
+    );
+  }
+}
+
+/// Shown while a release is queued and no runner has reported in: what a
+/// runner is, and the two lines that start one.
+class _NoRunnerCard extends StatelessWidget {
+  const _NoRunnerCard();
+
+  static const command =
+      'cd ~/Documents/GitHub/apprelease/runner\ndart run bin/runner.dart';
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return AppCard(
+      borderColor: scheme.onSurface.withValues(alpha: .4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.dns_outlined, size: 20, color: scheme.onSurface),
+              const SizedBox(width: Gap.sm),
+              Text(l10n.noRunnerTitle, style: theme.textTheme.titleSmall),
+            ],
+          ),
+          const SizedBox(height: Gap.sm),
+          Text(l10n.noRunnerBody, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: Gap.md),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Gap.md,
+              vertical: Gap.sm,
+            ),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(Radii.sm),
+              border: Border.all(color: scheme.outline),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: SelectionArea(
+                    child: Text(command, style: theme.textTheme.mono),
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.copy,
+                  onPressed: () async {
+                    await Clipboard.setData(const ClipboardData(text: command));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(l10n.copied)));
+                    }
+                  },
+                  icon: const Icon(Icons.copy, size: 18),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: Gap.sm),
+          Text(l10n.noRunnerFoot, style: theme.textTheme.bodySmall),
+        ],
+      ),
     );
   }
 }

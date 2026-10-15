@@ -104,7 +104,7 @@ final class AuthControllerProvider
   AuthController create() => AuthController();
 }
 
-String _$authControllerHash() => r'c4d8356920d0a994c262d428e3d8c212674b569e';
+String _$authControllerHash() => r'6681897081d9c87d4cbd966a9d765cf2215a3d5f';
 
 /// Drives the sign-in / sign-up forms. State is the in-flight request, not the
 /// session — the session lives in [authStateChangesProvider].

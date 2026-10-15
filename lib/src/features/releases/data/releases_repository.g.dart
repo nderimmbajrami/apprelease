@@ -326,3 +326,41 @@ final class ReleaseLogFamily extends $Family
   @override
   String toString() => r'releaseLogProvider';
 }
+
+/// True while at least one build machine is reporting in.
+
+@ProviderFor(runnerOnline)
+final runnerOnlineProvider = RunnerOnlineProvider._();
+
+/// True while at least one build machine is reporting in.
+
+final class RunnerOnlineProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// True while at least one build machine is reporting in.
+  RunnerOnlineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'runnerOnlineProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$runnerOnlineHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return runnerOnline(ref);
+  }
+}
+
+String _$runnerOnlineHash() => r'04189e25eaad402b7c00480b7514b3d0445ff8cf';

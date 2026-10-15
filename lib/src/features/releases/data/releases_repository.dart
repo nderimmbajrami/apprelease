@@ -25,6 +25,10 @@ abstract interface class ReleasesRepository {
   /// Removes the releases of an app that is being deleted.
   Future<void> deleteReleasesOfApp(String appId);
 
+  /// Whether any runner reported in recently. False means a queued release
+  /// has nobody to build it.
+  Stream<bool> watchRunnerOnline();
+
   void dispose();
 }
 
@@ -70,3 +74,8 @@ Stream<Release?> releaseStream(Ref ref, String releaseId) =>
 @riverpod
 Stream<List<LogLine>> releaseLog(Ref ref, String releaseId) =>
     ref.watch(releasesRepositoryProvider).watchLog(releaseId);
+
+/// True while at least one build machine is reporting in.
+@Riverpod(keepAlive: true)
+Stream<bool> runnerOnline(Ref ref) =>
+    ref.watch(releasesRepositoryProvider).watchRunnerOnline();

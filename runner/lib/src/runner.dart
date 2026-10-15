@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'api.dart';
@@ -43,6 +44,8 @@ class Runner {
   Future<bool> runOne() async {
     final release = await api.claimRelease(runnerId: id, platforms: platforms);
     if (release == null) return false;
+    // The claim returns the row alone; the steps come separately.
+    release['release_steps'] = await api.steps(release['id'] as String);
     final app = await api.app(release['app_id'] as String);
     final pipeline = Pipeline(
       api: api,

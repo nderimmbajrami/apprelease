@@ -309,5 +309,9 @@
       }
     }
   },
-  "navSetup": "Setup checklist"
+  "navSetup": "Setup checklist",
+  "noRunnerTitle": "No build machine is online",
+  "noRunnerBody": "A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:",
+  "noRunnerFoot": "The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.",
+  "runnerOnline": "A runner is online"
 }

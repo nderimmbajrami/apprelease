@@ -34,6 +34,21 @@ class SupabaseApi {
     return (body as Map).cast<String, dynamic>();
   }
 
+  /// The steps the console created for a release, in order.
+  Future<List<Map<String, dynamic>>> steps(String releaseId) async {
+    final response = await _client.get(
+      Uri.parse(
+        '$url/rest/v1/release_steps?release_id=eq.$releaseId&select=*&order=position.asc',
+      ),
+      headers: _headers,
+    );
+    _check(response);
+    return [
+      for (final row in jsonDecode(response.body) as List)
+        (row as Map).cast<String, dynamic>(),
+    ];
+  }
+
   Future<Map<String, dynamic>> app(String appId) async {
     final response = await _client.get(
       Uri.parse('$url/rest/v1/apps?id=eq.$appId&select=*'),

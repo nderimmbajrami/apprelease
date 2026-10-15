@@ -1412,6 +1412,30 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Setup checklist'**
   String get navSetup;
+
+  /// No description provided for @noRunnerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No build machine is online'**
+  String get noRunnerTitle;
+
+  /// No description provided for @noRunnerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:'**
+  String get noRunnerBody;
+
+  /// No description provided for @noRunnerFoot.
+  ///
+  /// In en, this message translates to:
+  /// **'The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.'**
+  String get noRunnerFoot;
+
+  /// No description provided for @runnerOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'A runner is online'**
+  String get runnerOnline;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

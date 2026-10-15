@@ -84,6 +84,18 @@ class Pipeline {
 
   Future<void> run() async {
     final started = DateTime.now();
+    if (steps.length < 7) {
+      await api.updateRelease(releaseId, {
+        'status': 'failed',
+        'finished_at': DateTime.now().toUtc().toIso8601String(),
+        'error_message': 'Release has ${steps.length} steps, expected 7',
+      });
+      await log(
+        'Release has ${steps.length} steps, expected 7',
+        level: 'error',
+      );
+      return;
+    }
     await log(
       'Runner claimed release #${release['number']} · ${app['name']} · $platform',
     );

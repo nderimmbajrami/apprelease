@@ -185,6 +185,10 @@ class LocalReleasesRepository implements ReleasesRepository {
     _log(releaseId, 'Cancelled by user', level: LogLevel.warning);
   }
 
+  /// The simulated runner is always there.
+  @override
+  Stream<bool> watchRunnerOnline() => Stream.value(true);
+
   @override
   Future<void> deleteReleasesOfApp(String appId) async {
     for (final release in _releases.rows.where((r) => r.appId == appId)) {

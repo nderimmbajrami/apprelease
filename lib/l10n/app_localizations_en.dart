@@ -736,4 +736,18 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get navSetup => 'Setup checklist';
+
+  @override
+  String get noRunnerTitle => 'No build machine is online';
+
+  @override
+  String get noRunnerBody =>
+      'A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:';
+
+  @override
+  String get noRunnerFoot =>
+      'The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.';
+
+  @override
+  String get runnerOnline => 'A runner is online';
 }
