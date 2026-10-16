@@ -219,9 +219,9 @@
 
       function step() {
         if (i > 0) nodes[i - 1].classList.replace('is-active', 'is-done');
+        if (i === nodes.length - 1) parcel.classList.add('is-hidden');
         if (i >= nodes.length) {
           stage.classList.add('is-live');
-          parcel.classList.add('is-hidden');
           setTimeout(runStage, 3600);
           return;
         }
@@ -257,6 +257,25 @@
       });
       card.addEventListener('mouseleave', function () { card.style.transform = ''; });
     });
+  }
+
+  /* ----------------------------------------------------------- time calc */
+
+  var calc = document.querySelector('[data-calc]');
+  if (calc) {
+    var out = document.querySelector('[data-calc-out]');
+    var hours = document.querySelector('[data-calc-hours]');
+    var days = document.querySelector('[data-calc-days]');
+    function update() {
+      var n = parseInt(calc.value, 10);
+      var h = Math.round(n * 70 / 60);
+      var d = Math.max(1, Math.round(h / 8));
+      out.textContent = n;
+      hours.textContent = h + ' h';
+      days.textContent = d + (d === 1 ? ' working day' : ' working days');
+    }
+    calc.addEventListener('input', update);
+    update();
   }
 
   /* -------------------------------------------------------- pricing toggle */

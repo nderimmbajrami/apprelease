@@ -8,7 +8,7 @@ priority: 1.0
 <section class="hero hero-center">
  <div class="wrap">
   <p class="kicker">Release automation for Flutter</p>
-  <h1>Push. It ships to both stores.</h1>
+  <h1>Push. It ships to <em>both stores.</em></h1>
   <p class="lead">AppRelease builds, signs and uploads your app to Google Play and the App Store. You keep one short file in your repository and push. That is the whole workflow.</p>
   <div class="hero-actions">
    <a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Get started free</a>
@@ -22,7 +22,7 @@ priority: 1.0
  </div>
 
  <!-- The release, as it happens: a build travels from your push to both stores. -->
- <div class="wrap">
+ <div class="wrap stage-wrap">
   <div class="stage" data-stage aria-hidden="true">
    <div class="stage-floor"></div>
    <div class="stage-track">
@@ -41,6 +41,7 @@ priority: 1.0
   </div>
  </div>
 </section>
+<div class="hero-spacer"></div>
 
 <section class="section" id="product">
  <div class="wrap">
@@ -58,6 +59,47 @@ priority: 1.0
    <li class="six-step rise"><span>6</span><h3>Tag to go live</h3><p>Tag a version and it goes to production and App Store review.</p><em>when ready</em></li>
   </ol>
   <p style="margin-top:22px"><a class="text-link" href="/how-it-works/">The steps in detail, what you do and what we do</a></p>
+ </div>
+</section>
+
+<section class="section time" id="time">
+ <div class="wrap">
+  <header class="section-head">
+   <p class="kicker">The time you get back</p>
+   <h2>A release by hand is an afternoon. Twice.</h2>
+   <p class="lead">Count what you actually do today, for one version, on two stores. Then see what is left.</p>
+  </header>
+  <div class="time-grid">
+   <div class="time-col rise">
+    <h3>By hand, per release</h3>
+    <ul>
+     <li>Bump version and build number, both projects <span>5 min</span></li>
+     <li>Build the Android bundle, find the keystore, sign <span>12 min</span></li>
+     <li>Upload to Play Console, pick the track, release notes <span>8 min</span></li>
+     <li>Open Xcode, fix signing, archive <span>15 min</span></li>
+     <li>Upload, wait for processing, add to TestFlight <span>20 min</span></li>
+     <li>"Version code already used", do half of it again <span>10 min</span></li>
+    </ul>
+    <div class="time-total"><b>~70 min</b><small>of your attention, every release</small></div>
+   </div>
+   <div class="time-col is-us rise">
+    <h3>With AppRelease</h3>
+    <ul>
+     <li>git push <span>5 s</span></li>
+     <li class="strike">Bump build numbers <span>0</span></li>
+     <li class="strike">Find the keystore, sign <span>0</span></li>
+     <li class="strike">Open Xcode, archive, upload <span>0</span></li>
+     <li class="strike">Wait for processing <span>0</span></li>
+     <li>Read the email: released <span>10 s</span></li>
+    </ul>
+    <div class="time-total"><b>&lt; 1 min</b><small>the machine does the other 70</small></div>
+   </div>
+  </div>
+  <div class="time-calc rise">
+   <label>Releases per month <output data-calc-out>8</output></label>
+   <input type="range" min="1" max="40" value="8" data-calc aria-label="Releases per month">
+   <div class="time-result"><b data-calc-hours>9 h</b><span>of your month back, <b data-calc-days style="font-size:inherit;color:#fff">1 working day</b>. Spent on the app instead of the stores.</span></div>
+  </div>
  </div>
 </section>
 
