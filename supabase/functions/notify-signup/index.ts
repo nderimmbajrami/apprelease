@@ -5,6 +5,7 @@
 //   supabase secrets set RESEND_API_KEY=re_...
 //   supabase functions deploy notify-signup
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { preflight, reply } from "../_shared/cors.ts";
 
 const FROM = "AppRelease <publish@apprelease.store>";
 const TEAM_INBOX = "publish@apprelease.store";
@@ -31,6 +32,8 @@ const shell = (title: string, body: string) => `<!DOCTYPE html>
 </table></td></tr></table></body></html>`;
 
 Deno.serve(async (req) => {
+  const pre = preflight(req);
+  if (pre) return pre;
   const authHeader = req.headers.get("Authorization") ?? "";
   const userClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -38,7 +41,7 @@ Deno.serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } },
   );
   const { data: { user } } = await userClient.auth.getUser();
-  if (!user || !user.email) return new Response("Unauthorized", { status: 401 });
+  if (!user || !user.email) return reply(401, { error: "Unauthorized" });
 
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -46,11 +49,9 @@ Deno.serve(async (req) => {
   );
   const { data: profile } = await admin
     .from("profiles").select("name, welcomed_at").eq("id", user.id).single();
-  if (!profile) return new Response("No profile", { status: 404 });
+  if (!profile) return reply(404, { error: "No profile" });
   if (profile.welcomed_at) {
-    return new Response(JSON.stringify({ ok: true, already: true }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return reply(200, { ok: true, already: true });
   }
   const name = (profile.name as string) || user.email.split("@")[0];
 
@@ -80,7 +81,5 @@ Deno.serve(async (req) => {
   );
 
   await admin.from("profiles").update({ welcomed_at: new Date().toISOString() }).eq("id", user.id);
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return reply(200, { ok: true });
 });

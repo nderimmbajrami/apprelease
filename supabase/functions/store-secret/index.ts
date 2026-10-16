@@ -7,8 +7,11 @@
 //   supabase secrets set SECRETS_KEY=<32+ random bytes, base64>
 //   supabase functions deploy store-secret
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { preflight, reply } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
+  const pre = preflight(req);
+  if (pre) return pre;
   const authHeader = req.headers.get("Authorization") ?? "";
   const userClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -16,7 +19,7 @@ Deno.serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } },
   );
   const { data: { user } } = await userClient.auth.getUser();
-  if (!user) return new Response("Unauthorized", { status: 401 });
+  if (!user) return reply(401, { error: "Unauthorized" });
 
   const body = await req.json();
   const { id, team_id, kind, name, meta, secret } = body;
@@ -25,7 +28,7 @@ Deno.serve(async (req) => {
   const { data: profile } = await userClient
     .from("profiles").select("team_id").eq("id", user.id).single();
   if (!profile || profile.team_id !== team_id) {
-    return new Response("Forbidden", { status: 403 });
+    return reply(403, { error: "Forbidden" });
   }
 
   const admin = createClient(
@@ -36,7 +39,7 @@ Deno.serve(async (req) => {
 
   const { error: credError } = await admin
     .from("credentials").insert({ id, team_id, kind, name, meta });
-  if (credError) return new Response(credError.message, { status: 400 });
+  if (credError) return reply(400, { error: credError.message });
 
   // pgp_sym_encrypt runs in the database so the key never meets the bytes
   // anywhere but here and on the runner.
@@ -49,10 +52,8 @@ Deno.serve(async (req) => {
   });
   if (secretError) {
     await admin.from("credentials").delete().eq("id", id);
-    return new Response(secretError.message, { status: 400 });
+    return reply(400, { error: secretError.message });
   }
 
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return reply(200, { ok: true });
 });

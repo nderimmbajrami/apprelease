@@ -431,3 +431,12 @@ enabled = true
 # GitHub signs its deliveries with the app secret; there is no user token.
 [functions.github-webhook]
 verify_jwt = false
+
+[functions.store-secret]
+verify_jwt = false
+
+[functions.notify-signup]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false

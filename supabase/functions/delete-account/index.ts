@@ -3,8 +3,11 @@
 // cascades to the profile; if they were the last member, the team and
 // everything in it goes too.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { preflight, reply } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
+  const pre = preflight(req);
+  if (pre) return pre;
   const authHeader = req.headers.get("Authorization") ?? "";
   const userClient = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -12,7 +15,7 @@ Deno.serve(async (req) => {
     { global: { headers: { Authorization: authHeader } } },
   );
   const { data: { user } } = await userClient.auth.getUser();
-  if (!user) return new Response("Unauthorized", { status: 401 });
+  if (!user) return reply(401, { error: "Unauthorized" });
 
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -31,7 +34,5 @@ Deno.serve(async (req) => {
       await admin.from("teams").delete().eq("id", profile.team_id);
     }
   }
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return reply(200, { ok: true });
 });
