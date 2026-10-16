@@ -98,6 +98,7 @@
  <li>In the <a href="https://console.cloud.google.com/">Google Cloud Console</a>, choose or create a project and open <strong>IAM &amp; Admin</strong> → <strong>Service accounts</strong>.</li>
  <li>Click <strong>Create service account</strong>, name it (for example "apprelease-publisher") and finish without granting project roles.</li>
  <li>Open the account, go to <strong>Keys</strong> → <strong>Add key</strong> → <strong>Create new key</strong> → <strong>JSON</strong>. The file downloads once.</li>
+ <li>Still in the Cloud Console, open <strong>APIs &amp; Services</strong> → <strong>Library</strong>, search for <strong>Google Play Android Developer API</strong> and press <strong>Enable</strong>. Without it every call is refused with "API has not been used in project … or it is disabled".</li>
  <li>In Google Play Console, open <strong>Users and permissions</strong> → <strong>Invite new users</strong>, enter the service account's email address and grant it <strong>Release to production, exclude devices, and use Play App Signing</strong> and <strong>Release apps to testing tracks</strong> for the app. Admin is not needed.</li>
 </ol>
 <div class="note">It can take a few minutes, sometimes longer, before Google Play accepts calls from a freshly invited account. A "The current user has insufficient permissions" error on the first release is usually just that.</div>
@@ -137,6 +138,7 @@
  <tr><td>Version code 57 has already been used</td><td>Use <code>versioning: source: google_play</code> so the build number comes from the store.</td></tr>
  <tr><td>Only releases with status draft may be created on draft app</td><td>Add <code>submit_as_draft: true</code>.</td></tr>
  <tr><td>The Android App Bundle was signed with the wrong key</td><td>The keystore is not the upload key. See <a href="/docs/android-signing/#checking-the-signature">checking the signature</a>.</td></tr>
+ <tr><td>Google Play Android Developer API has not been used in project … or it is disabled</td><td>Enable that API in the Cloud project that owns the service account (step 4 above), then wait a minute.</td></tr>
 </tbody></table>
 <div class="docs-next">
  <a href="/docs/android-signing/"><small>Previous</small><b>Android code signing</b></a>
