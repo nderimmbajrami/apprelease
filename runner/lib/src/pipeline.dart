@@ -77,7 +77,13 @@ class Pipeline {
   ]..sort((a, b) => (a['position'] as int).compareTo(b['position'] as int));
 
   /// Environment handed to every script. Grows as steps add to it.
-  final env = <String, String>{'CI': 'true'};
+  final env = <String, String>{
+    'CI': 'true',
+    // One fresh Gradle per build. The shared daemon survived from build to
+    // build and crashed its JVM every few runs on the Mac; a cold start
+    // costs seconds, a crash costs the release.
+    'GRADLE_OPTS': '-Dorg.gradle.daemon=false',
+  };
 
   /// Steps that reached a final state, so a failure later does not mark
   /// them as skipped.
@@ -147,6 +153,7 @@ class Pipeline {
       await SigningFiles.cleanUp(env);
       try {
         final dir = Directory(p.join(workspace.path, releaseId));
+        await _keepCrashLogs(dir);
         if (dir.existsSync()) await dir.delete(recursive: true);
       } catch (error) {
         stderr.writeln('could not remove checkout: $error');
@@ -375,6 +382,23 @@ class Pipeline {
       stepId: stepId,
       secretsKey: secretsKey,
     ).run(release: release, workflow: workflow, env: env, artifacts: artifacts);
+  }
+
+  /// A JVM crash leaves an hs_err file in the checkout; its head is worth
+  /// more in the release log than in a directory about to be deleted.
+  Future<void> _keepCrashLogs(Directory dir) async {
+    if (!dir.existsSync()) return;
+    await for (final entity in dir.list(recursive: true, followLinks: false)) {
+      if (entity is! File ||
+          !p.basename(entity.path).startsWith('hs_err_pid')) {
+        continue;
+      }
+      final head = (await entity.readAsLines()).take(40).join('\n');
+      await log(
+        'JVM crash log ${p.basename(entity.path)}:\n$head',
+        level: 'warning',
+      );
+    }
   }
 
   // ------------------------------------------------------------------ shell
