@@ -2,22 +2,22 @@
    Flat, light, one accent. Mobile first. */
 
 :root {
-  --bg:      #F6F1E7;   /* warm cream paper */
-  --paper:   #FFFDF8;
-  --ink:     #15130F;
-  --ink-2:   #4F4A40;
-  --ink-3:   #8B8477;
-  --line:    #E6DFD0;
-  --line-2:  #D3CAB8;
-  --fill:    #EEE7D9;
+  --bg:      #F4F5F7;   /* cool grey paper */
+  --paper:   #FFFFFF;
+  --ink:     #0E1013;
+  --ink-2:   #4B5160;
+  --ink-3:   #8A91A0;
+  --line:    #E3E6EB;
+  --line-2:  #CDD2DB;
+  --fill:    #EDEFF3;
 
-  --signal:  #FF4A1C;   /* the one loud colour: buttons, the moving build */
-  --signal-2:#FFE6DD;
-  --accent:  #1D7A4A;   /* green: released, live, done */
-  --accent-2:#DDF2E6;
-  --night:   #15130F;   /* dark bands */
-  --night-2: #221F19;
-  --night-line: rgba(255,253,248,.12);
+  --signal:  #2F6BFF;   /* the one colour that acts: buttons, the moving build */
+  --signal-2:#E4ECFF;
+  --accent:  #159A5B;   /* green: released, live, done */
+  --accent-2:#DDF4E7;
+  --night:   #0E1013;   /* dark bands */
+  --night-2: #171A20;
+  --night-line: rgba(255,255,255,.1);
   --danger:  #B3261E;
 
   --radius:  10px;
@@ -66,8 +66,8 @@ p code, li code { font-size: .9em; padding: 1px 5px; border-radius: 5px; backgro
   transition: background .15s, border-color .15s, color .15s;
 }
 .btn:hover { background: #000; }
-.btn-primary, .btn-accent { background: var(--signal); color: #fff; border-color: var(--signal); box-shadow: 0 8px 24px -12px rgba(255,74,28,.7); }
-.btn-primary:hover, .btn-accent:hover { background: #E63F12; border-color: #E63F12; }
+.btn-primary, .btn-accent { background: var(--signal); color: #fff; border-color: var(--signal); box-shadow: 0 10px 26px -12px rgba(47,107,255,.7); }
+.btn-primary:hover, .btn-accent:hover { background: #2358E0; border-color: #2358E0; }
 .btn-ghost { background: var(--paper); color: var(--ink); border-color: var(--line-2); }
 .btn-ghost:hover { background: var(--fill); border-color: var(--ink-3); }
 .btn-sm { padding: 8px 14px; font-size: .88rem; }
@@ -78,7 +78,7 @@ p code, li code { font-size: .9em; padding: 1px 5px; border-radius: 5px; backgro
 
 /* ----------------------------------------------------------------- header */
 
-.site-header { position: sticky; top: 0; z-index: 60; background: rgba(246,241,231,.9); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; }
+.site-header { position: sticky; top: 0; z-index: 60; background: rgba(244,245,247,.9); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; }
 .site-header.is-stuck { border-bottom-color: var(--line); }
 .header-inner { display: flex; align-items: center; gap: 12px; height: 64px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; min-width: 0; }
@@ -486,7 +486,7 @@ p code, li code { font-size: .9em; padding: 1px 5px; border-radius: 5px; backgro
 .hero-center .stage-wrap { position: relative; transform: translateY(56px); margin-top: -8px; }
 .hero-spacer { height: 96px; background: var(--bg); }
 .stage { box-shadow: 0 30px 80px -30px rgba(21,19,15,.55), 0 0 0 1px var(--line); }
-.parcel { background: var(--signal); box-shadow: 0 10px 24px -8px rgba(255,74,28,.7); }
+.parcel { background: var(--signal); box-shadow: 0 12px 28px -8px rgba(47,107,255,.75); }
 .stage-fill { background: var(--signal); }
 .stage-node.is-active .stage-ico { border-color: var(--signal); color: var(--signal); }
 .stage-dot { background: var(--signal); }
@@ -537,3 +537,54 @@ p code, li code { font-size: .9em; padding: 1px 5px; border-radius: 5px; backgro
 .site-footer .footer-cols a { color: rgba(255,253,248,.65); }
 .site-footer .footer-cols a:hover { color: #fff; }
 .site-footer .footer-foot { border-top-color: var(--night-line); color: rgba(255,253,248,.45); }
+
+/* ---------------------------------------------------- hero v3: stage up */
+
+.hero-center { padding-top: 56px; }
+.hero-center h1 { font-size: clamp(2.6rem, 6.4vw, 4.6rem); margin-bottom: 14px; }
+.hero-center .lead { font-size: 1.08rem; margin-bottom: 22px; max-width: 52ch; }
+.hero-center .hero-foot { margin-bottom: 28px; }
+.hero-center .stage-wrap { transform: translateY(40px); }
+.hero-spacer { height: 72px; }
+
+.stage { padding: 44px 28px 22px; border-radius: 20px; border: 0; box-shadow: 0 40px 100px -40px rgba(14,16,19,.7), 0 0 0 1px var(--line); }
+.stage-floor { opacity: .9; }
+.stage-track { gap: 16px; transform: perspective(1600px) rotateX(7deg); }
+.stage-node { padding-top: 68px; }
+.stage-ico { width: 56px; height: 56px; border-radius: 16px; border-width: 2px; }
+.stage-ico svg { width: 24px; height: 24px; }
+.stage-node b { font-size: 1.02rem; }
+.stage-node small { font-size: .74rem; }
+.stage-node.is-active .stage-ico { box-shadow: 0 0 0 6px var(--signal-2), 0 14px 28px -14px rgba(47,107,255,.8); transform: translateX(-50%) translateY(-5px) scale(1.04); }
+.stage-node.is-done .stage-ico { box-shadow: none; }
+.stage-line { top: 27px; height: 3px; left: 10%; right: 10%; }
+.stage-fill { box-shadow: 0 0 14px rgba(47,107,255,.6); }
+.store { padding: 10px 12px; border-radius: 12px; border-width: 2px; grid-template-columns: 32px 1fr; }
+.store-mark { width: 32px; height: 32px; }
+.store b { font-size: .92rem; }
+.store small { font-size: .7rem; }
+.stage-node-stores { gap: 10px; }
+
+.parcel { top: -4px; padding: 7px 14px 7px 7px; gap: 10px; }
+.parcel-mark, .parcel-mark svg { width: 32px; height: 32px; }
+.parcel-text b { font-size: .86rem; }
+.parcel-text small { font-size: .7rem; }
+.parcel::after { content: ""; position: absolute; right: 100%; top: 50%; height: 3px; width: 90px; margin-right: 6px;
+  background: linear-gradient(90deg, transparent, var(--signal)); opacity: .55; transform: translateY(-50%); border-radius: 2px; }
+.stage-log { margin-top: 34px; font-size: .84rem; padding: 12px 14px; }
+.stage.is-live .stage-log { background: var(--accent-2); color: var(--accent); }
+
+@media (max-width: 899px) {
+  .stage { padding: 20px 14px 14px; }
+  .stage-track { gap: 10px; transform: none; }
+  .stage-node { padding: 0; }
+  .stage-ico { width: 44px; height: 44px; border-radius: 12px; }
+  .stage-node.is-active .stage-ico { transform: none; }
+  .stage-line { left: 21px; top: 22px; width: 2px; height: auto; }
+  .parcel::after { display: none; }
+}
+
+/* capsule rides above the icons, not over them */
+.parcel { top: -30px; }
+.stage { padding-top: 64px; }
+.parcel::after { width: 70px; }
