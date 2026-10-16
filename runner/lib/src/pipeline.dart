@@ -281,6 +281,8 @@ class Pipeline {
       exec('flutter', ['pub', 'get'], stepId: stepId);
 
   Future<void> _versioning(String stepId) async {
+    // The store credentials have to be in place before the store is asked.
+    await _loadSecrets(stepId);
     final next =
         await Versioning(
           api: api,
@@ -318,21 +320,30 @@ class Pipeline {
     }
   }
 
-  Future<void> _buildScripts(String stepId) async {
-    if (platform == 'android') {
-      await SigningFiles(
-        api: api,
-        log: log,
-        stepId: stepId,
-        secretsKey: secretsKey,
-      ).prepareAndroid(release: release, workflow: workflow, env: env);
-    }
-    await SigningFiles(
+  /// Keystore and variable groups, materialised once per release.
+  var _secretsLoaded = false;
+
+  Future<void> _loadSecrets(String stepId) async {
+    if (_secretsLoaded) return;
+    _secretsLoaded = true;
+    final files = SigningFiles(
       api: api,
       log: log,
       stepId: stepId,
       secretsKey: secretsKey,
-    ).loadGroups(release: release, workflow: workflow, env: env);
+    );
+    if (platform == 'android') {
+      await files.prepareAndroid(
+        release: release,
+        workflow: workflow,
+        env: env,
+      );
+    }
+    await files.loadGroups(release: release, workflow: workflow, env: env);
+  }
+
+  Future<void> _buildScripts(String stepId) async {
+    await _loadSecrets(stepId);
 
     for (final script in workflow.scripts) {
       await log('▶ ${script.name}', stepId: stepId, level: 'command');
