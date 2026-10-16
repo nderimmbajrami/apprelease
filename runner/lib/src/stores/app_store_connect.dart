@@ -147,7 +147,9 @@ class AppStoreConnectClient {
     },
   });
 
-  /// Adds the build to each named group. External groups start beta review.
+  /// Adds the build to each named group. An internal group that is set to
+  /// receive every build already has it; Apple refuses an explicit
+  /// assignment there, so it is reported and skipped.
   Future<void> addToBetaGroups({
     required String appId,
     required String buildId,
@@ -159,6 +161,7 @@ class AppStoreConnectClient {
         'filter[app]': appId,
         'filter[name]': name,
         'limit': '1',
+        'fields[betaGroups]': 'name,isInternalGroup,hasAccessToAllBuilds',
       });
       final data = body['data'] as List;
       if (data.isEmpty) {
@@ -168,13 +171,31 @@ class AppStoreConnectClient {
           'No TestFlight group named "$name"',
         );
       }
-      final groupId = (data.first as Map)['id'] as String;
-      await _post('/betaGroups/$groupId/relationships/builds', {
-        'data': [
-          {'type': 'builds', 'id': buildId},
-        ],
-      }, expectBody: false);
-      onLog?.call('Added to TestFlight group "$name"');
+      final group = data.first as Map;
+      final attributes = (group['attributes'] as Map?) ?? const {};
+      final groupId = group['id'] as String;
+      if (attributes['isInternalGroup'] == true &&
+          attributes['hasAccessToAllBuilds'] == true) {
+        onLog?.call(
+          'Internal group "$name" receives every build automatically',
+        );
+        continue;
+      }
+      try {
+        await _post('/betaGroups/$groupId/relationships/builds', {
+          'data': [
+            {'type': 'builds', 'id': buildId},
+          ],
+        }, expectBody: false);
+        onLog?.call('Added to TestFlight group "$name"');
+      } on AppStoreConnectException catch (error) {
+        // "Cannot add internal group to a build": it has the build already.
+        if (error.status == 422 && error.body.contains('internal group')) {
+          onLog?.call('Internal group "$name" already has the build');
+          continue;
+        }
+        rethrow;
+      }
     }
   }
 
