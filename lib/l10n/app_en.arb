@@ -328,5 +328,36 @@
   "webhookUrl": "Payload URL",
   "webhookSecret": "Secret",
   "webhookLocalNote": "Webhooks need the live backend; in the demo nothing is posted.",
-  "versionAuto": "from pubspec"
+  "versionAuto": "from pubspec",
+  "playGuideTitle": "How to get this file",
+  "playGuide1": "Create a service account in Google Cloud. Any project works; the name does not matter.",
+  "playGuide1Link": "Open Google Cloud → Service accounts",
+  "playGuide2": "Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents.",
+  "playGuide3": "Enable the Google Play Android Developer API in the same Cloud project.",
+  "playGuide3Link": "Enable the API for project {project}",
+  "@playGuide3Link": {
+    "placeholders": {
+      "project": {
+        "type": "String"
+      }
+    }
+  },
+  "playGuide3LinkGeneric": "Enable the API",
+  "playGuide4": "In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.",
+  "playGuide4Link": "Open Play Console → Users and permissions",
+  "playGuideEmail": "Service account email",
+  "playGuideAfter": "Press Check on the saved credential afterwards; it tells you if a step is still missing.",
+  "checkCredential": "Check",
+  "checkingCredential": "Checking with Google…",
+  "checkResultTitle": "Google Play check",
+  "checkOk": "Ready",
+  "checkFix": "Open the page to fix it",
+  "checkFailed": "The check could not run: {error}",
+  "@checkFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

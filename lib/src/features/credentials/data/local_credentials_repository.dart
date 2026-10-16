@@ -50,5 +50,14 @@ class LocalCredentialsRepository implements CredentialsRepository {
       _table.delete((row) => row.id == id);
 
   @override
+  Future<List<CredentialCheck>> check(String id) async => const [
+    CredentialCheck(
+      package: 'com.acme.shop',
+      status: 'ok',
+      message: 'Google Play accepts uploads from this account.',
+    ),
+  ];
+
+  @override
   void dispose() => _table.dispose();
 }

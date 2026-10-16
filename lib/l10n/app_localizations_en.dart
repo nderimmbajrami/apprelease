@@ -799,4 +799,64 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get versionAuto => 'from pubspec';
+
+  @override
+  String get playGuideTitle => 'How to get this file';
+
+  @override
+  String get playGuide1 =>
+      'Create a service account in Google Cloud. Any project works; the name does not matter.';
+
+  @override
+  String get playGuide1Link => 'Open Google Cloud → Service accounts';
+
+  @override
+  String get playGuide2 =>
+      'Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents.';
+
+  @override
+  String get playGuide3 =>
+      'Enable the Google Play Android Developer API in the same Cloud project.';
+
+  @override
+  String playGuide3Link(String project) {
+    return 'Enable the API for project $project';
+  }
+
+  @override
+  String get playGuide3LinkGeneric => 'Enable the API';
+
+  @override
+  String get playGuide4 =>
+      'In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.';
+
+  @override
+  String get playGuide4Link => 'Open Play Console → Users and permissions';
+
+  @override
+  String get playGuideEmail => 'Service account email';
+
+  @override
+  String get playGuideAfter =>
+      'Press Check on the saved credential afterwards; it tells you if a step is still missing.';
+
+  @override
+  String get checkCredential => 'Check';
+
+  @override
+  String get checkingCredential => 'Checking with Google…';
+
+  @override
+  String get checkResultTitle => 'Google Play check';
+
+  @override
+  String get checkOk => 'Ready';
+
+  @override
+  String get checkFix => 'Open the page to fix it';
+
+  @override
+  String checkFailed(String error) {
+    return 'The check could not run: $error';
+  }
 }

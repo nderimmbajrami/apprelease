@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../domain/credential.dart';
 import 'credentials_controller.dart';
@@ -251,6 +254,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         ),
       ],
       CredentialKind.googlePlayServiceAccount => [
+        _PlayGuide(json: _json.text),
+        const SizedBox(height: Gap.lg),
         filePicker,
         const SizedBox(height: Gap.md),
         TextFormField(
@@ -263,6 +268,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
           maxLines: 6,
           style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12.5),
           validator: validators.required,
+          onChanged: (_) => setState(() {}),
         ),
       ],
       CredentialKind.appStoreConnectKey => [
@@ -351,6 +357,151 @@ class _FilePickerField extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The four Google steps, with links that become exact once the JSON is in:
+/// the API page for their project and the email to invite.
+class _PlayGuide extends StatelessWidget {
+  const _PlayGuide({required this.json});
+
+  final String json;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    String? project;
+    String? email;
+    try {
+      final parsed = jsonDecode(json) as Map<String, dynamic>;
+      project = parsed['project_id'] as String?;
+      email = parsed['client_email'] as String?;
+    } catch (_) {}
+
+    Widget step(
+      int n,
+      String text, {
+      String? linkLabel,
+      String? url,
+      Widget? extra,
+    }) => Padding(
+      padding: const EdgeInsets.only(bottom: Gap.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            margin: const EdgeInsets.only(top: 1),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$n',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.surface,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: Gap.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(text, style: theme.textTheme.bodySmall),
+                if (url != null)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 0,
+                        vertical: 6,
+                      ),
+                    ),
+                    onPressed: () => launchUrl(
+                      Uri.parse(url),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.open_in_new, size: 15),
+                    label: Text(linkLabel ?? url),
+                  ),
+                ?extra,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(Gap.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(Radii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.playGuideTitle, style: theme.textTheme.titleSmall),
+          const SizedBox(height: Gap.sm),
+          step(
+            1,
+            l10n.playGuide1,
+            linkLabel: l10n.playGuide1Link,
+            url:
+                'https://console.cloud.google.com/iam-admin/serviceaccounts/create',
+          ),
+          step(2, l10n.playGuide2),
+          step(
+            3,
+            l10n.playGuide3,
+            linkLabel: project == null
+                ? l10n.playGuide3LinkGeneric
+                : l10n.playGuide3Link(project),
+            url: project == null
+                ? 'https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com'
+                : 'https://console.developers.google.com/apis/api/androidpublisher.googleapis.com/overview?project=$project',
+          ),
+          step(
+            4,
+            l10n.playGuide4,
+            linkLabel: l10n.playGuide4Link,
+            url: 'https://play.google.com/console/developers',
+            extra: email == null
+                ? null
+                : Row(
+                    children: [
+                      Expanded(
+                        child: SelectionArea(
+                          child: Text(
+                            email,
+                            style: theme.textTheme.mono.copyWith(fontSize: 12),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.copy,
+                        onPressed: () async {
+                          await Clipboard.setData(ClipboardData(text: email!));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(l10n.copied)),
+                            );
+                          }
+                        },
+                        icon: const Icon(Icons.copy, size: 16),
+                      ),
+                    ],
+                  ),
+          ),
+          Text(l10n.playGuideAfter, style: theme.textTheme.bodySmall),
+        ],
+      ),
     );
   }
 }

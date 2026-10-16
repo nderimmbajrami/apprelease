@@ -76,6 +76,25 @@ class SupabaseCredentialsRepository implements CredentialsRepository {
   }
 
   @override
+  Future<List<CredentialCheck>> check(String id) async {
+    final response = await _client.functions.invoke(
+      'check-credential',
+      body: {'credential_id': id},
+    );
+    final data = response.data as Map<String, dynamic>;
+    if (data['error'] != null) throw Exception(data['error']);
+    return [
+      for (final c in (data['checks'] as List))
+        CredentialCheck(
+          package: (c as Map)['package'] as String,
+          status: c['status'] as String,
+          message: c['message'] as String,
+          link: c['link'] as String?,
+        ),
+    ];
+  }
+
+  @override
   void dispose() {
     unawaited(_writes.close());
   }

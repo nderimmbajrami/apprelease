@@ -72,3 +72,25 @@ class CredentialSecret {
   /// Passwords, the JSON key, issuer and key ids.
   final Map<String, String> fields;
 }
+
+/// One line of a connection check: a package and what Google said about it.
+class CredentialCheck {
+  const CredentialCheck({
+    required this.package,
+    required this.status,
+    required this.message,
+    this.link,
+  });
+
+  final String package;
+
+  /// `ok`, `api_disabled`, `not_invited`, `unknown_package`, `invalid_key`,
+  /// `no_apps` or `error`.
+  final String status;
+  final String message;
+
+  /// Where to fix it, when there is such a page.
+  final String? link;
+
+  bool get isOk => status == 'ok';
+}

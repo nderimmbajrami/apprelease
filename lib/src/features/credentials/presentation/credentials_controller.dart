@@ -35,6 +35,20 @@ class CredentialsController extends _$CredentialsController {
     );
   }
 
+  /// Runs the store check; null when the call itself failed.
+  Future<List<CredentialCheck>?> check(String id) async {
+    state = const AsyncValue.loading();
+    final result = await AsyncValue.guard(
+      () => ref.read(credentialsRepositoryProvider).check(id),
+    );
+    if (ref.mounted) {
+      state = result.hasError
+          ? AsyncError(result.error!, result.stackTrace!)
+          : const AsyncData(null);
+    }
+    return result.value;
+  }
+
   Future<bool> deleteCredential(String id) =>
       _run(() => ref.read(credentialsRepositoryProvider).deleteCredential(id));
 

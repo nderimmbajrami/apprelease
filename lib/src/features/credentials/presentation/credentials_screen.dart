@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -140,6 +141,12 @@ class _CredentialRow extends ConsumerWidget {
               ],
             ),
           ),
+          if (credential.kind == CredentialKind.googlePlayServiceAccount)
+            OutlinedButton(
+              onPressed: () => _check(context, ref),
+              child: Text(l10n.checkCredential),
+            ),
+          const SizedBox(width: Gap.xs),
           IconButton(
             tooltip: l10n.deleteCredential,
             onPressed: () async {
@@ -173,6 +180,100 @@ class _CredentialRow extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+extension on _CredentialRow {
+  Future<void> _check(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(SnackBar(content: Text(l10n.checkingCredential)));
+    final checks = await ref
+        .read(credentialsControllerProvider.notifier)
+        .check(credential.id);
+    messenger.hideCurrentSnackBar();
+    if (!context.mounted) return;
+    if (checks == null) {
+      final error = ref.read(credentialsControllerProvider).error;
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.checkFailed('$error'))),
+      );
+      return;
+    }
+    await showDialog<void>(
+      context: context,
+      builder: (context) => _CheckDialog(checks: checks),
+    );
+  }
+}
+
+/// What Google said, one line per app, with the page that fixes it.
+class _CheckDialog extends StatelessWidget {
+  const _CheckDialog({required this.checks});
+
+  final List<CredentialCheck> checks;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return AlertDialog(
+      title: Text(l10n.checkResultTitle),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final c in checks)
+              Padding(
+                padding: const EdgeInsets.only(bottom: Gap.md),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      c.isOk ? Icons.check_circle : Icons.error_outline,
+                      size: 20,
+                      color: c.isOk ? scheme.tertiary : scheme.error,
+                    ),
+                    const SizedBox(width: Gap.sm),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            c.package == '*'
+                                ? l10n.checkResultTitle
+                                : c.package,
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(c.message, style: theme.textTheme.bodySmall),
+                          if (c.link != null)
+                            TextButton(
+                              onPressed: () => launchUrl(
+                                Uri.parse(c.link!),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              child: Text(l10n.checkFix),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.close),
+        ),
+      ],
     );
   }
 }

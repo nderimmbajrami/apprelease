@@ -1526,6 +1526,108 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'from pubspec'**
   String get versionAuto;
+
+  /// No description provided for @playGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get this file'**
+  String get playGuideTitle;
+
+  /// No description provided for @playGuide1.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a service account in Google Cloud. Any project works; the name does not matter.'**
+  String get playGuide1;
+
+  /// No description provided for @playGuide1Link.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Google Cloud → Service accounts'**
+  String get playGuide1Link;
+
+  /// No description provided for @playGuide2.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents.'**
+  String get playGuide2;
+
+  /// No description provided for @playGuide3.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the Google Play Android Developer API in the same Cloud project.'**
+  String get playGuide3;
+
+  /// No description provided for @playGuide3Link.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the API for project {project}'**
+  String playGuide3Link(String project);
+
+  /// No description provided for @playGuide3LinkGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the API'**
+  String get playGuide3LinkGeneric;
+
+  /// No description provided for @playGuide4.
+  ///
+  /// In en, this message translates to:
+  /// **'In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.'**
+  String get playGuide4;
+
+  /// No description provided for @playGuide4Link.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Play Console → Users and permissions'**
+  String get playGuide4Link;
+
+  /// No description provided for @playGuideEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Service account email'**
+  String get playGuideEmail;
+
+  /// No description provided for @playGuideAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Check on the saved credential afterwards; it tells you if a step is still missing.'**
+  String get playGuideAfter;
+
+  /// No description provided for @checkCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get checkCredential;
+
+  /// No description provided for @checkingCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking with Google…'**
+  String get checkingCredential;
+
+  /// No description provided for @checkResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play check'**
+  String get checkResultTitle;
+
+  /// No description provided for @checkOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get checkOk;
+
+  /// No description provided for @checkFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the page to fix it'**
+  String get checkFix;
+
+  /// No description provided for @checkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The check could not run: {error}'**
+  String checkFailed(String error);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -20,6 +20,11 @@ abstract interface class CredentialsRepository {
   );
 
   Future<void> deleteCredential(String id);
+
+  /// Asks the backend to test the credential against the store and say
+  /// what, if anything, is still missing.
+  Future<List<CredentialCheck>> check(String id);
+
   void dispose();
 }
 
