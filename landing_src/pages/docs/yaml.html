@@ -139,15 +139,6 @@ workflows:
  <tr><td><code>AR_EXPORT_OPTIONS</code> …</td><td>iOS signing, see <a href="/docs/ios-signing/#export-options">iOS code signing</a></td></tr>
  <tr><td><code>AR_ARTIFACT_DIR</code></td><td>Where collected artifacts are copied</td></tr>
 </tbody></table>
-<h2 id="from-codemagic">Coming from codemagic.yaml</h2>
-<table><thead><tr><th>Codemagic</th><th>AppRelease</th></tr></thead><tbody>
- <tr><td><code>CM_BUILD_DIR</code>, <code>CM_*</code></td><td><code>AR_BUILD_DIR</code>, <code>AR_*</code></td></tr>
- <tr><td><code>instance_type: mac_mini_m2</code></td><td><code>instance_type: mac_m2</code></td></tr>
- <tr><td><code>google-play get-latest-build-number</code> script</td><td><code>versioning: source: google_play</code></td></tr>
- <tr><td><code>app-store-connect get-latest-build-number</code> script</td><td><code>versioning: source: app_store_connect</code></td></tr>
- <tr><td><code>app_store_connect: auth: integration</code></td><td>same</td></tr>
- <tr><td><code>ios_signing</code>, <code>android_signing</code></td><td>same</td></tr>
-</tbody></table>
 <div class="docs-next">
  <a href="/docs/app-store/"><small>Previous</small><b>App Store Connect publishing</b></a>
  <a class="next" href="/docs/flutter/"><small>Start here</small><b>Flutter quick start</b></a>

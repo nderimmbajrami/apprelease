@@ -18,7 +18,6 @@ priority: 0.9
 <h2 id="how-it-fits">How the pieces fit together</h2>
 <p>AppRelease has three parts. The <strong>console</strong> at <a href="{{app}}">publish.apprelease.store</a> is where apps, credentials and releases live. The <strong>runner</strong> is the machine that checks out your code, builds and uploads. And <strong>apprelease.yaml</strong> in your repository tells the runner what to do.</p>
 <p>A release starts in the console (or from a push, once triggers are on). The runner claims it, fetches the credentials the workflow names, runs the scripts, publishes the artifacts and streams the log back. When it is done you get an email.</p>
-<div class="note note-tip"><b>Coming from Codemagic?</b> The file structure is deliberately similar. Rename <code>codemagic.yaml</code>, swap <code>CM_</code> variables for <code>AR_</code> and check the <a href="/docs/yaml/">reference</a> for the few keys that differ.</div>
 <section class="docs-help">
  <h2>Getting help and support</h2>
  <p><strong>Email</strong> — <a href="mailto:support@apprelease.store">support@apprelease.store</a>, answered within a business day.<br><strong>In the console</strong> — every failed release has a "Send to support" button that attaches the log.</p>

@@ -1,6 +1,6 @@
 ---
 title: FAQ – AppRelease
-description: Answers about how AppRelease builds, signs and publishes Flutter apps: Macs, keys, stores, limits, React Native, migrating from Codemagic.
+description: Answers about how AppRelease builds, signs and publishes Flutter apps: Macs, keys, stores, limits, React Native, moving from another CI.
 path: /faq/
 nav: faq
 priority: 0.7
@@ -36,7 +36,7 @@ priority: 0.7
   <h2 class="reveal" style="font-size:1.4rem;margin:44px 0 18px">General</h2>
   <div class="faq reveal">
    <details><summary>Is this only for Flutter?</summary><div class="answer"><p>Today, yes. The workflows are plain shell scripts, so a React Native or native project builds fine already; what is missing is the guided setup and the quick start. React Native is next.</p></div></details>
-   <details><summary>I use Codemagic. Is migrating painful?</summary><div class="answer"><p>No. The structure of <code>apprelease.yaml</code> is deliberately close to <code>codemagic.yaml</code>: workflows, environment, scripts, artifacts, publishing. Most files move with a handful of renamed keys and the <code>CM_</code> variables becoming <code>AR_</code>.</p></div></details>
+   <details><summary>I already use another CI. Is moving painful?</summary><div class="answer"><p>No. <code>apprelease.yaml</code> is one short file: workflows, environment, scripts, artifacts, publishing. Most existing pipelines translate in a few minutes, and the console generates a starting point from your app settings.</p></div></details>
    <details><summary>Where does AppRelease run?</summary><div class="answer"><p>The control plane runs in the EU. macOS runners are Apple Silicon machines; Linux runners are used for Android when no iOS build is needed.</p></div></details>
   </div>
  </div>
