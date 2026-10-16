@@ -7,8 +7,7 @@ import 'package:apprelease_runner/runner.dart';
 /// Reads its settings from the environment (see .env.example). One process
 /// runs one release at a time; start a second process for concurrency.
 Future<void> main(List<String> args) async {
-  final env = Map<String, String>.from(Platform.environment)
-    ..addAll(_dotEnv());
+  final env = Map<String, String>.from(Platform.environment)..addAll(_dotEnv());
   String need(String key) {
     final value = env[key];
     if (value == null || value.isEmpty) {
@@ -26,7 +25,9 @@ Future<void> main(List<String> args) async {
     secretsKey: need('SECRETS_KEY'),
     name: env['RUNNER_NAME'] ?? Platform.localHostname,
     platforms: (env['RUNNER_PLATFORMS'] ?? 'android,ios').split(','),
-    workspace: Directory(env['RUNNER_WORKSPACE'] ?? 'workspace'),
+    // Absolute: scripts run inside the checkout, and artifact paths are
+    // handed to tools from there.
+    workspace: Directory(env['RUNNER_WORKSPACE'] ?? 'workspace').absolute,
   );
 
   if (args.contains('--once')) {
