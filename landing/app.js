@@ -182,6 +182,83 @@
     play();
   }
 
+  /* ---------------------------------------------------------------- stage */
+
+  var stage = document.querySelector('[data-stage]');
+  if (stage) {
+    var nodes = stage.querySelectorAll('.stage-node');
+    var fill = stage.querySelector('.stage-fill');
+    var parcel = stage.querySelector('.parcel');
+    var logEl = stage.querySelector('[data-stage-log]');
+    var timeEl = stage.querySelector('[data-stage-time]');
+    var track = stage.querySelector('.stage-track');
+    var script = [
+      ['Checking out main @ 4f2e1c9', 1.6],
+      ['flutter build appbundle --release --build-number=57', 3.4],
+      ['Signed with upload_keystore · keys wiped after the build', 1.4],
+      ['Build number from Google Play: 56 → 57 · uploading 38.4 MB', 2.2],
+      ['Released 1.4.0 (57) · Google Play internal · TestFlight', 3.2]
+    ];
+    var isWide = function () { return window.innerWidth >= 900; };
+
+    function placeParcel(index) {
+      if (!isWide()) return;
+      var node = nodes[index];
+      var ico = node.querySelector('.stage-ico') || node;
+      var a = ico.getBoundingClientRect(), b = track.getBoundingClientRect();
+      parcel.style.left = (a.left + a.width / 2 - b.left) + 'px';
+    }
+
+    function runStage() {
+      var i = 0;
+      nodes.forEach(function (n) { n.classList.remove('is-active', 'is-done'); });
+      stage.classList.remove('is-live');
+      if (isWide()) { fill.style.width = '0%'; } else { fill.style.height = '0%'; }
+      parcel.classList.remove('is-hidden');
+      placeParcel(0);
+
+      function step() {
+        if (i > 0) nodes[i - 1].classList.replace('is-active', 'is-done');
+        if (i >= nodes.length) {
+          stage.classList.add('is-live');
+          parcel.classList.add('is-hidden');
+          setTimeout(runStage, 3600);
+          return;
+        }
+        nodes[i].classList.add('is-active');
+        var pct = (i / (nodes.length - 1)) * 100;
+        if (isWide()) { fill.style.width = pct + '%'; } else { fill.style.height = pct + '%'; }
+        placeParcel(i);
+        logEl.textContent = script[i][0];
+        var took = script[i][1] * (reduceMotion ? 0.5 : 1);
+        var started = Date.now();
+        var tick = setInterval(function () { timeEl.textContent = ((Date.now() - started) / 1000).toFixed(1) + 's'; }, 100);
+        setTimeout(function () {
+          clearInterval(tick);
+          timeEl.textContent = script[i][1].toFixed(1) + 's';
+          i += 1; step();
+        }, took * 1000 * 0.6);
+      }
+      step();
+    }
+    runStage();
+    window.addEventListener('resize', function () { placeParcel(Math.max(0, Array.prototype.findIndex.call(nodes, function (n) { return n.classList.contains('is-active'); }))); });
+  }
+
+  /* ----------------------------------------------------------------- tilt */
+
+  if (!reduceMotion && window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.tilt').forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = 'perspective(900px) rotateX(' + (-y * 5) + 'deg) rotateY(' + (x * 5) + 'deg) translateY(-2px)';
+      });
+      card.addEventListener('mouseleave', function () { card.style.transform = ''; });
+    });
+  }
+
   /* -------------------------------------------------------- pricing toggle */
 
   var toggle = document.querySelector('[data-cycle]');

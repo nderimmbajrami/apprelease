@@ -5,61 +5,101 @@ path: /
 nav: product
 priority: 1.0
 ---
-<section class="hero">
- <div class="wrap hero-inner">
-  <div class="hero-text">
-   <h1>Ship your Flutter app to both stores.</h1>
-   <p class="lead">AppRelease builds, signs and uploads your app to Google Play and the App Store. You keep one short file in your repository; we do the rest, and you watch the log while it runs.</p>
-   <div class="hero-actions reveal" data-delay="3">
-    <a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Get started free</a>
-    <a class="btn btn-ghost btn-lg" href="/docs/flutter/">Read the docs</a>
-   </div>
-   <div class="hero-foot reveal" data-delay="4">
-    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No credit card</span>
-    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Flutter first, React Native next</span>
-    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Keys never leave the build machine</span>
-   </div>
+<section class="hero hero-center">
+ <div class="wrap">
+  <p class="kicker">Release automation for Flutter</p>
+  <h1>Push. It ships to both stores.</h1>
+  <p class="lead">AppRelease builds, signs and uploads your app to Google Play and the App Store. You keep one short file in your repository and push. That is the whole workflow.</p>
+  <div class="hero-actions">
+   <a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Get started free</a>
+   <a class="btn btn-ghost btn-lg" href="/how-it-works/">How it works</a>
   </div>
-  <div class="console reveal" data-delay="2" data-console aria-hidden="true">
-   <div class="console-bar">
-    <div class="console-dots"><i></i><i></i><i></i></div>
-    <span class="console-title">Android · production</span>
-    <span class="console-status">BUILDING</span>
+  <div class="hero-foot">
+   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No credit card</span>
+   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>No Mac, no Xcode on your side</span>
+   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>Keys never leave the build machine</span>
+  </div>
+ </div>
+
+ <!-- The release, as it happens: a build travels from your push to both stores. -->
+ <div class="wrap">
+  <div class="stage" data-stage aria-hidden="true">
+   <div class="stage-floor"></div>
+   <div class="stage-track">
+    <div class="stage-node" data-node="0"><span class="stage-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v6m0 6v6"/></svg></span><b>Push</b><small>main @ 4f2e1c9</small></div>
+    <div class="stage-node" data-node="1"><span class="stage-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v12H4zM4 7l2-3h12l2 3"/></svg></span><b>Build</b><small>flutter build</small></div>
+    <div class="stage-node" data-node="2"><span class="stage-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><b>Sign</b><small>your keys, encrypted</small></div>
+    <div class="stage-node" data-node="3"><span class="stage-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m0 0-5 5m5-5 5 5"/></svg></span><b>Upload</b><small>build number from the store</small></div>
+    <div class="stage-node stage-node-stores" data-node="4">
+     <div class="store"><span class="store-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5V3.5c0-.6.6-1 1.1-.7l14.8 8.5c.5.3.5 1.1 0 1.4L4.1 21.2c-.5.3-1.1-.1-1.1-.7z"/></svg></span><b>Google Play</b><small>internal · production</small><i class="store-tick">✓</i></div>
+     <div class="store"><span class="store-mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.7.9-.8 0-2-.9-3.2-.9-1.7 0-3.2 1-4.1 2.5-1.8 3-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.3 0 1.7-.8 3.3-.8 1.5 0 2 .8 3.3.8 1.4 0 2.2-1.2 3-2.5.9-1.4 1.3-2.7 1.3-2.8 0 0-2.6-1-2.8-4.1zM14 5.3c.7-.8 1.1-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg></span><b>App Store</b><small>TestFlight · review</small><i class="store-tick">✓</i></div>
+    </div>
+    <div class="stage-line"><i class="stage-fill"></i></div>
+    <div class="parcel"><span class="parcel-mark"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#111"/><path d="M32 13 L46 29 H38 V45 H26 V29 H18 Z" fill="#fff"/></svg></span><span class="parcel-text"><b>Acme Shop</b><small>1.4.0 (57)</small></span></div>
    </div>
-   <div class="console-body"></div>
+   <div class="stage-log"><span class="stage-dot"></span><code data-stage-log>Checking out main @ 4f2e1c9</code><span class="stage-time" data-stage-time>0.0s</span></div>
   </div>
  </div>
 </section>
 
 <section class="section" id="product">
  <div class="wrap">
-  <header class="section-head reveal">
+  <header class="section-head">
    <p class="kicker">How it works</p>
-   <h2>Three steps, then it is routine.</h2>
-   <p class="lead">You connect the repository and hand over the signing material once. From then on every release is one click, or one push.</p>
+   <h2>Six steps. Four of them once.</h2>
+   <p class="lead">You hand over the repository and the keys one time. After that, releasing is a push.</p>
   </header>
-  <ol class="steps">
-   <li class="step reveal"><h3>Connect the repository</h3><p>GitHub, GitLab, Bitbucket or any Git URL. AppRelease scans the branch for <code>apprelease.yaml</code> and shows the workflows it finds.</p></li>
-   <li class="step reveal" data-delay="1"><h3>Add signing credentials</h3><p>Upload the Android keystore, the Google Play service account and the App Store Connect API key. They are encrypted at rest and only ever decrypted on the runner.</p></li>
-   <li class="step reveal" data-delay="2"><h3>Release</h3><p>Pick a workflow, a track and a version. Watch the log live. When it is green, the build is on Google Play or TestFlight, and you get an email.</p></li>
+  <ol class="six">
+   <li class="six-step rise"><span>1</span><h3>Create your account</h3><p>Email, password, a code by mail.</p><em>once</em></li>
+   <li class="six-step rise"><span>2</span><h3>Add your keys</h3><p>Keystore, Google Play account, Apple key. Each form shows where to get them.</p><em>once</em></li>
+   <li class="six-step rise"><span>3</span><h3>Connect the repository</h3><p>Git address, branch, package name. We generate the one file you commit.</p><em>per app</em></li>
+   <li class="six-step rise"><span>4</span><h3>Connect GitHub</h3><p>One address and one secret in the webhook settings.</p><em>per app</em></li>
+   <li class="six-step rise"><span>5</span><h3>Push</h3><p>A signed build lands on internal testing and TestFlight. You watch the log.</p><em>every release</em></li>
+   <li class="six-step rise"><span>6</span><h3>Tag to go live</h3><p>Tag a version and it goes to production and App Store review.</p><em>when ready</em></li>
   </ol>
-  <p style="margin-top:22px"><a class="text-link" href="/how-it-works/">All six steps, in plain words</a></p>
+  <p style="margin-top:22px"><a class="text-link" href="/how-it-works/">The steps in detail, what you do and what we do</a></p>
  </div>
 </section>
 
 <section class="section section-alt" id="features">
  <div class="wrap">
-  <header class="section-head reveal">
+  <header class="section-head">
    <p class="kicker">What you get</p>
-   <h2>What you get</h2>
+   <h2>Everything between push and store listing.</h2>
   </header>
-  <div class="grid grid-3">
-   <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Managed code signing</h3><p>Keystores, provisioning profiles and certificates are fetched for the build and wiped afterwards. Automatic signing through the App Store Connect API, or bring your own files.</p></article>
-   <article class="card reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5m0 14h16M8 15l4-6 4 3 4-7"/></svg></div><h3>Store-based versioning</h3><p>Before each build the latest build number is read from Google Play or App Store Connect and incremented. No more "this version has already been used".</p></article>
-   <article class="card reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><h3>Tracks and TestFlight</h3><p>Internal, alpha, beta or production on Google Play. TestFlight groups or a full App Store submission on iOS. Draft submissions for new apps.</p></article>
-   <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></div><h3>Live logs</h3><p>Every step streams its output as it runs. A failed build tells you which command failed and shows the lines around it, not a 40 MB archive.</p></article>
-   <article class="card reveal" data-delay="1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Release history</h3><p>Which commit became which build on which track, who started it and how long it took. Artifacts stay downloadable for 30 days.</p></article>
-   <article class="card reveal" data-delay="2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></div><h3>Notifications</h3><p>An email when a release is live or when it fails, with the link to the log. Slack and webhooks are on the way.</p></article>
+  <div class="bento">
+   <article class="bento-card bento-wide tilt rise">
+    <div class="bento-visual">
+     <div class="log-mini">
+      <div><span>12:01:03</span>$ flutter build appbundle --release --build-number=57</div>
+      <div><span>12:02:21</span>✓ Built build/app/outputs/bundle/release/app-release.aab (38.4MB)</div>
+      <div><span>12:02:22</span>Keystore upload_keystore written to $AR_KEYSTORE_PATH</div>
+      <div><span>12:02:40</span>Bundle accepted · version code 57</div>
+      <div class="ok"><span>12:02:41</span>Released 1.4.0 (57) to Google Play · internal</div>
+     </div>
+    </div>
+    <h3>Live logs</h3><p>Every step streams as it runs. A failed build tells you which command failed, not a 40 MB archive.</p>
+   </article>
+   <article class="bento-card tilt rise">
+    <div class="bento-visual"><div class="counter"><span class="counter-from">56</span><span class="counter-arrow">→</span><span class="counter-to">57</span></div><small>read from Google Play before the build</small></div>
+    <h3>Build numbers from the store</h3><p>No more "this version has already been used".</p>
+   </article>
+   <article class="bento-card tilt rise">
+    <div class="bento-visual"><div class="keys"><i></i><i></i><i></i></div><small>encrypted · decrypted only on the runner</small></div>
+    <h3>Managed signing</h3><p>Keystore, certificates, profiles. Fetched for one build, wiped after.</p>
+   </article>
+   <article class="bento-card tilt rise">
+    <div class="bento-visual"><div class="tracks"><span>internal</span><span>alpha</span><span>beta</span><span class="on">production</span></div><small>plus TestFlight groups and App Store review</small></div>
+    <h3>Tracks and TestFlight</h3><p>Pick where a build goes. Draft, staged rollout, review submission.</p>
+   </article>
+   <article class="bento-card tilt rise">
+    <div class="bento-visual"><div class="hook"><span>git push</span><i>→</i><span>webhook</span><i>→</i><span>release</span></div><small>one address, one secret, done</small></div>
+    <h3>Release on push</h3><p>Branches to testing, tags to production. Your choice per app.</p>
+   </article>
+   <article class="bento-card tilt rise">
+    <div class="bento-visual"><div class="mail"><b>Released 1.4.0 (57)</b><small>to publish@… · 2 min ago</small></div><small>email when it is live or failed</small></div>
+    <h3>Notifications</h3><p>An email with the link to the log. Slack and webhooks next.</p>
+   </article>
   </div>
  </div>
 </section>
