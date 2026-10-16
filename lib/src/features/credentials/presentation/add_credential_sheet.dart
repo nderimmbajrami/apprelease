@@ -272,6 +272,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         ),
       ],
       CredentialKind.appStoreConnectKey => [
+        const _AscGuide(),
+        const SizedBox(height: Gap.lg),
         TextFormField(
           controller: _issuerId,
           decoration: InputDecoration(labelText: l10n.issuerId),
@@ -500,6 +502,96 @@ class _PlayGuide extends StatelessWidget {
                   ),
           ),
           Text(l10n.playGuideAfter, style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+/// The Apple steps, with the two pages they happen on.
+class _AscGuide extends StatelessWidget {
+  const _AscGuide();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
+    Widget step(int n, String text, {String? linkLabel, String? url}) =>
+        Padding(
+          padding: const EdgeInsets.only(bottom: Gap.sm),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                margin: const EdgeInsets.only(top: 1),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '$n',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.surface,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: Gap.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(text, style: theme.textTheme.bodySmall),
+                    if (url != null)
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                        ),
+                        onPressed: () => launchUrl(
+                          Uri.parse(url),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        icon: const Icon(Icons.open_in_new, size: 15),
+                        label: Text(linkLabel ?? url),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+
+    return Container(
+      padding: const EdgeInsets.all(Gap.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(Radii.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.ascGuideTitle, style: theme.textTheme.titleSmall),
+          const SizedBox(height: Gap.sm),
+          step(
+            1,
+            l10n.ascGuide1,
+            linkLabel: l10n.ascGuide1Link,
+            url: 'https://appstoreconnect.apple.com/access/integrations/api',
+          ),
+          step(2, l10n.ascGuide2),
+          step(3, l10n.ascGuide3),
+          step(
+            4,
+            l10n.ascGuide4,
+            linkLabel: l10n.ascGuide4Link,
+            url: 'https://appstoreconnect.apple.com/apps',
+          ),
+          Text(l10n.ascGuideAfter, style: theme.textTheme.bodySmall),
         ],
       ),
     );

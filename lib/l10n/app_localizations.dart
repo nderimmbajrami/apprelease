@@ -1628,6 +1628,60 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'The check could not run: {error}'**
   String checkFailed(String error);
+
+  /// No description provided for @ascGuideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get this key'**
+  String get ascGuideTitle;
+
+  /// No description provided for @ascGuide1.
+  ///
+  /// In en, this message translates to:
+  /// **'In App Store Connect open Users and Access → Integrations → App Store Connect API and press \"+\" next to Active keys. Needs the Account Holder or an Admin.'**
+  String get ascGuide1;
+
+  /// No description provided for @ascGuide1Link.
+  ///
+  /// In en, this message translates to:
+  /// **'Open App Store Connect → Integrations'**
+  String get ascGuide1Link;
+
+  /// No description provided for @ascGuide2.
+  ///
+  /// In en, this message translates to:
+  /// **'Name it AppRelease, choose the App Manager role, Generate. Then Download API Key: the .p8 can be downloaded only once, keep it.'**
+  String get ascGuide2;
+
+  /// No description provided for @ascGuide3.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the Issuer ID shown above the table and the Key ID from the key\'s row into the fields below, and pick the .p8 file.'**
+  String get ascGuide3;
+
+  /// No description provided for @ascGuide4.
+  ///
+  /// In en, this message translates to:
+  /// **'The app itself must exist in App Store Connect with the same bundle identifier; AppRelease uploads builds, it does not create app records.'**
+  String get ascGuide4;
+
+  /// No description provided for @ascGuide4Link.
+  ///
+  /// In en, this message translates to:
+  /// **'Open App Store Connect → Apps'**
+  String get ascGuide4Link;
+
+  /// No description provided for @ascGuideAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'Press Check on the saved credential afterwards; it tells you if Apple accepts the key for your apps.'**
+  String get ascGuideAfter;
+
+  /// No description provided for @checkResultTitleAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store Connect check'**
+  String get checkResultTitleAsc;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -141,7 +141,7 @@ class _CredentialRow extends ConsumerWidget {
               ],
             ),
           ),
-          if (credential.kind == CredentialKind.googlePlayServiceAccount)
+          if (credential.kind != CredentialKind.androidKeystore)
             OutlinedButton(
               onPressed: () => _check(context, ref),
               child: Text(l10n.checkCredential),
@@ -203,24 +203,28 @@ extension on _CredentialRow {
     }
     await showDialog<void>(
       context: context,
-      builder: (context) => _CheckDialog(checks: checks),
+      builder: (context) => _CheckDialog(checks: checks, kind: credential.kind),
     );
   }
 }
 
 /// What Google said, one line per app, with the page that fixes it.
 class _CheckDialog extends StatelessWidget {
-  const _CheckDialog({required this.checks});
+  const _CheckDialog({required this.checks, required this.kind});
 
   final List<CredentialCheck> checks;
+  final CredentialKind kind;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final title = kind == CredentialKind.appStoreConnectKey
+        ? l10n.checkResultTitleAsc
+        : l10n.checkResultTitle;
     return AlertDialog(
-      title: Text(l10n.checkResultTitle),
+      title: Text(title),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: Column(

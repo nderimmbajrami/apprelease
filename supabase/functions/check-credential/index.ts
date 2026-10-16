@@ -48,6 +48,41 @@ async function accessToken(sa: Record<string, string>): Promise<string> {
 
 type Check = { package: string; status: string; message: string; link?: string };
 
+// ---------------------------------------------------------- App Store Connect
+
+async function ascToken(issuerId: string, keyId: string, p8: string): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    "pkcs8", pemToDer(p8), { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"],
+  );
+  const now = Math.floor(Date.now() / 1000);
+  const header = b64url(JSON.stringify({ alg: "ES256", kid: keyId, typ: "JWT" }));
+  const payload = b64url(JSON.stringify({ iss: issuerId, iat: now, exp: now + 600, aud: "appstoreconnect-v1" }));
+  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, enc.encode(`${header}.${payload}`));
+  return `${header}.${payload}.${b64url(sig)}`;
+}
+
+async function checkBundle(token: string, bundleId: string): Promise<Check> {
+  const res = await fetch(
+    `https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]=${encodeURIComponent(bundleId)}&limit=1`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  const text = await res.text();
+  let message = text;
+  try { message = (JSON.parse(text).errors ?? []).map((e: { title: string; detail: string }) => `${e.title}: ${e.detail}`).join("; ") || text; } catch { /* keep */ }
+  if (res.status === 401) {
+    return { package: bundleId, status: "invalid_key", message: "Apple rejected the key. Check the Issuer ID, the Key ID and that the .p8 belongs to them.", link: "https://appstoreconnect.apple.com/access/integrations/api" };
+  }
+  if (res.status === 403) {
+    return { package: bundleId, status: "not_invited", message: "The key's role is too low. Create a key with the App Manager role.", link: "https://appstoreconnect.apple.com/access/integrations/api" };
+  }
+  if (!res.ok) return { package: bundleId, status: "error", message: `${res.status}: ${message}` };
+  const data = JSON.parse(text).data ?? [];
+  if (!data.length) {
+    return { package: bundleId, status: "unknown_package", message: `App Store Connect has no app with bundle identifier ${bundleId}. Create the app record there first.`, link: "https://appstoreconnect.apple.com/apps" };
+  }
+  return { package: bundleId, status: "ok", message: `App Store Connect accepts uploads for ${data[0].attributes?.name ?? bundleId}.` };
+}
+
 async function checkPackage(token: string, pkg: string, projectId: string): Promise<Check> {
   const res = await fetch(`${API}/applications/${pkg}/edits`, {
     method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: "{}",
@@ -99,12 +134,33 @@ Deno.serve(async (req) => {
   // RLS: the user only sees their team's credential.
   const { data: credential } = await userClient.from("credentials").select("*").eq("id", credential_id).maybeSingle();
   if (!credential) return reply(404, { error: "unknown credential" });
-  if (credential.kind !== "googlePlayServiceAccount") return reply(400, { error: "only Google Play accounts can be checked yet" });
+  if (!["googlePlayServiceAccount", "appStoreConnectKey"].includes(credential.kind)) {
+    return reply(400, { error: "only store accounts can be checked" });
+  }
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: rows, error } = await admin.rpc("read_credential_secret", { p_credential_id: credential_id, p_key: Deno.env.get("SECRETS_KEY") });
   if (error || !rows?.length) return reply(500, { error: error?.message ?? "secret unreadable" });
-  const sa = JSON.parse(JSON.parse(rows[0].fields_json).json);
+  const fields = JSON.parse(rows[0].fields_json);
+
+  if (credential.kind === "appStoreConnectKey") {
+    const hex: string = rows[0].file_bytes.startsWith("\\x") ? rows[0].file_bytes.slice(2) : rows[0].file_bytes;
+    const p8 = new TextDecoder().decode(new Uint8Array(hex.match(/.{2}/g)!.map((h: string) => parseInt(h, 16))));
+    let token: string;
+    try {
+      token = await ascToken(fields.issuerId, fields.keyId, p8);
+    } catch (e) {
+      return reply(200, { checks: [{ package: "*", status: "invalid_key", message: `The .p8 file could not be used to sign: ${e}` }] });
+    }
+    const { data: apps } = await userClient.from("apps").select("name, ios_bundle_id").eq("team_id", credential.team_id);
+    const bundles = (apps ?? []).map((a) => a.ios_bundle_id).filter((b: string) => b);
+    if (!bundles.length) return reply(200, { checks: [{ package: "*", status: "no_apps", message: "Add an application with an iOS bundle identifier first." }] });
+    const checks: Check[] = [];
+    for (const b of bundles) checks.push(await checkBundle(token, b));
+    return reply(200, { checks });
+  }
+
+  const sa = JSON.parse(fields.json);
 
   let token: string;
   try {

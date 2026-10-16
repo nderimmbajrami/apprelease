@@ -859,4 +859,36 @@ class AppL10nEn extends AppL10n {
   String checkFailed(String error) {
     return 'The check could not run: $error';
   }
+
+  @override
+  String get ascGuideTitle => 'How to get this key';
+
+  @override
+  String get ascGuide1 =>
+      'In App Store Connect open Users and Access → Integrations → App Store Connect API and press \"+\" next to Active keys. Needs the Account Holder or an Admin.';
+
+  @override
+  String get ascGuide1Link => 'Open App Store Connect → Integrations';
+
+  @override
+  String get ascGuide2 =>
+      'Name it AppRelease, choose the App Manager role, Generate. Then Download API Key: the .p8 can be downloaded only once, keep it.';
+
+  @override
+  String get ascGuide3 =>
+      'Copy the Issuer ID shown above the table and the Key ID from the key\'s row into the fields below, and pick the .p8 file.';
+
+  @override
+  String get ascGuide4 =>
+      'The app itself must exist in App Store Connect with the same bundle identifier; AppRelease uploads builds, it does not create app records.';
+
+  @override
+  String get ascGuide4Link => 'Open App Store Connect → Apps';
+
+  @override
+  String get ascGuideAfter =>
+      'Press Check on the saved credential afterwards; it tells you if Apple accepts the key for your apps.';
+
+  @override
+  String get checkResultTitleAsc => 'App Store Connect check';
 }
