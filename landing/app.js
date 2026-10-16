@@ -42,7 +42,7 @@
 
   /* -------------------------------------------------------------- reveals */
 
-  var reveals = document.querySelectorAll('.reveal');
+  var reveals = document.querySelectorAll('.reveal, .rise');
   if (!('IntersectionObserver' in window) || reduceMotion) {
     reveals.forEach(function (el) { el.classList.add('is-in'); });
   } else {

@@ -1,0 +1,101 @@
+---
+title: How it works – AppRelease
+description: The steps from an empty account to an app in Google Play and the App Store. What you do, what AppRelease does.
+path: /how-it-works/
+nav: how
+priority: 0.9
+---
+<section class="page-hero hiw-hero">
+ <div class="wrap">
+  <p class="kicker">How it works</p>
+  <h1>Six steps. Most of them once.</h1>
+  <p class="lead">What you do on the left, what AppRelease does on the right. No build machine of yours, no Xcode, no certificates to manage.</p>
+ </div>
+</section>
+
+<section class="hiw">
+ <div class="wrap">
+
+  <p class="hiw-phase rise">Once, for your account</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>1</span></div>
+   <div class="hiw-body">
+    <h2>Create your account</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Name, email, password. A six-digit code arrives by email; you type it in.</p></div>
+     <div><h3>AppRelease</h3><p>Opens your workspace and shows a short checklist of what a release needs.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>2</span></div>
+   <div class="hiw-body">
+    <h2>Add your signing keys</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Upload the Android keystore, the Google Play service account and the App Store Connect key. Each form shows exactly where to get it.</p></div>
+     <div><h3>AppRelease</h3><p>Encrypts them, checks them with Google and Apple on request, and tells you in plain words if a step is still missing.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <p class="hiw-phase rise">Once, per app</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>3</span></div>
+   <div class="hiw-body">
+    <h2>Connect the repository</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>The Git address, the branch, the package name and bundle identifier the stores already know.</p></div>
+     <div><h3>AppRelease</h3><p>Generates the one configuration file your project needs. You commit it, next to your code.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>4</span></div>
+   <div class="hiw-body">
+    <h2>Connect GitHub</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Paste one address and one secret into your repository's webhook settings. Two minutes.</p></div>
+     <div><h3>AppRelease</h3><p>Hears about every push from now on. Which branch and which tracks is your choice.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <p class="hiw-phase rise">Every release</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>5</span></div>
+   <div class="hiw-body">
+    <h2>Push</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Push to your branch. Nothing else. The version is read from your project.</p></div>
+     <div><h3>AppRelease</h3><p>Checks out the code, asks the store for the next build number, builds, signs, uploads to Google Play internal testing and TestFlight, and streams the log while it runs.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>6</span></div>
+   <div class="hiw-body">
+    <h2>Tag to go live</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Tag a version, like <em>v1.4.0</em>, when the testers are happy.</p></div>
+     <div><h3>AppRelease</h3><p>Releases to Google Play production and submits to App Store review. You get an email when it is done.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <div class="hiw-never rise">
+   <h2>What we never ask for</h2>
+   <p>Your Google or Apple passwords. Store listings, screenshots or pricing: those stay in the store consoles. Apple certificates and provisioning profiles: the runner fetches them with the key you added.</p>
+  </div>
+
+  <div class="hiw-cta rise">
+   <a class="btn btn-primary btn-lg" href="{{app}}/#/sign-up">Start with step one</a>
+   <a class="text-link" href="/docs/flutter/">Read the detailed guide</a>
+  </div>
+ </div>
+</section>

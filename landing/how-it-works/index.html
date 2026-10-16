@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How it works – AppRelease</title>
+<meta name="description" content="The steps from an empty account to an app in Google Play and the App Store. What you do, what AppRelease does.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/how-it-works/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/how-it-works/">
+<meta property="og:title" content="How it works – AppRelease">
+<meta property="og:description" content="The steps from an empty account to an app in Google Play and the App Store. What you do, what AppRelease does.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261016">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <!--docs-search-->
+    <nav class="nav" aria-label="Main">
+      <a href="/how-it-works/" data-nav="how" class="is-active">How it works</a>
+      <a href="/docs/" data-nav="docs">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/how-it-works/">How it works</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><section class="page-hero hiw-hero">
+ <div class="wrap">
+  <p class="kicker">How it works</p>
+  <h1>Six steps. Most of them once.</h1>
+  <p class="lead">What you do on the left, what AppRelease does on the right. No build machine of yours, no Xcode, no certificates to manage.</p>
+ </div>
+</section>
+
+<section class="hiw">
+ <div class="wrap">
+
+  <p class="hiw-phase rise">Once, for your account</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>1</span></div>
+   <div class="hiw-body">
+    <h2>Create your account</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Name, email, password. A six-digit code arrives by email; you type it in.</p></div>
+     <div><h3>AppRelease</h3><p>Opens your workspace and shows a short checklist of what a release needs.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>2</span></div>
+   <div class="hiw-body">
+    <h2>Add your signing keys</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Upload the Android keystore, the Google Play service account and the App Store Connect key. Each form shows exactly where to get it.</p></div>
+     <div><h3>AppRelease</h3><p>Encrypts them, checks them with Google and Apple on request, and tells you in plain words if a step is still missing.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <p class="hiw-phase rise">Once, per app</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>3</span></div>
+   <div class="hiw-body">
+    <h2>Connect the repository</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>The Git address, the branch, the package name and bundle identifier the stores already know.</p></div>
+     <div><h3>AppRelease</h3><p>Generates the one configuration file your project needs. You commit it, next to your code.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>4</span></div>
+   <div class="hiw-body">
+    <h2>Connect GitHub</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Paste one address and one secret into your repository's webhook settings. Two minutes.</p></div>
+     <div><h3>AppRelease</h3><p>Hears about every push from now on. Which branch and which tracks is your choice.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <p class="hiw-phase rise">Every release</p>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>5</span></div>
+   <div class="hiw-body">
+    <h2>Push</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Push to your branch. Nothing else. The version is read from your project.</p></div>
+     <div><h3>AppRelease</h3><p>Checks out the code, asks the store for the next build number, builds, signs, uploads to Google Play internal testing and TestFlight, and streams the log while it runs.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <article class="hiw-step rise">
+   <div class="hiw-num"><span>6</span></div>
+   <div class="hiw-body">
+    <h2>Tag to go live</h2>
+    <div class="hiw-cols">
+     <div><h3>You</h3><p>Tag a version, like <em>v1.4.0</em>, when the testers are happy.</p></div>
+     <div><h3>AppRelease</h3><p>Releases to Google Play production and submits to App Store review. You get an email when it is done.</p></div>
+    </div>
+   </div>
+  </article>
+
+  <div class="hiw-never rise">
+   <h2>What we never ask for</h2>
+   <p>Your Google or Apple passwords. Store listings, screenshots or pricing: those stay in the store consoles. Apple certificates and provisioning profiles: the runner fetches them with the key you added.</p>
+  </div>
+
+  <div class="hiw-cta rise">
+   <a class="btn btn-primary btn-lg" href="https://publish.apprelease.store/#/sign-up">Start with step one</a>
+   <a class="text-link" href="/docs/flutter/">Read the detailed guide</a>
+  </div>
+ </div>
+</section>
+</main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/how-it-works/">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261016"></script>
+</body>
+</html>
