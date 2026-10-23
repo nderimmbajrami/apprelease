@@ -1413,24 +1413,6 @@ abstract class AppL10n {
   /// **'Setup checklist'**
   String get navSetup;
 
-  /// No description provided for @noRunnerTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No build machine is online'**
-  String get noRunnerTitle;
-
-  /// No description provided for @noRunnerBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:'**
-  String get noRunnerBody;
-
-  /// No description provided for @noRunnerFoot.
-  ///
-  /// In en, this message translates to:
-  /// **'The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.'**
-  String get noRunnerFoot;
-
   /// No description provided for @runnerOnline.
   ///
   /// In en, this message translates to:
@@ -1778,6 +1760,48 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'All {count} releases'**
   String allReleasesOfApp(int count);
+
+  /// No description provided for @queueShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting in line…'**
+  String get queueShort;
+
+  /// No description provided for @queueInLineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Number {position} in line'**
+  String queueInLineTitle(int position);
+
+  /// No description provided for @queueInLineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{ahead, plural, =0{The build machine is finishing another release.} =1{One release goes before yours.} other{{ahead} releases go before yours.}} Your {platform} build should start in about {minutes} min. You can close this page; the release carries on without it.'**
+  String queueInLineBody(int ahead, int minutes, String platform);
+
+  /// No description provided for @queueStartingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting now'**
+  String get queueStartingTitle;
+
+  /// No description provided for @queueStartingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A build machine is free and picks this release up in a few seconds.'**
+  String get queueStartingBody;
+
+  /// No description provided for @queueOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The build machines are offline for a moment'**
+  String get queueOfflineTitle;
+
+  /// No description provided for @queueOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side.'**
+  String get queueOfflineBody;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

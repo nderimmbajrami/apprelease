@@ -140,6 +140,11 @@ class SupabaseReleasesRepository implements ReleasesRepository {
   }
 
   @override
+  Future<QueueInfo?> queueInfo(String releaseId) async => QueueInfo.fromJson(
+    await _client.rpc('release_queue', params: {'p_release': releaseId}),
+  );
+
+  @override
   Future<void> deleteReleasesOfApp(String appId) async {
     // Cascades through release_steps and release_logs.
     await _client.from('releases').delete().eq('app_id', appId);

@@ -738,17 +738,6 @@ class AppL10nEn extends AppL10n {
   String get navSetup => 'Setup checklist';
 
   @override
-  String get noRunnerTitle => 'No build machine is online';
-
-  @override
-  String get noRunnerBody =>
-      'A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:';
-
-  @override
-  String get noRunnerFoot =>
-      'The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.';
-
-  @override
   String get runnerOnline => 'A runner is online';
 
   @override
@@ -951,4 +940,38 @@ class AppL10nEn extends AppL10n {
   String allReleasesOfApp(int count) {
     return 'All $count releases';
   }
+
+  @override
+  String get queueShort => 'Waiting in line…';
+
+  @override
+  String queueInLineTitle(int position) {
+    return 'Number $position in line';
+  }
+
+  @override
+  String queueInLineBody(int ahead, int minutes, String platform) {
+    String _temp0 = intl.Intl.pluralLogic(
+      ahead,
+      locale: localeName,
+      other: '$ahead releases go before yours.',
+      one: 'One release goes before yours.',
+      zero: 'The build machine is finishing another release.',
+    );
+    return '$_temp0 Your $platform build should start in about $minutes min. You can close this page; the release carries on without it.';
+  }
+
+  @override
+  String get queueStartingTitle => 'Starting now';
+
+  @override
+  String get queueStartingBody =>
+      'A build machine is free and picks this release up in a few seconds.';
+
+  @override
+  String get queueOfflineTitle => 'The build machines are offline for a moment';
+
+  @override
+  String get queueOfflineBody =>
+      'Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side.';
 }

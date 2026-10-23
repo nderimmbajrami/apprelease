@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +14,7 @@ import '../../../core/widgets/page_body.dart';
 import '../../../core/widgets/page_header.dart';
 import '../../../routing/app_routes.dart';
 import '../../apps/data/apps_repository.dart';
+import '../../apps/domain/app_project.dart';
 import '../data/releases_repository.dart';
 import '../domain/release.dart';
 import 'releases_controller.dart';
@@ -71,7 +71,9 @@ class _ReleaseView extends ConsumerWidget {
     final isCompact = context.isCompact;
     final log = ref.watch(releaseLogProvider(release.id));
     final app = ref.watch(appByIdProvider(release.appId));
-    final runnerOnline = ref.watch(runnerOnlineProvider).value ?? true;
+    final queue = release.status == ReleaseStatus.queued
+        ? ref.watch(releaseQueueProvider(release.id)).value
+        : null;
 
     final steps = AppCard(
       child: Column(
@@ -92,7 +94,7 @@ class _ReleaseView extends ConsumerWidget {
             Text(l10n.releaseLog, style: theme.textTheme.titleSmall),
             const Spacer(),
             if (release.status == ReleaseStatus.queued)
-              Text(l10n.waitingForRunner, style: theme.textTheme.bodySmall),
+              Text(l10n.queueShort, style: theme.textTheme.bodySmall),
           ],
         ),
         const SizedBox(height: Gap.md),
@@ -176,9 +178,9 @@ class _ReleaseView extends ConsumerWidget {
               ),
           ],
         ),
-        if (release.status == ReleaseStatus.queued && !runnerOnline) ...[
+        if (release.status == ReleaseStatus.queued && queue != null) ...[
           const SizedBox(height: Gap.lg),
-          const _NoRunnerCard(),
+          _QueueCard(info: queue, platform: release.platform),
         ],
         if (release.errorMessage != null) ...[
           const SizedBox(height: Gap.lg),
@@ -222,67 +224,57 @@ class _ReleaseView extends ConsumerWidget {
 
 /// Shown while a release is queued and no runner has reported in: what a
 /// runner is, and the two lines that start one.
-class _NoRunnerCard extends StatelessWidget {
-  const _NoRunnerCard();
+/// The customer's place in line, or an honest word that the build machines
+/// are away. Nothing here asks the customer to do anything.
+class _QueueCard extends StatelessWidget {
+  const _QueueCard({required this.info, required this.platform});
 
-  static const command =
-      'cd ~/Documents/GitHub/apprelease/runner\ndart run bin/runner.dart';
+  final QueueInfo info;
+  final Platform platform;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final offline = info.machinesOffline;
+    final minutes = (info.estimatedWait.inSeconds / 60).ceil();
+    final title = offline
+        ? l10n.queueOfflineTitle
+        : info.ahead == 0 && minutes == 0
+        ? l10n.queueStartingTitle
+        : l10n.queueInLineTitle(info.ahead + 1);
+    final body = offline
+        ? l10n.queueOfflineBody
+        : minutes == 0
+        ? l10n.queueStartingBody
+        : l10n.queueInLineBody(
+            info.ahead,
+            minutes,
+            platform == Platform.ios ? 'iOS' : 'Android',
+          );
 
     return AppCard(
-      borderColor: scheme.onSurface.withValues(alpha: .4),
-      child: Column(
+      borderColor: offline ? scheme.error.withValues(alpha: .5) : null,
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.dns_outlined, size: 20, color: scheme.onSurface),
-              const SizedBox(width: Gap.sm),
-              Text(l10n.noRunnerTitle, style: theme.textTheme.titleSmall),
-            ],
+          Icon(
+            offline ? Icons.cloud_off_outlined : Icons.hourglass_top_rounded,
+            size: 20,
+            color: offline ? scheme.error : scheme.primary,
           ),
-          const SizedBox(height: Gap.sm),
-          Text(l10n.noRunnerBody, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: Gap.md),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Gap.md,
-              vertical: Gap.sm,
-            ),
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(Radii.sm),
-              border: Border.all(color: scheme.outline),
-            ),
-            child: Row(
+          const SizedBox(width: Gap.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SelectionArea(
-                    child: Text(command, style: theme.textTheme.mono),
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.copy,
-                  onPressed: () async {
-                    await Clipboard.setData(const ClipboardData(text: command));
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.copied)));
-                    }
-                  },
-                  icon: const Icon(Icons.copy, size: 18),
-                ),
+                Text(title, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 3),
+                Text(body, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
-          const SizedBox(height: Gap.sm),
-          Text(l10n.noRunnerFoot, style: theme.textTheme.bodySmall),
         ],
       ),
     );

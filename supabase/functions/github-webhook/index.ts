@@ -108,8 +108,29 @@ Deno.serve(async (req) => {
   }
 
   const queued: string[] = [];
+  const replaced: number[] = [];
+  const isTag = ref.startsWith("refs/tags/");
   for (const { platform, track } of plan) {
     if (!STEPS[platform]) continue;
+    // A newer push to the same branch replaces an older release of this app
+    // and platform that has not started yet: ten quick pushes are one build,
+    // and other teams do not wait behind the nine stale ones. Only releases
+    // still 'queued' match, so a build already running is never touched.
+    if (!isTag) {
+      const { data: stale } = await admin.from("releases")
+        .update({
+          status: "cancelled",
+          finished_at: new Date().toISOString(),
+          error_message: `Replaced by a newer push to ${branch} (${sha}).`,
+        })
+        .eq("app_id", app.id).eq("platform", platform).eq("branch", branch).eq("status", "queued")
+        .select("id, number");
+      for (const s of stale ?? []) {
+        await admin.from("release_steps").update({ status: "skipped" })
+          .eq("release_id", s.id).eq("status", "pending");
+        replaced.push(s.number);
+      }
+    }
     const { data: number } = await admin.rpc("next_release_number", { p_app_id: app.id });
     const id = crypto.randomUUID();
     const { error } = await admin.from("releases").insert({
@@ -123,5 +144,5 @@ Deno.serve(async (req) => {
     );
     queued.push(`${platform} #${number} → ${track}`);
   }
-  return json(200, { ok: true, queued });
+  return json(200, { ok: true, queued, replaced });
 });

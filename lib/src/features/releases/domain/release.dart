@@ -234,3 +234,42 @@ List<ReleaseStep> pipelineSteps(Platform platform, String releaseId) {
       ReleaseStep(id: '$releaseId-$index', name: name, order: index),
   ];
 }
+
+/// Where a queued release stands: how many go first, how many build now,
+/// how many machines take this platform, how long one usually takes.
+class QueueInfo {
+  const QueueInfo({
+    required this.ahead,
+    required this.running,
+    required this.runnersOnline,
+    required this.averageBuild,
+  });
+
+  final int ahead;
+  final int running;
+  final int runnersOnline;
+  final Duration averageBuild;
+
+  bool get machinesOffline => runnersOnline == 0;
+
+  /// Rough wait until this release starts. Builds in progress count as half
+  /// done; the machines share the line.
+  Duration get estimatedWait {
+    if (runnersOnline == 0) return Duration.zero;
+    final slotsBefore = ahead + running * .5;
+    final waves = slotsBefore / runnersOnline;
+    final free = running < runnersOnline && ahead == 0;
+    return free ? Duration.zero : averageBuild * waves;
+  }
+
+  static QueueInfo? fromJson(Object? json) {
+    if (json is! Map) return null;
+    int n(String k) => (json[k] as num?)?.toInt() ?? 0;
+    return QueueInfo(
+      ahead: n('ahead'),
+      running: n('running'),
+      runnersOnline: n('runners_online'),
+      averageBuild: Duration(seconds: n('avg_seconds')),
+    );
+  }
+}

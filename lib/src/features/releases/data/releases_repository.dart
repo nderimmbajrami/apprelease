@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/data/backend.dart';
@@ -28,6 +30,10 @@ abstract interface class ReleasesRepository {
   /// Whether any runner reported in recently. False means a queued release
   /// has nobody to build it.
   Stream<bool> watchRunnerOnline();
+
+  /// The line in front of a queued release; null once it is no longer
+  /// queued or not visible.
+  Future<QueueInfo?> queueInfo(String releaseId);
 
   void dispose();
 }
@@ -74,6 +80,31 @@ Stream<Release?> releaseStream(Ref ref, String releaseId) =>
 @riverpod
 Stream<List<LogLine>> releaseLog(Ref ref, String releaseId) =>
     ref.watch(releasesRepositoryProvider).watchLog(releaseId);
+
+/// The queue in front of one release, refreshed every 10 seconds while the
+/// page that shows it is open.
+@riverpod
+Stream<QueueInfo?> releaseQueue(Ref ref, String releaseId) {
+  final repository = ref.watch(releasesRepositoryProvider);
+  final controller = StreamController<QueueInfo?>();
+  Future<void> load() async {
+    QueueInfo? info;
+    try {
+      info = await repository.queueInfo(releaseId);
+    } catch (_) {
+      info = null;
+    }
+    if (!controller.isClosed) controller.add(info);
+  }
+
+  unawaited(load());
+  final timer = Timer.periodic(const Duration(seconds: 10), (_) => load());
+  ref.onDispose(() {
+    timer.cancel();
+    unawaited(controller.close());
+  });
+  return controller.stream;
+}
 
 /// True while at least one build machine is reporting in.
 @Riverpod(keepAlive: true)

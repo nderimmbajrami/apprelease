@@ -310,9 +310,6 @@
     }
   },
   "navSetup": "Setup checklist",
-  "noRunnerTitle": "No build machine is online",
-  "noRunnerBody": "A release is built by a runner: a Mac (or, for Android only, a Linux machine) running the AppRelease runner. None has reported in during the last two minutes, so this release waits in the queue. To build on your own machine, open a terminal there and run:",
-  "noRunnerFoot": "The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.",
   "runnerOnline": "A runner is online",
   "triggersTitle": "Release on push",
   "triggersExplain": "Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.",
@@ -422,5 +419,32 @@
         "type": "int"
       }
     }
-  }
+  },
+  "queueShort": "Waiting in line…",
+  "queueInLineTitle": "Number {position} in line",
+  "@queueInLineTitle": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "queueInLineBody": "{ahead, plural, =0{The build machine is finishing another release.} =1{One release goes before yours.} other{{ahead} releases go before yours.}} Your {platform} build should start in about {minutes} min. You can close this page; the release carries on without it.",
+  "@queueInLineBody": {
+    "placeholders": {
+      "ahead": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "queueStartingTitle": "Starting now",
+  "queueStartingBody": "A build machine is free and picks this release up in a few seconds.",
+  "queueOfflineTitle": "The build machines are offline for a moment",
+  "queueOfflineBody": "Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side."
 }

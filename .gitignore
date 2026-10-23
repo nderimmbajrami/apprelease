@@ -66,3 +66,6 @@ app.*.map.json
 
 # Per-machine runner identity.
 /runner/.runner-id
+/runner/.runner-id-*
+/runner/logs/
+/runner/build/

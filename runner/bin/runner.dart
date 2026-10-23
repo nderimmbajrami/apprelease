@@ -7,7 +7,9 @@ import 'package:apprelease_runner/runner.dart';
 /// Reads its settings from the environment (see .env.example). One process
 /// runs one release at a time; start a second process for concurrency.
 Future<void> main(List<String> args) async {
-  final env = Map<String, String>.from(Platform.environment)..addAll(_dotEnv());
+  // .env first, then the process environment on top: launchd (or a shell)
+  // can run two processes from one folder, one per platform.
+  final env = <String, String>{..._dotEnv(), ...Platform.environment};
   String need(String key) {
     final value = env[key];
     if (value == null || value.isEmpty) {
@@ -28,6 +30,7 @@ Future<void> main(List<String> args) async {
     // Absolute: scripts run inside the checkout, and artifact paths are
     // handed to tools from there.
     workspace: Directory(env['RUNNER_WORKSPACE'] ?? 'workspace').absolute,
+    idFile: env['RUNNER_ID_FILE'] ?? '.runner-id',
   );
 
   if (args.contains('--once')) {

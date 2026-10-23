@@ -327,6 +327,94 @@ final class ReleaseLogFamily extends $Family
   String toString() => r'releaseLogProvider';
 }
 
+/// The queue in front of one release, refreshed every 10 seconds while the
+/// page that shows it is open.
+
+@ProviderFor(releaseQueue)
+final releaseQueueProvider = ReleaseQueueFamily._();
+
+/// The queue in front of one release, refreshed every 10 seconds while the
+/// page that shows it is open.
+
+final class ReleaseQueueProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<QueueInfo?>,
+          QueueInfo?,
+          Stream<QueueInfo?>
+        >
+    with $FutureModifier<QueueInfo?>, $StreamProvider<QueueInfo?> {
+  /// The queue in front of one release, refreshed every 10 seconds while the
+  /// page that shows it is open.
+  ReleaseQueueProvider._({
+    required ReleaseQueueFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'releaseQueueProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$releaseQueueHash();
+
+  @override
+  String toString() {
+    return r'releaseQueueProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<QueueInfo?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<QueueInfo?> create(Ref ref) {
+    final argument = this.argument as String;
+    return releaseQueue(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ReleaseQueueProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$releaseQueueHash() => r'afe46ddfc4b941d716b935f3a3623859dbbc2a6c';
+
+/// The queue in front of one release, refreshed every 10 seconds while the
+/// page that shows it is open.
+
+final class ReleaseQueueFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<QueueInfo?>, String> {
+  ReleaseQueueFamily._()
+    : super(
+        retry: null,
+        name: r'releaseQueueProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The queue in front of one release, refreshed every 10 seconds while the
+  /// page that shows it is open.
+
+  ReleaseQueueProvider call(String releaseId) =>
+      ReleaseQueueProvider._(argument: releaseId, from: this);
+
+  @override
+  String toString() => r'releaseQueueProvider';
+}
+
 /// True while at least one build machine is reporting in.
 
 @ProviderFor(runnerOnline)

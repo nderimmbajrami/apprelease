@@ -13,6 +13,7 @@ class Runner {
     required this.platforms,
     required this.workspace,
     this.pollInterval = const Duration(seconds: 5),
+    this.idFile = '.runner-id',
   });
 
   final SupabaseApi api;
@@ -22,6 +23,10 @@ class Runner {
   final Directory workspace;
   final Duration pollInterval;
 
+  /// Where the stable id is kept. One file per process when a machine runs
+  /// several (`.runner-id-android`, `.runner-id-ios`).
+  final String idFile;
+
   /// Stable across restarts of the same machine, so the console can show one
   /// runner rather than a new one every boot.
   late final String id = _stableId();
@@ -30,13 +35,25 @@ class Runner {
     stdout.writeln(
       'runner $name ($id) · ${platforms.join(', ')} · polling every ${pollInterval.inSeconds}s',
     );
-    var tick = 0;
-    while (true) {
-      if (tick++ % 6 == 0) {
+    // Alive every 30 s, also in the middle of a long build, so the console
+    // can tell a busy machine from one that is off.
+    Future<void> beat() async {
+      try {
         await api.heartbeat(runnerId: id, name: name, platforms: platforms);
+      } catch (error) {
+        stderr.writeln('heartbeat failed: $error');
       }
-      final ran = await runOne();
-      if (!ran) await Future<void>.delayed(pollInterval);
+    }
+
+    await beat();
+    final timer = Timer.periodic(const Duration(seconds: 30), (_) => beat());
+    try {
+      while (true) {
+        final ran = await runOne();
+        if (!ran) await Future<void>.delayed(pollInterval);
+      }
+    } finally {
+      timer.cancel();
     }
   }
 
@@ -59,7 +76,7 @@ class Runner {
   }
 
   String _stableId() {
-    final file = File('.runner-id');
+    final file = File(idFile);
     if (file.existsSync()) return file.readAsStringSync().trim();
     final id = _uuid();
     file.writeAsStringSync(id);

@@ -189,6 +189,15 @@ class LocalReleasesRepository implements ReleasesRepository {
   @override
   Stream<bool> watchRunnerOnline() => Stream.value(true);
 
+  /// The simulated runner starts right away: nobody is ever in front.
+  @override
+  Future<QueueInfo?> queueInfo(String releaseId) async => const QueueInfo(
+    ahead: 0,
+    running: 0,
+    runnersOnline: 1,
+    averageBuild: Duration(minutes: 6),
+  );
+
   @override
   Future<void> deleteReleasesOfApp(String appId) async {
     for (final release in _releases.rows.where((r) => r.appId == appId)) {

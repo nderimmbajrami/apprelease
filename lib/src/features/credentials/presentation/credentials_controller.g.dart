@@ -34,7 +34,7 @@ final class CredentialsControllerProvider
 }
 
 String _$credentialsControllerHash() =>
-    r'408fa5c69de923ce4e75ed39282fb6ea8988e924';
+    r'f086f041ef8b2ca8436000f32bd2bd2525467d54';
 
 abstract class _$CredentialsController extends $AsyncNotifier<void> {
   FutureOr<void> build();
