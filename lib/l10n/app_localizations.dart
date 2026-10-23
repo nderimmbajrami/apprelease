@@ -1766,6 +1766,18 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'No keystore yet for this app.'**
   String get noKeystoreForApp;
+
+  /// No description provided for @appReleasesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} releases · last {ago}'**
+  String appReleasesSummary(int count, String ago);
+
+  /// No description provided for @allReleasesOfApp.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} releases'**
+  String allReleasesOfApp(int count);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

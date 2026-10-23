@@ -941,4 +941,14 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get noKeystoreForApp => 'No keystore yet for this app.';
+
+  @override
+  String appReleasesSummary(int count, String ago) {
+    return '$count releases · last $ago';
+  }
+
+  @override
+  String allReleasesOfApp(int count) {
+    return 'All $count releases';
+  }
 }

@@ -18,7 +18,10 @@ import '../../apps/domain/app_project.dart';
 import '../../credentials/data/credentials_repository.dart';
 import '../../releases/data/releases_repository.dart';
 import '../../releases/domain/release.dart';
-import '../../releases/presentation/widgets/release_row.dart';
+import '../../../core/utils/date_format.dart';
+import '../../../core/widgets/app_pill.dart';
+import '../../releases/presentation/widgets/platform_icon.dart';
+import '../../releases/presentation/widgets/status_pill.dart';
 
 /// What shipped, what is shipping, what failed.
 class DashboardScreen extends ConsumerWidget {
@@ -79,7 +82,6 @@ class _Dashboard extends StatelessWidget {
         : '${(succeeded / finished.length * 100).round()} %';
     final running = releases.where((r) => r.status.isActive).length;
     final scheme = Theme.of(context).colorScheme;
-    final appNames = {for (final app in apps) app.id: app.name};
 
     final tiles = [
       StatTile(
@@ -161,22 +163,242 @@ class _Dashboard extends StatelessWidget {
             ),
           )
         else
-          for (final release in releases.take(8))
+          // One block per app, the app with the newest release first.
+          for (final app in _appsByActivity(apps, releases))
             Padding(
-              padding: const EdgeInsets.only(bottom: Gap.sm),
-              child: ReleaseRow(
-                release: release,
-                appName: appNames[release.appId],
-                onTap: () => context.goNamed(
-                  AppRoute.release.name,
-                  pathParameters: {
-                    'appId': release.appId,
-                    'releaseId': release.id,
-                  },
-                ),
+              padding: const EdgeInsets.only(bottom: Gap.lg),
+              child: _AppReleases(
+                app: app,
+                releases: [
+                  for (final r in releases)
+                    if (r.appId == app.id) r,
+                ],
               ),
             ),
       ],
+    );
+  }
+
+  static List<AppProject> _appsByActivity(
+    List<AppProject> apps,
+    List<Release> releases,
+  ) {
+    DateTime? last(AppProject a) {
+      for (final r in releases) {
+        if (r.appId == a.id) return r.createdAt;
+      }
+      return null;
+    }
+
+    final withReleases = [
+      for (final a in apps)
+        if (last(a) != null) a,
+    ];
+    withReleases.sort((a, b) => last(b)!.compareTo(last(a)!));
+    return withReleases;
+  }
+}
+
+/// An app's recent releases: where each platform stands now, then the last
+/// few runs, then a way into the rest.
+class _AppReleases extends StatelessWidget {
+  const _AppReleases({required this.app, required this.releases});
+
+  static const _shown = 4;
+
+  final AppProject app;
+
+  /// Newest first.
+  final List<Release> releases;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isCompact = context.isCompact;
+    final latest = <Platform, Release>{};
+    for (final r in releases) {
+      latest.putIfAbsent(r.platform, () => r);
+    }
+    void open(Release r) => context.goNamed(
+      AppRoute.release.name,
+      pathParameters: {'appId': app.id, 'releaseId': r.id},
+    );
+
+    final title = InkWell(
+      borderRadius: BorderRadius.circular(Radii.sm),
+      onTap: () => context.goNamed(
+        AppRoute.appDetail.name,
+        pathParameters: {'appId': app.id},
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(Radii.sm + 2),
+            ),
+            child: Text(
+              app.name.isEmpty ? '?' : app.name[0].toUpperCase(),
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: scheme.onSecondaryContainer,
+              ),
+            ),
+          ),
+          const SizedBox(width: Gap.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  app.name,
+                  style: theme.textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  l10n.appReleasesSummary(
+                    releases.length,
+                    formatAgo(releases.first.createdAt),
+                  ),
+                  style: theme.textTheme.bodySmall,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Where each store stands right now.
+    final chips = [
+      for (final platform in Platform.values)
+        if (latest[platform] case final r?)
+          InkWell(
+            borderRadius: BorderRadius.circular(Radii.sm),
+            onTap: () => open(r),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(6, 5, 6, 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: scheme.outline),
+                borderRadius: BorderRadius.circular(Radii.sm),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PlatformIcon(platform, size: 22),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      isCompact
+                          ? r.versionLabel
+                          : '${r.versionLabel} · ${trackLabel(context, r.track)}',
+                      style: theme.textTheme.labelMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  StatusPill(r.status),
+                ],
+              ),
+            ),
+          ),
+    ];
+
+    final header = Padding(
+      padding: const EdgeInsets.fromLTRB(Gap.lg, Gap.lg, Gap.lg, Gap.md),
+      child: isCompact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                title,
+                const SizedBox(height: Gap.md),
+                Wrap(spacing: Gap.sm, runSpacing: Gap.sm, children: chips),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: title),
+                for (final chip in chips) ...[
+                  const SizedBox(width: Gap.sm),
+                  chip,
+                ],
+              ],
+            ),
+    );
+
+    Widget row(Release r) => InkWell(
+      onTap: () => open(r),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: Gap.lg,
+          vertical: Gap.sm + 2,
+        ),
+        child: Row(
+          children: [
+            PlatformIcon(r.platform, size: 26),
+            const SizedBox(width: Gap.md),
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: r.versionLabel,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    TextSpan(
+                      text: [
+                        '',
+                        '#${r.number}',
+                        trackLabel(context, r.track),
+                        if (!isCompact && r.commit.isNotEmpty) r.commit,
+                        formatAgo(r.createdAt),
+                      ].join(' · '),
+                    ),
+                  ],
+                ),
+                style: theme.textTheme.bodySmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: Gap.sm),
+            if (!isCompact && r.duration != null) ...[
+              AppPill(label: formatDuration(r.duration!), isMono: true),
+              const SizedBox(width: Gap.sm),
+            ],
+            StatusPill(r.status),
+          ],
+        ),
+      ),
+    );
+
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          header,
+          const Divider(height: 1),
+          for (final r in releases.take(_shown)) row(r),
+          if (releases.length > _shown) ...[
+            const Divider(height: 1),
+            TextButton(
+              onPressed: () => context.goNamed(
+                AppRoute.appDetail.name,
+                pathParameters: {'appId': app.id},
+              ),
+              child: Text(l10n.allReleasesOfApp(releases.length)),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -106,10 +106,13 @@ void main() {
     await pumpApp(tester);
     await signIn(tester);
 
-    expect(find.text('Published'), findsNWidgets(2));
-    expect(find.text('Failed'), findsOneWidget);
+    // Grouped by app: the store chips on top repeat the newest state of
+    // each platform, then the rows.
+    expect(find.text('Acme Shop'), findsOneWidget);
+    expect(find.text('Published'), findsWidgets);
+    expect(find.text('Failed'), findsWidgets);
 
-    await tester.tap(find.text('Failed'));
+    await tester.tap(find.text('Failed').last);
     await tester.pumpAndSettle();
     expect(find.textContaining('No profiles for'), findsWidgets);
     expect(find.text('Run again'), findsOneWidget);

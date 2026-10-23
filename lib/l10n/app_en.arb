@@ -403,5 +403,24 @@
       }
     }
   },
-  "noKeystoreForApp": "No keystore yet for this app."
+  "noKeystoreForApp": "No keystore yet for this app.",
+  "appReleasesSummary": "{count} releases · last {ago}",
+  "@appReleasesSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "ago": {
+        "type": "String"
+      }
+    }
+  },
+  "allReleasesOfApp": "All {count} releases",
+  "@allReleasesOfApp": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
