@@ -20,16 +20,14 @@ void main() {
 
   test('the defaults send develop to testers and main to the stores', () {
     final dev = PushRule.defaults.first, prod = PushRule.defaults.last;
-    expect((dev.branch, dev.trackAndroid, dev.trackIos), (
-      'develop',
-      'internal',
-      'testflight',
-    ));
-    expect((prod.branch, prod.trackAndroid, prod.trackIos), (
-      'main',
-      'production',
-      'appStore',
-    ));
+    expect(
+      (dev.branch, dev.trackAndroid, dev.trackIos),
+      ('develop', 'internal', 'testflight'),
+    );
+    expect(
+      (prod.branch, prod.trackAndroid, prod.trackIos),
+      ('main', 'production', 'appStore'),
+    );
   });
 
   test('the yaml signs with the app\'s own keystore, not another app\'s', () {

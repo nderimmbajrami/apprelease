@@ -172,142 +172,155 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
     final validators = Validators(l10n);
     final isBusy = ref.watch(appsControllerProvider).isLoading;
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: Gap.xxl),
-      children: [
-        AppCard(
-          padding: const EdgeInsets.all(Gap.xl),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(l10n.appSettingsExplain, style: theme.textTheme.bodySmall),
-                const SizedBox(height: Gap.lg),
-                TextFormField(
-                  controller: _name,
-                  decoration: InputDecoration(labelText: l10n.appName),
-                  validator: validators.required,
-                ),
-                const SizedBox(height: Gap.md),
-                TextFormField(
-                  controller: _repoUrl,
-                  decoration: InputDecoration(labelText: l10n.repoUrl),
-                  validator: validators.repoUrl,
-                ),
-                const SizedBox(height: Gap.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _branch,
-                        decoration: InputDecoration(labelText: l10n.branch),
-                        validator: validators.required,
-                      ),
-                    ),
-                    const SizedBox(width: Gap.md),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _flutterVersion,
-                        decoration: InputDecoration(
-                          labelText: l10n.flutterVersion,
+    // One form around the whole page, all of it built: a lazy list dropped
+    // the top card once you scrolled down to Save, and the save failed.
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: Gap.xxl),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppCard(
+              padding: const EdgeInsets.all(Gap.xl),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.appSettingsExplain,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: Gap.lg),
+                  TextFormField(
+                    controller: _name,
+                    decoration: InputDecoration(labelText: l10n.appName),
+                    validator: validators.required,
+                  ),
+                  const SizedBox(height: Gap.md),
+                  TextFormField(
+                    controller: _repoUrl,
+                    decoration: InputDecoration(labelText: l10n.repoUrl),
+                    validator: validators.repoUrl,
+                  ),
+                  const SizedBox(height: Gap.md),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _branch,
+                          decoration: InputDecoration(labelText: l10n.branch),
+                          validator: validators.required,
                         ),
-                        validator: validators.required,
+                      ),
+                      const SizedBox(width: Gap.md),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _flutterVersion,
+                          decoration: InputDecoration(
+                            labelText: l10n.flutterVersion,
+                          ),
+                          validator: validators.required,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Gap.lg),
+                  CheckboxListTile(
+                    value: _platforms.contains(Platform.android),
+                    onChanged: (on) => setState(() {
+                      _platforms = {..._platforms};
+                      on!
+                          ? _platforms.add(Platform.android)
+                          : _platforms.remove(Platform.android);
+                    }),
+                    secondary: const Icon(Icons.android),
+                    title: Text(l10n.platformAndroid),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (_platforms.contains(Platform.android))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 56, bottom: Gap.md),
+                      child: TextFormField(
+                        controller: _packageName,
+                        decoration: InputDecoration(
+                          labelText: l10n.androidPackageName,
+                        ),
+                        validator: validators.applicationId,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: Gap.lg),
-                CheckboxListTile(
-                  value: _platforms.contains(Platform.android),
-                  onChanged: (on) => setState(() {
-                    _platforms = {..._platforms};
-                    on!
-                        ? _platforms.add(Platform.android)
-                        : _platforms.remove(Platform.android);
-                  }),
-                  secondary: const Icon(Icons.android),
-                  title: Text(l10n.platformAndroid),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                if (_platforms.contains(Platform.android))
-                  Padding(
-                    padding: const EdgeInsets.only(left: 56, bottom: Gap.md),
-                    child: TextFormField(
-                      controller: _packageName,
-                      decoration: InputDecoration(
-                        labelText: l10n.androidPackageName,
+                  CheckboxListTile(
+                    value: _platforms.contains(Platform.ios),
+                    onChanged: (on) => setState(() {
+                      _platforms = {..._platforms};
+                      on!
+                          ? _platforms.add(Platform.ios)
+                          : _platforms.remove(Platform.ios);
+                    }),
+                    secondary: const Icon(Icons.apple),
+                    title: Text(l10n.platformIos),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  if (_platforms.contains(Platform.ios))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 56),
+                      child: TextFormField(
+                        controller: _bundleId,
+                        decoration: InputDecoration(
+                          labelText: l10n.iosBundleId,
+                        ),
+                        validator: validators.applicationId,
                       ),
-                      validator: validators.applicationId,
                     ),
-                  ),
-                CheckboxListTile(
-                  value: _platforms.contains(Platform.ios),
-                  onChanged: (on) => setState(() {
-                    _platforms = {..._platforms};
-                    on!
-                        ? _platforms.add(Platform.ios)
-                        : _platforms.remove(Platform.ios);
-                  }),
-                  secondary: const Icon(Icons.apple),
-                  title: Text(l10n.platformIos),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                if (_platforms.contains(Platform.ios))
-                  Padding(
-                    padding: const EdgeInsets.only(left: 56),
-                    child: TextFormField(
-                      controller: _bundleId,
-                      decoration: InputDecoration(labelText: l10n.iosBundleId),
-                      validator: validators.applicationId,
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: Gap.xl),
-        _triggersCard(context),
-        const SizedBox(height: Gap.lg),
-        Align(
-          alignment: Alignment.centerRight,
-          child: FilledButton.icon(
-            onPressed: isBusy ? null : _save,
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: Text(l10n.save),
-          ),
-        ),
-        const SizedBox(height: Gap.xl),
-        AppCard(
-          borderColor: theme.colorScheme.error.withValues(alpha: .4),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.dangerZone, style: theme.textTheme.titleSmall),
-                    const SizedBox(height: 3),
-                    Text(
-                      l10n.deleteAppConfirm(widget.app.name),
-                      style: theme.textTheme.bodySmall,
+            const SizedBox(height: Gap.xl),
+            _triggersCard(context),
+            const SizedBox(height: Gap.lg),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton.icon(
+                onPressed: isBusy ? null : _save,
+                icon: const Icon(Icons.save_outlined, size: 18),
+                label: Text(l10n.save),
+              ),
+            ),
+            const SizedBox(height: Gap.xl),
+            AppCard(
+              borderColor: theme.colorScheme.error.withValues(alpha: .4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.dangerZone,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          l10n.deleteAppConfirm(widget.app.name),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: Gap.md),
+                  OutlinedButton.icon(
+                    onPressed: isBusy ? null : _delete,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                    ),
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    label: Text(l10n.deleteApp),
+                  ),
+                ],
               ),
-              const SizedBox(width: Gap.md),
-              OutlinedButton.icon(
-                onPressed: isBusy ? null : _delete,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                ),
-                icon: const Icon(Icons.delete_outline, size: 18),
-                label: Text(l10n.deleteApp),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
