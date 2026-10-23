@@ -59,6 +59,7 @@ class AppDetailScreen extends ConsumerWidget {
       child: DefaultTabController(
         length: 3,
         initialIndex: initialIndex,
+        animationDuration: Duration.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -82,9 +83,11 @@ class AppDetailScreen extends ConsumerWidget {
             TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
+              // The tab only changes the body below; the address bar keeps
+              // up without building a new page.
               onTap: (index) {
                 final name = const ['releases', 'config', 'settings'][index];
-                context.goNamed(
+                GoRouter.of(context).replaceNamed(
                   AppRoute.appDetail.name,
                   pathParameters: {'appId': app.id},
                   queryParameters: {'tab': name},
@@ -98,7 +101,7 @@ class AppDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: Gap.lg),
             Expanded(
-              child: TabBarView(
+              child: _TabBody(
                 children: [
                   _ReleasesTab(app: app),
                   ConfigPanel(app: app),
@@ -167,6 +170,24 @@ class _ReleasesTab extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// The selected tab only, switched in one frame. The others keep their
+/// state (an edited settings form survives a look at the releases).
+class _TabBody extends StatelessWidget {
+  const _TabBody({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = DefaultTabController.of(context);
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) =>
+          IndexedStack(index: controller.index, children: children),
     );
   }
 }

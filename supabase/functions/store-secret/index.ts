@@ -22,13 +22,19 @@ Deno.serve(async (req) => {
   if (!user) return reply(401, { error: "Unauthorized" });
 
   const body = await req.json();
-  const { id, team_id, kind, name, meta, secret } = body;
+  const { id, team_id, kind, name, meta, secret, app_id } = body;
 
   // The caller may only write into their own team.
   const { data: profile } = await userClient
     .from("profiles").select("team_id").eq("id", user.id).single();
   if (!profile || profile.team_id !== team_id) {
     return reply(403, { error: "Forbidden" });
+  }
+
+  // A linked app must be one the caller can see (RLS: same team).
+  if (app_id) {
+    const { data: app } = await userClient.from("apps").select("id").eq("id", app_id).maybeSingle();
+    if (!app) return reply(403, { error: "Unknown app" });
   }
 
   const admin = createClient(
@@ -38,7 +44,7 @@ Deno.serve(async (req) => {
   const key = Deno.env.get("SECRETS_KEY")!;
 
   const { error: credError } = await admin
-    .from("credentials").insert({ id, team_id, kind, name, meta });
+    .from("credentials").insert({ id, team_id, kind, name, meta, app_id: app_id ?? null });
   if (credError) return reply(400, { error: credError.message });
 
   // pgp_sym_encrypt runs in the database so the key never meets the bytes

@@ -31,15 +31,35 @@ class SupabaseAppsRepository implements AppsRepository {
 
   @override
   Future<AppProject> addApp(AppProject app) async {
-    await _client.from(_table).insert(_toRow(app));
+    await _write((row) => _client.from(_table).insert(row), app);
     _touch();
     return app;
   }
 
   @override
   Future<void> updateApp(AppProject app) async {
-    await _client.from(_table).update(_toRow(app)).eq('id', app.id);
+    await _write(
+      (row) => _client.from(_table).update(row).eq('id', app.id),
+      app,
+    );
     _touch();
+  }
+
+  /// Writes the row; on a database that predates `trigger_rules`, writes it
+  /// again without that column so the rest still saves (first rule only).
+  Future<void> _write(
+    Future<void> Function(Map<String, dynamic> row) write,
+    AppProject app,
+  ) async {
+    final row = _toRow(app);
+    try {
+      await write(row);
+    } on PostgrestException catch (e) {
+      final missing =
+          e.code == 'PGRST204' || e.message.contains('trigger_rules');
+      if (!missing) rethrow;
+      await write(row..remove('trigger_rules'));
+    }
   }
 
   @override
@@ -79,14 +99,7 @@ class SupabaseAppsRepository implements AppsRepository {
         ? null
         : DateTime.parse(row['last_release_at'] as String),
     triggerEnabled: (row['trigger_enabled'] as bool?) ?? false,
-    triggerBranch: (row['trigger_branch'] as String?) ?? 'main',
-    triggerPlatforms: {
-      for (final p in (row['trigger_platforms'] as List?) ?? const ['android'])
-        Platform.values.byName(p as String),
-    },
-    triggerTrackAndroid:
-        (row['trigger_track_android'] as String?) ?? 'internal',
-    triggerTrackIos: (row['trigger_track_ios'] as String?) ?? 'testflight',
+    pushRules: _rulesFromRow(row),
     triggerTags: (row['trigger_tags'] as bool?) ?? false,
     webhookSecret: (row['webhook_secret'] as String?) ?? '',
   );
@@ -103,10 +116,32 @@ class SupabaseAppsRepository implements AppsRepository {
     'ios_bundle_id': app.iosBundleId,
     'flutter_version': app.flutterVersion,
     'trigger_enabled': app.triggerEnabled,
-    'trigger_branch': app.triggerBranch,
-    'trigger_platforms': [for (final p in app.triggerPlatforms) p.name],
-    'trigger_track_android': app.triggerTrackAndroid,
-    'trigger_track_ios': app.triggerTrackIos,
+    'trigger_rules': [for (final r in app.pushRules) r.toJson()],
+    // The single-branch columns mirror the first rule.
+    if (app.pushRules.isNotEmpty) ...{
+      'trigger_branch': app.pushRules.first.branch,
+      'trigger_platforms': [
+        for (final p in app.pushRules.first.platforms) p.name,
+      ],
+      'trigger_track_android': app.pushRules.first.trackAndroid,
+      'trigger_track_ios': app.pushRules.first.trackIos,
+    },
     'trigger_tags': app.triggerTags,
   };
+
+  /// `trigger_rules`, or one rule from the old single-branch columns.
+  static List<PushRule> _rulesFromRow(Map<String, dynamic> row) {
+    final rules = row['trigger_rules'];
+    if (rules is List && rules.isNotEmpty) {
+      return [for (final r in rules) PushRule.fromJson(r as Map)];
+    }
+    return [
+      PushRule.fromJson({
+        'branch': row['trigger_branch'],
+        'platforms': row['trigger_platforms'],
+        'track_android': row['trigger_track_android'],
+        'track_ios': row['trigger_track_ios'],
+      }),
+    ];
+  }
 }

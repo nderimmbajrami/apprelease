@@ -17,6 +17,7 @@ class CredentialsController extends _$CredentialsController {
     required String name,
     required Map<String, String> meta,
     required CredentialSecret secret,
+    String? appId,
   }) {
     final user = ref.read(currentUserProvider);
     if (user == null) return Future.value(false);
@@ -27,6 +28,7 @@ class CredentialsController extends _$CredentialsController {
       name: _reference(name),
       createdAt: DateTime.now(),
       meta: meta,
+      appId: appId,
     );
     return _run(
       () => ref
@@ -48,6 +50,9 @@ class CredentialsController extends _$CredentialsController {
     }
     return result.value;
   }
+
+  Future<bool> linkToApp(String id, String? appId) =>
+      _run(() => ref.read(credentialsRepositoryProvider).linkToApp(id, appId));
 
   Future<bool> deleteCredential(String id) =>
       _run(() => ref.read(credentialsRepositoryProvider).deleteCredential(id));

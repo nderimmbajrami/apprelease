@@ -11,12 +11,14 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/page_body.dart';
 import '../../../core/widgets/page_header.dart';
 import '../../../core/widgets/section_title.dart';
+import '../../apps/data/apps_repository.dart';
+import '../../apps/domain/app_project.dart';
 import '../data/credentials_repository.dart';
 import '../domain/credential.dart';
 import 'add_credential_sheet.dart';
 import 'credentials_controller.dart';
 
-/// Signing keys and store access, grouped by kind.
+/// Signing keys and store access, grouped by kind; keystores also by app.
 class CredentialsScreen extends ConsumerWidget {
   const CredentialsScreen({super.key});
 
@@ -24,6 +26,7 @@ class CredentialsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final credentials = ref.watch(credentialsStreamProvider);
+    final apps = ref.watch(appsStreamProvider).value ?? const <AppProject>[];
 
     return PageBody(
       child: AsyncValueWidget(
@@ -65,14 +68,24 @@ class CredentialsScreen extends ConsumerWidget {
                     label: Text(l10n.addCredential),
                   ),
                 ),
-                for (final credential in credentials.where(
-                  (c) => c.kind == kind,
-                ))
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: Gap.sm),
-                    child: _CredentialRow(credential: credential),
-                  ),
-                if (credentials.every((c) => c.kind != kind))
+                if (kind == CredentialKind.androidKeystore)
+                  _KeystoresByApp(
+                    keystores: [
+                      for (final c in credentials)
+                        if (c.kind == kind) c,
+                    ],
+                    apps: apps,
+                  )
+                else
+                  for (final credential in credentials.where(
+                    (c) => c.kind == kind,
+                  ))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: Gap.sm),
+                      child: _CredentialRow(credential: credential),
+                    ),
+                if (kind != CredentialKind.androidKeystore &&
+                    credentials.every((c) => c.kind != kind))
                   Padding(
                     padding: const EdgeInsets.only(bottom: Gap.sm),
                     child: AppCard(
@@ -95,10 +108,113 @@ class CredentialsScreen extends ConsumerWidget {
   }
 }
 
+/// Each Android app with its keystores, then the shared ones.
+class _KeystoresByApp extends StatelessWidget {
+  const _KeystoresByApp({required this.keystores, required this.apps});
+
+  final List<Credential> keystores;
+  final List<AppProject> apps;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final known = {for (final a in apps) a.id};
+    final androidApps = [
+      for (final a in apps)
+        if (a.hasAndroid || keystores.any((k) => k.appId == a.id)) a,
+    ];
+    final shared = [
+      for (final k in keystores)
+        if (k.appId == null || !known.contains(k.appId)) k,
+    ];
+
+    Widget header(String title, {String? appId}) => Padding(
+      padding: const EdgeInsets.only(top: Gap.xs, bottom: Gap.xs),
+      child: Row(
+        children: [
+          Icon(
+            appId == null ? Icons.share_outlined : Icons.apps,
+            size: 15,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: Gap.xs + 2),
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.labelLarge,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (appId != null)
+            TextButton.icon(
+              onPressed: () => showAddCredentialSheet(
+                context,
+                kind: CredentialKind.androidKeystore,
+                appId: appId,
+              ),
+              icon: const Icon(Icons.add, size: 15),
+              label: Text(l10n.addCredential),
+            ),
+        ],
+      ),
+    );
+
+    Widget row(Credential c) => Padding(
+      padding: const EdgeInsets.only(bottom: Gap.sm),
+      child: _CredentialRow(credential: c, apps: apps),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final app in androidApps) ...[
+          header(app.name, appId: app.id),
+          for (final k in keystores)
+            if (k.appId == app.id) row(k),
+          if (!keystores.any((k) => k.appId == app.id))
+            Padding(
+              padding: const EdgeInsets.only(bottom: Gap.sm),
+              child: AppCard(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Gap.lg,
+                  vertical: Gap.md,
+                ),
+                child: Text(
+                  l10n.noKeystoreForApp,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ),
+          const SizedBox(height: Gap.sm),
+        ],
+        if (shared.isNotEmpty) ...[
+          header(l10n.credentialSharedKeys),
+          for (final k in shared) row(k),
+        ],
+        if (androidApps.isEmpty && shared.isEmpty)
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Gap.lg,
+              vertical: Gap.md,
+            ),
+            child: Text(
+              kindBody(context, CredentialKind.androidKeystore),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _CredentialRow extends ConsumerWidget {
-  const _CredentialRow({required this.credential});
+  const _CredentialRow({required this.credential, this.apps = const []});
 
   final Credential credential;
+
+  /// For keystores: the apps it can be linked to.
+  final List<AppProject> apps;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -145,6 +261,35 @@ class _CredentialRow extends ConsumerWidget {
             OutlinedButton(
               onPressed: () => _check(context, ref),
               child: Text(l10n.checkCredential),
+            ),
+          if (credential.kind == CredentialKind.androidKeystore &&
+              apps.isNotEmpty)
+            PopupMenuButton<String>(
+              tooltip: l10n.linkToApp,
+              icon: const Icon(Icons.link, size: 20),
+              onSelected: (v) => ref
+                  .read(credentialsControllerProvider.notifier)
+                  .linkToApp(credential.id, v.isEmpty ? null : v),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Text(
+                    l10n.linkToApp,
+                    style: theme.textTheme.labelMedium,
+                  ),
+                ),
+                for (final app in apps)
+                  CheckedPopupMenuItem(
+                    value: app.id,
+                    checked: credential.appId == app.id,
+                    child: Text(app.name),
+                  ),
+                CheckedPopupMenuItem(
+                  value: '',
+                  checked: credential.appId == null,
+                  child: Text(l10n.credentialShared),
+                ),
+              ],
             ),
           const SizedBox(width: Gap.xs),
           IconButton(

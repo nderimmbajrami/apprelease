@@ -24,11 +24,15 @@ class Credential {
     required this.name,
     required this.createdAt,
     this.meta = const {},
+    this.appId,
   });
 
   final String id;
   final String teamId;
   final CredentialKind kind;
+
+  /// The app this key belongs to; null when shared between apps.
+  final String? appId;
 
   /// The reference name used in apprelease.yaml, e.g. `upload_keystore`.
   final String name;
@@ -38,6 +42,16 @@ class Credential {
   /// Non-secret facts worth showing: key alias, fingerprint, issuer id,
   /// key id, service account email, file name.
   final Map<String, String> meta;
+
+  Credential withApp(String? appId) => Credential(
+    id: id,
+    teamId: teamId,
+    kind: kind,
+    name: name,
+    createdAt: createdAt,
+    meta: meta,
+    appId: appId,
+  );
 
   /// A one-line description for the list.
   String get summary => switch (kind) {

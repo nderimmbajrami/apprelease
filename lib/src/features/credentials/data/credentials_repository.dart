@@ -21,6 +21,9 @@ abstract interface class CredentialsRepository {
 
   Future<void> deleteCredential(String id);
 
+  /// Ties a credential to one app, or makes it shared again (null).
+  Future<void> linkToApp(String id, String? appId);
+
   /// Asks the backend to test the credential against the store and say
   /// what, if anything, is still missing.
   Future<List<CredentialCheck>> check(String id);

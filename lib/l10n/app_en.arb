@@ -315,7 +315,7 @@
   "noRunnerFoot": "The runner picks the release up within a few seconds and streams the log here. Leave the window open while it builds.",
   "runnerOnline": "A runner is online",
   "triggersTitle": "Release on push",
-  "triggersExplain": "Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.",
+  "triggersExplain": "Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.",
   "triggerEnabled": "Release automatically on push",
   "triggerBranch": "Branch",
   "triggerPlatforms": "Platforms to release",
@@ -368,5 +368,40 @@
   "ascGuide4": "The app itself must exist in App Store Connect with the same bundle identifier; AppRelease uploads builds, it does not create app records.",
   "ascGuide4Link": "Open App Store Connect → Apps",
   "ascGuideAfter": "Press Check on the saved credential afterwards; it tells you if Apple accepts the key for your apps.",
-  "checkResultTitleAsc": "App Store Connect check"
+  "checkResultTitleAsc": "App Store Connect check",
+  "pushRuleTitle": "Rule {n}",
+  "@pushRuleTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pushRuleBranchHelper": "A branch name, or a prefix with * such as release/*",
+  "addPushRule": "Add a branch",
+  "removePushRule": "Remove rule",
+  "pushRuleNoPlatforms": "Pick at least one platform for this rule.",
+  "pushRuleDuplicate": "Two rules use the branch {branch}.",
+  "@pushRuleDuplicate": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "credentialApp": "App",
+  "credentialAppHelper": "The app this key signs. Leave it shared if several apps use it.",
+  "credentialShared": "Shared",
+  "credentialSharedKeys": "Shared keys",
+  "linkToApp": "Link to app",
+  "keystoresTitle": "Android keystores",
+  "appKeystores": "{app}",
+  "@appKeystores": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "noKeystoreForApp": "No keystore yet for this app."
 }

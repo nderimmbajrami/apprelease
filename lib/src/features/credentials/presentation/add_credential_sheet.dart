@@ -10,6 +10,7 @@ import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../apps/data/apps_repository.dart';
 import '../domain/credential.dart';
 import 'credentials_controller.dart';
 import 'credentials_screen.dart';
@@ -17,17 +18,19 @@ import 'credentials_screen.dart';
 Future<void> showAddCredentialSheet(
   BuildContext context, {
   CredentialKind? kind,
+  String? appId,
 }) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
   constraints: const BoxConstraints(maxWidth: 600),
-  builder: (context) => _AddCredentialSheet(initialKind: kind),
+  builder: (context) => _AddCredentialSheet(initialKind: kind, appId: appId),
 );
 
 class _AddCredentialSheet extends ConsumerStatefulWidget {
-  const _AddCredentialSheet({this.initialKind});
+  const _AddCredentialSheet({this.initialKind, this.appId});
 
   final CredentialKind? initialKind;
+  final String? appId;
 
   @override
   ConsumerState<_AddCredentialSheet> createState() =>
@@ -37,6 +40,7 @@ class _AddCredentialSheet extends ConsumerStatefulWidget {
 class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
   final _formKey = GlobalKey<FormState>();
   late var _kind = widget.initialKind ?? CredentialKind.androidKeystore;
+  late String? _appId = widget.appId;
   final _name = TextEditingController();
   final _keystorePassword = TextEditingController();
   final _keyAlias = TextEditingController();
@@ -129,6 +133,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         .addCredential(
           kind: _kind,
           name: _name.text,
+          appId: _kind == CredentialKind.androidKeystore ? _appId : null,
           meta: meta,
           secret: CredentialSecret(
             fileBytes: _file?.bytes,
@@ -194,6 +199,26 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                 ),
                 validator: validators.required,
               ),
+              if (_kind == CredentialKind.androidKeystore) ...[
+                const SizedBox(height: Gap.lg),
+                DropdownButtonFormField<String?>(
+                  initialValue: _appId,
+                  decoration: InputDecoration(
+                    labelText: l10n.credentialApp,
+                    helperText: l10n.credentialAppHelper,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text(l10n.credentialShared),
+                    ),
+                    for (final app
+                        in ref.watch(appsStreamProvider).value ?? const [])
+                      DropdownMenuItem(value: app.id, child: Text(app.name)),
+                  ],
+                  onChanged: (v) => setState(() => _appId = v),
+                ),
+              ],
               const SizedBox(height: Gap.lg),
               ..._fieldsFor(_kind, validators),
               const SizedBox(height: Gap.xl),

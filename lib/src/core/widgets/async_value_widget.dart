@@ -19,22 +19,20 @@ class AsyncValueWidget<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 180),
-      child: switch (value) {
-        AsyncValue(hasValue: true, value: final loaded) => data(loaded as T),
-        AsyncValue(hasError: true, error: final error) => ErrorView(
-          error: error!,
-          onRetry: onRetry,
+    // No cross-fade: a fade showed the spinner and the page at once.
+    return switch (value) {
+      AsyncValue(hasValue: true, value: final loaded) => data(loaded as T),
+      AsyncValue(hasError: true, error: final error) => ErrorView(
+        error: error!,
+        onRetry: onRetry,
+      ),
+      _ => const Center(
+        child: SizedBox.square(
+          dimension: 26,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
         ),
-        _ => const Center(
-          child: SizedBox.square(
-            dimension: 26,
-            child: CircularProgressIndicator(strokeWidth: 2.5),
-          ),
-        ),
-      },
-    );
+      ),
+    };
   }
 }
 

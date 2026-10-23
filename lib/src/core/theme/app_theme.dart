@@ -83,6 +83,12 @@ abstract final class AppTheme {
     );
 
     return base.copyWith(
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          for (final platform in TargetPlatform.values)
+            platform: const _InstantTransitionsBuilder(),
+        },
+      ),
       scaffoldBackgroundColor: scheme.surface,
       canvasColor: scheme.surface,
       textTheme: _textTheme(base.textTheme, scheme),
@@ -318,4 +324,18 @@ extension MonoTextStyle on TextTheme {
 /// `context.isCompact` — true on phone-width layouts.
 extension ResponsiveContext on BuildContext {
   bool get isCompact => MediaQuery.sizeOf(this).width < AppTheme.compactWidth;
+}
+
+/// No animation between pages: the new page replaces the old in one frame.
+class _InstantTransitionsBuilder extends PageTransitionsBuilder {
+  const _InstantTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => child;
 }

@@ -68,28 +68,48 @@ Deno.serve(async (req) => {
   const pusher: string = payload.pusher?.name ?? payload.sender?.login ?? "GitHub";
   if (payload.deleted) return json(200, { ok: true, ignored: "deleted ref" });
 
-  // What to release, and where.
+  // What to release, and where: one entry per platform.
+  type Rule = { branch: string; platforms: string[]; track_android: string; track_ios: string };
+  const rules: Rule[] = Array.isArray(app.trigger_rules) && app.trigger_rules.length
+    ? app.trigger_rules
+    : [{ branch: app.trigger_branch, platforms: app.trigger_platforms, track_android: app.trigger_track_android, track_ios: app.trigger_track_ios }];
+  const matches = (pattern: string, name: string) => {
+    const p = (pattern ?? "").trim();
+    if (!p) return false;
+    if (p.endsWith("*")) return name.startsWith(p.slice(0, -1));
+    return p === name;
+  };
+
   let branch: string;
   let version = "auto";          // the runner reads pubspec.yaml after checkout
-  let production = false;
+  const plan: { platform: string; track: string }[] = [];
   if (ref.startsWith("refs/tags/")) {
     if (!app.trigger_tags) return json(200, { ok: true, ignored: "tags off" });
     branch = ref.slice("refs/tags/".length);
     const m = branch.match(/^v?(\d+\.\d+\.\d+)/);
     if (!m) return json(200, { ok: true, ignored: "tag is not a version" });
     version = m[1];
-    production = true;
-  } else if (ref === `refs/heads/${app.trigger_branch}`) {
-    branch = app.trigger_branch;
+    for (const platform of app.platforms as string[]) {
+      plan.push({ platform, track: platform === "android" ? "production" : "appStore" });
+    }
+  } else if (ref.startsWith("refs/heads/")) {
+    branch = ref.slice("refs/heads/".length);
+    // The first rule that names a platform for this branch decides its track.
+    for (const rule of rules) {
+      if (!matches(rule.branch, branch)) continue;
+      for (const platform of rule.platforms ?? []) {
+        if (plan.some((x) => x.platform === platform)) continue;
+        plan.push({ platform, track: platform === "android" ? rule.track_android : rule.track_ios });
+      }
+    }
+    if (!plan.length) return json(200, { ok: true, ignored: `no rule for ${branch}` });
   } else {
     return json(200, { ok: true, ignored: `ref ${ref}` });
   }
 
   const queued: string[] = [];
-  for (const platform of app.trigger_platforms as string[]) {
-    const track = production
-      ? (platform === "android" ? "production" : "appStore")
-      : (platform === "android" ? app.trigger_track_android : app.trigger_track_ios);
+  for (const { platform, track } of plan) {
+    if (!STEPS[platform]) continue;
     const { data: number } = await admin.rpc("next_release_number", { p_app_id: app.id });
     const id = crypto.randomUUID();
     const { error } = await admin.from("releases").insert({

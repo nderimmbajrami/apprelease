@@ -50,6 +50,12 @@ class LocalCredentialsRepository implements CredentialsRepository {
       _table.delete((row) => row.id == id);
 
   @override
+  Future<void> linkToApp(String id, String? appId) async {
+    final c = _table.find((row) => row.id == id);
+    if (c != null) _table.upsert((row) => row.id == id, c.withApp(appId));
+  }
+
+  @override
   Future<List<CredentialCheck>> check(String id) async => const [
     CredentialCheck(
       package: 'com.acme.shop',

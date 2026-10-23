@@ -22,6 +22,11 @@ part 'app_router.g.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
+/// Pages switch like a desktop app: the new one is simply there. A fade or
+/// zoom left the old page visible over the new one for a moment.
+Page<void> _instant(GoRouterState state, Widget child) =>
+    NoTransitionPage<void>(key: state.pageKey, child: child);
+
 /// Where the app opens. A test can start anywhere.
 @Riverpod(keepAlive: true)
 String initialLocation(Ref ref) => AppRoute.home.path;
@@ -70,12 +75,12 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: AppRoute.signIn.path,
         name: AppRoute.signIn.name,
-        builder: (context, state) => const SignInScreen(),
+        pageBuilder: (context, state) => _instant(state, const SignInScreen()),
       ),
       GoRoute(
         path: AppRoute.signUp.path,
         name: AppRoute.signUp.name,
-        builder: (context, state) => const SignUpScreen(),
+        pageBuilder: (context, state) => _instant(state, const SignUpScreen()),
       ),
       // Everything behind the login shares one frame.
       ShellRoute(
@@ -84,37 +89,47 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: AppRoute.home.path,
             name: AppRoute.home.name,
-            builder: (context, state) => const DashboardScreen(),
+            pageBuilder: (context, state) =>
+                _instant(state, const DashboardScreen()),
           ),
           GoRoute(
             path: AppRoute.setup.path,
             name: AppRoute.setup.name,
-            builder: (context, state) => const SetupScreen(),
+            pageBuilder: (context, state) =>
+                _instant(state, const SetupScreen()),
           ),
           GoRoute(
             path: AppRoute.apps.path,
             name: AppRoute.apps.name,
-            builder: (context, state) => const AppsScreen(),
+            pageBuilder: (context, state) =>
+                _instant(state, const AppsScreen()),
             routes: [
               GoRoute(
                 path: AppRoute.appNew.path,
                 name: AppRoute.appNew.name,
-                builder: (context, state) => const AddAppScreen(),
+                pageBuilder: (context, state) =>
+                    _instant(state, const AddAppScreen()),
               ),
               GoRoute(
                 path: AppRoute.appDetail.path,
                 name: AppRoute.appDetail.name,
-                builder: (context, state) => AppDetailScreen(
-                  appId: state.pathParameters['appId']!,
-                  tab: state.uri.queryParameters['tab'],
+                pageBuilder: (context, state) => _instant(
+                  state,
+                  AppDetailScreen(
+                    appId: state.pathParameters['appId']!,
+                    tab: state.uri.queryParameters['tab'],
+                  ),
                 ),
                 routes: [
                   GoRoute(
                     path: AppRoute.release.path,
                     name: AppRoute.release.name,
-                    builder: (context, state) => ReleaseDetailScreen(
-                      appId: state.pathParameters['appId']!,
-                      releaseId: state.pathParameters['releaseId']!,
+                    pageBuilder: (context, state) => _instant(
+                      state,
+                      ReleaseDetailScreen(
+                        appId: state.pathParameters['appId']!,
+                        releaseId: state.pathParameters['releaseId']!,
+                      ),
                     ),
                   ),
                 ],
@@ -124,12 +139,14 @@ GoRouter goRouter(Ref ref) {
           GoRoute(
             path: AppRoute.credentials.path,
             name: AppRoute.credentials.name,
-            builder: (context, state) => const CredentialsScreen(),
+            pageBuilder: (context, state) =>
+                _instant(state, const CredentialsScreen()),
           ),
           GoRoute(
             path: AppRoute.settings.path,
             name: AppRoute.settings.name,
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) =>
+                _instant(state, const SettingsScreen()),
           ),
         ],
       ),

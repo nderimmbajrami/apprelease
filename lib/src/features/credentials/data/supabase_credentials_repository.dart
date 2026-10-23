@@ -34,6 +34,7 @@ class SupabaseCredentialsRepository implements CredentialsRepository {
             kind: CredentialKind.values.byName(row['kind'] as String),
             name: row['name'] as String,
             createdAt: DateTime.parse(row['created_at'] as String),
+            appId: row['app_id'] as String?,
             meta: {
               for (final e in ((row['meta'] as Map?) ?? const {}).entries)
                 e.key as String: '${e.value}',
@@ -56,6 +57,7 @@ class SupabaseCredentialsRepository implements CredentialsRepository {
         'kind': credential.kind.name,
         'name': credential.name,
         'meta': credential.meta,
+        'app_id': credential.appId,
         'secret': {
           'file_name': secret.fileName,
           'file_base64': secret.fileBytes == null
@@ -72,6 +74,12 @@ class SupabaseCredentialsRepository implements CredentialsRepository {
   @override
   Future<void> deleteCredential(String id) async {
     await _client.from(_table).delete().eq('id', id);
+    _touch();
+  }
+
+  @override
+  Future<void> linkToApp(String id, String? appId) async {
+    await _client.from(_table).update({'app_id': appId}).eq('id', id);
     _touch();
   }
 

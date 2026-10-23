@@ -1446,7 +1446,7 @@ abstract class AppL10n {
   /// No description provided for @triggersExplain.
   ///
   /// In en, this message translates to:
-  /// **'Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.'**
+  /// **'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.'**
   String get triggersExplain;
 
   /// No description provided for @triggerEnabled.
@@ -1682,6 +1682,90 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'App Store Connect check'**
   String get checkResultTitleAsc;
+
+  /// No description provided for @pushRuleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule {n}'**
+  String pushRuleTitle(int n);
+
+  /// No description provided for @pushRuleBranchHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'A branch name, or a prefix with * such as release/*'**
+  String get pushRuleBranchHelper;
+
+  /// No description provided for @addPushRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a branch'**
+  String get addPushRule;
+
+  /// No description provided for @removePushRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove rule'**
+  String get removePushRule;
+
+  /// No description provided for @pushRuleNoPlatforms.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick at least one platform for this rule.'**
+  String get pushRuleNoPlatforms;
+
+  /// No description provided for @pushRuleDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Two rules use the branch {branch}.'**
+  String pushRuleDuplicate(String branch);
+
+  /// No description provided for @credentialApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get credentialApp;
+
+  /// No description provided for @credentialAppHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The app this key signs. Leave it shared if several apps use it.'**
+  String get credentialAppHelper;
+
+  /// No description provided for @credentialShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get credentialShared;
+
+  /// No description provided for @credentialSharedKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared keys'**
+  String get credentialSharedKeys;
+
+  /// No description provided for @linkToApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to app'**
+  String get linkToApp;
+
+  /// No description provided for @keystoresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android keystores'**
+  String get keystoresTitle;
+
+  /// No description provided for @appKeystores.
+  ///
+  /// In en, this message translates to:
+  /// **'{app}'**
+  String appKeystores(String app);
+
+  /// No description provided for @noKeystoreForApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No keystore yet for this app.'**
+  String get noKeystoreForApp;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

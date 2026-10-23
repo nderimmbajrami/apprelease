@@ -20,6 +20,67 @@ enum Platform {
   };
 }
 
+/// One "push to this branch, release there" rule. A branch ending in `*`
+/// matches every branch with that prefix (`release/*`).
+class PushRule {
+  const PushRule({
+    required this.branch,
+    this.platforms = const {Platform.android},
+    this.trackAndroid = 'internal',
+    this.trackIos = 'testflight',
+  });
+
+  final String branch;
+  final Set<Platform> platforms;
+
+  /// `internal`, `alpha`, `beta` or `production`.
+  final String trackAndroid;
+
+  /// `testflight` or `appStore`.
+  final String trackIos;
+
+  PushRule copyWith({
+    String? branch,
+    Set<Platform>? platforms,
+    String? trackAndroid,
+    String? trackIos,
+  }) => PushRule(
+    branch: branch ?? this.branch,
+    platforms: platforms ?? this.platforms,
+    trackAndroid: trackAndroid ?? this.trackAndroid,
+    trackIos: trackIos ?? this.trackIos,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'branch': branch,
+    'platforms': [for (final p in platforms) p.name],
+    'track_android': trackAndroid,
+    'track_ios': trackIos,
+  };
+
+  static PushRule fromJson(Map json) => PushRule(
+    branch: (json['branch'] as String?) ?? 'main',
+    platforms: {
+      for (final p in (json['platforms'] as List?) ?? const ['android'])
+        if (Platform.values.any((x) => x.name == p))
+          Platform.values.byName('$p'),
+    },
+    trackAndroid: (json['track_android'] as String?) ?? 'internal',
+    trackIos: (json['track_ios'] as String?) ?? 'testflight',
+  );
+
+  /// The usual pair: a development branch to testers, main to the stores.
+  static const defaults = [
+    PushRule(branch: 'develop', platforms: {Platform.android, Platform.ios}),
+    PushRule(
+      branch: 'main',
+      platforms: {Platform.android, Platform.ios},
+      trackAndroid: 'production',
+      trackIos: 'appStore',
+    ),
+  ];
+}
+
 /// An application registered on AppRelease: the repository and what to build
 /// from it. Credentials and releases hang off it by id.
 class AppProject {
@@ -38,10 +99,7 @@ class AppProject {
     this.releaseCount = 0,
     this.lastReleaseAt,
     this.triggerEnabled = false,
-    this.triggerBranch = 'main',
-    this.triggerPlatforms = const {Platform.android},
-    this.triggerTrackAndroid = 'internal',
-    this.triggerTrackIos = 'testflight',
+    this.pushRules = const [PushRule(branch: 'main')],
     this.triggerTags = false,
     this.webhookSecret = '',
   });
@@ -71,10 +129,10 @@ class AppProject {
 
   /// Push triggers: GitHub posts to the webhook, a release is queued.
   final bool triggerEnabled;
-  final String triggerBranch;
-  final Set<Platform> triggerPlatforms;
-  final String triggerTrackAndroid;
-  final String triggerTrackIos;
+
+  /// Which branch goes where. The first rule that names a platform for a
+  /// pushed branch decides that platform's track.
+  final List<PushRule> pushRules;
 
   /// A tag like `v1.4.0` releases to production / App Store review.
   final bool triggerTags;
@@ -112,10 +170,7 @@ class AppProject {
     int? releaseCount,
     DateTime? lastReleaseAt,
     bool? triggerEnabled,
-    String? triggerBranch,
-    Set<Platform>? triggerPlatforms,
-    String? triggerTrackAndroid,
-    String? triggerTrackIos,
+    List<PushRule>? pushRules,
     bool? triggerTags,
     String? webhookSecret,
   }) => AppProject(
@@ -133,10 +188,7 @@ class AppProject {
     releaseCount: releaseCount ?? this.releaseCount,
     lastReleaseAt: lastReleaseAt ?? this.lastReleaseAt,
     triggerEnabled: triggerEnabled ?? this.triggerEnabled,
-    triggerBranch: triggerBranch ?? this.triggerBranch,
-    triggerPlatforms: triggerPlatforms ?? this.triggerPlatforms,
-    triggerTrackAndroid: triggerTrackAndroid ?? this.triggerTrackAndroid,
-    triggerTrackIos: triggerTrackIos ?? this.triggerTrackIos,
+    pushRules: pushRules ?? this.pushRules,
     triggerTags: triggerTags ?? this.triggerTags,
     webhookSecret: webhookSecret ?? this.webhookSecret,
   );

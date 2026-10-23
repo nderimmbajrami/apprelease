@@ -10,11 +10,19 @@ class ReleaseConfig {
   final AppProject app;
   final List<Credential> credentials;
 
+  /// The app's own credential of that kind, else a shared one, else any.
   Credential? _first(CredentialKind kind) {
+    Credential? shared, other;
     for (final c in credentials) {
-      if (c.kind == kind) return c;
+      if (c.kind != kind) continue;
+      if (c.appId == app.id) return c;
+      if (c.appId == null) {
+        shared ??= c;
+      } else {
+        other ??= c;
+      }
     }
-    return null;
+    return shared ?? other;
   }
 
   bool get hasKeystore => _first(CredentialKind.androidKeystore) != null;

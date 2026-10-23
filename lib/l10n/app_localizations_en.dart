@@ -756,7 +756,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get triggersExplain =>
-      'Let GitHub start releases. On every push to the branch below, AppRelease queues a release for the platforms you pick; the version comes from pubspec.yaml.';
+      'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.';
 
   @override
   String get triggerEnabled => 'Release automatically on push';
@@ -891,4 +891,54 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get checkResultTitleAsc => 'App Store Connect check';
+
+  @override
+  String pushRuleTitle(int n) {
+    return 'Rule $n';
+  }
+
+  @override
+  String get pushRuleBranchHelper =>
+      'A branch name, or a prefix with * such as release/*';
+
+  @override
+  String get addPushRule => 'Add a branch';
+
+  @override
+  String get removePushRule => 'Remove rule';
+
+  @override
+  String get pushRuleNoPlatforms => 'Pick at least one platform for this rule.';
+
+  @override
+  String pushRuleDuplicate(String branch) {
+    return 'Two rules use the branch $branch.';
+  }
+
+  @override
+  String get credentialApp => 'App';
+
+  @override
+  String get credentialAppHelper =>
+      'The app this key signs. Leave it shared if several apps use it.';
+
+  @override
+  String get credentialShared => 'Shared';
+
+  @override
+  String get credentialSharedKeys => 'Shared keys';
+
+  @override
+  String get linkToApp => 'Link to app';
+
+  @override
+  String get keystoresTitle => 'Android keystores';
+
+  @override
+  String appKeystores(String app) {
+    return '$app';
+  }
+
+  @override
+  String get noKeystoreForApp => 'No keystore yet for this app.';
 }

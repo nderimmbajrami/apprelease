@@ -41,13 +41,32 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
   late final _bundleId = TextEditingController(text: widget.app.iosBundleId);
   late var _platforms = {...widget.app.platforms};
   late var _triggerEnabled = widget.app.triggerEnabled;
-  late final _triggerBranch = TextEditingController(
-    text: widget.app.triggerBranch,
-  );
-  late var _triggerPlatforms = {...widget.app.triggerPlatforms};
-  late var _trackAndroid = widget.app.triggerTrackAndroid;
-  late var _trackIos = widget.app.triggerTrackIos;
+  late var _rules = [...widget.app.pushRules];
+  late final _ruleBranches = [
+    for (final r in widget.app.pushRules) TextEditingController(text: r.branch),
+  ];
   late var _triggerTags = widget.app.triggerTags;
+
+  void _addRule() => setState(() {
+    final used = {for (final r in _rules) r.branch};
+    final next = PushRule.defaults.firstWhere(
+      (r) => !used.contains(r.branch),
+      orElse: () => const PushRule(
+        branch: '',
+        platforms: {Platform.android, Platform.ios},
+      ),
+    );
+    _rules = [..._rules, next];
+    _ruleBranches.add(TextEditingController(text: next.branch));
+  });
+
+  void _removeRule(int i) => setState(() {
+    _rules = [..._rules]..removeAt(i);
+    _ruleBranches.removeAt(i).dispose();
+  });
+
+  void _updateRule(int i, PushRule rule) =>
+      setState(() => _rules = [..._rules]..[i] = rule);
 
   @override
   void dispose() {
@@ -58,6 +77,7 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
       _flutterVersion,
       _packageName,
       _bundleId,
+      ..._ruleBranches,
     ]) {
       c.dispose();
     }
@@ -66,11 +86,29 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = context.l10n;
+    void tell(String m) =>
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
     if (_platforms.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.pickAtLeastOnePlatform)),
-      );
+      tell(l10n.pickAtLeastOnePlatform);
       return;
+    }
+    final rules = [
+      for (final (i, r) in _rules.indexed)
+        r.copyWith(branch: _ruleBranches[i].text.trim()),
+    ]..removeWhere((r) => r.branch.isEmpty);
+    if (_triggerEnabled) {
+      if (rules.any((r) => r.platforms.isEmpty)) {
+        tell(l10n.pushRuleNoPlatforms);
+        return;
+      }
+      final seen = <String>{};
+      for (final r in rules) {
+        if (!seen.add(r.branch)) {
+          tell(l10n.pushRuleDuplicate(r.branch));
+          return;
+        }
+      }
     }
     final ok = await ref
         .read(appsControllerProvider.notifier)
@@ -84,12 +122,7 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
             androidPackageName: _packageName.text.trim(),
             iosBundleId: _bundleId.text.trim(),
             triggerEnabled: _triggerEnabled,
-            triggerBranch: _triggerBranch.text.trim().isEmpty
-                ? 'main'
-                : _triggerBranch.text.trim(),
-            triggerPlatforms: _triggerPlatforms,
-            triggerTrackAndroid: _trackAndroid,
-            triggerTrackIos: _trackIos,
+            pushRules: rules.isEmpty ? const [PushRule(branch: 'main')] : rules,
             triggerTags: _triggerTags,
           ),
         );
@@ -328,71 +361,27 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
             contentPadding: EdgeInsets.zero,
           ),
           if (_triggerEnabled) ...[
+            const SizedBox(height: Gap.sm),
+            for (final (i, rule) in _rules.indexed) ...[
+              _RuleEditor(
+                key: ObjectKey(_ruleBranches[i]),
+                index: i,
+                rule: rule,
+                branch: _ruleBranches[i],
+                onChanged: (r) => _updateRule(i, r),
+                onRemove: _rules.length > 1 ? () => _removeRule(i) : null,
+              ),
+              const SizedBox(height: Gap.md),
+            ],
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _addRule,
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.addPushRule),
+              ),
+            ),
             const SizedBox(height: Gap.md),
-            TextFormField(
-              controller: _triggerBranch,
-              decoration: InputDecoration(labelText: l10n.triggerBranch),
-            ),
-            const SizedBox(height: Gap.lg),
-            Text(l10n.triggerPlatforms, style: theme.textTheme.labelMedium),
-            CheckboxListTile(
-              value: _triggerPlatforms.contains(Platform.android),
-              onChanged: (on) => setState(() {
-                _triggerPlatforms = {..._triggerPlatforms};
-                on!
-                    ? _triggerPlatforms.add(Platform.android)
-                    : _triggerPlatforms.remove(Platform.android);
-              }),
-              secondary: const Icon(Icons.android),
-              title: Text(l10n.platformAndroid),
-              contentPadding: EdgeInsets.zero,
-            ),
-            if (_triggerPlatforms.contains(Platform.android))
-              Padding(
-                padding: const EdgeInsets.only(left: 56, bottom: Gap.md),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _trackAndroid,
-                  decoration: InputDecoration(
-                    labelText: l10n.triggerTrackAndroid,
-                  ),
-                  items: [
-                    for (final t in ReleaseTrack.forPlatform(Platform.android))
-                      DropdownMenuItem(
-                        value: t.name,
-                        child: Text(trackLabel(context, t)),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => _trackAndroid = v!),
-                ),
-              ),
-            CheckboxListTile(
-              value: _triggerPlatforms.contains(Platform.ios),
-              onChanged: (on) => setState(() {
-                _triggerPlatforms = {..._triggerPlatforms};
-                on!
-                    ? _triggerPlatforms.add(Platform.ios)
-                    : _triggerPlatforms.remove(Platform.ios);
-              }),
-              secondary: const Icon(Icons.apple),
-              title: Text(l10n.platformIos),
-              contentPadding: EdgeInsets.zero,
-            ),
-            if (_triggerPlatforms.contains(Platform.ios))
-              Padding(
-                padding: const EdgeInsets.only(left: 56, bottom: Gap.md),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _trackIos,
-                  decoration: InputDecoration(labelText: l10n.triggerTrackIos),
-                  items: [
-                    for (final t in ReleaseTrack.forPlatform(Platform.ios))
-                      DropdownMenuItem(
-                        value: t.name,
-                        child: Text(trackLabel(context, t)),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => _trackIos = v!),
-                ),
-              ),
             SwitchListTile(
               value: _triggerTags,
               onChanged: (on) => setState(() => _triggerTags = on),
@@ -413,6 +402,127 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
             copyRow(l10n.webhookSecret, widget.app.webhookSecret, secret: true),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// One branch rule: the branch, then per platform where it goes.
+class _RuleEditor extends StatelessWidget {
+  const _RuleEditor({
+    required this.index,
+    required this.rule,
+    required this.branch,
+    required this.onChanged,
+    this.onRemove,
+    super.key,
+  });
+
+  final int index;
+  final PushRule rule;
+  final TextEditingController branch;
+  final ValueChanged<PushRule> onChanged;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+
+    Widget platformRow(Platform platform) {
+      final on = rule.platforms.contains(platform);
+      final isAndroid = platform == Platform.android;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CheckboxListTile(
+            value: on,
+            onChanged: (v) {
+              final next = {...rule.platforms};
+              v! ? next.add(platform) : next.remove(platform);
+              onChanged(rule.copyWith(platforms: next));
+            },
+            secondary: Icon(isAndroid ? Icons.android : Icons.apple),
+            title: Text(isAndroid ? l10n.platformAndroid : l10n.platformIos),
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+          ),
+          if (on)
+            Padding(
+              padding: const EdgeInsets.only(left: 56, bottom: Gap.sm),
+              child: DropdownButtonFormField<String>(
+                initialValue: isAndroid ? rule.trackAndroid : rule.trackIos,
+                decoration: InputDecoration(
+                  labelText: isAndroid
+                      ? l10n.triggerTrackAndroid
+                      : l10n.triggerTrackIos,
+                ),
+                items: [
+                  for (final t in ReleaseTrack.forPlatform(platform))
+                    DropdownMenuItem(
+                      value: t.name,
+                      child: Text(trackLabel(context, t)),
+                    ),
+                ],
+                onChanged: (v) => onChanged(
+                  isAndroid
+                      ? rule.copyWith(trackAndroid: v)
+                      : rule.copyWith(trackIos: v),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline),
+        borderRadius: BorderRadius.circular(Radii.md),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(Gap.lg, Gap.md, Gap.sm, Gap.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  l10n.pushRuleTitle(index + 1),
+                  style: theme.textTheme.labelMedium,
+                ),
+                const Spacer(),
+                if (onRemove != null)
+                  IconButton(
+                    tooltip: l10n.removePushRule,
+                    onPressed: onRemove,
+                    icon: const Icon(Icons.close, size: 18),
+                  ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: Gap.sm),
+              child: TextFormField(
+                controller: branch,
+                decoration: InputDecoration(
+                  labelText: l10n.triggerBranch,
+                  helperText: l10n.pushRuleBranchHelper,
+                ),
+              ),
+            ),
+            const SizedBox(height: Gap.sm),
+            Padding(
+              padding: const EdgeInsets.only(right: Gap.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  platformRow(Platform.android),
+                  platformRow(Platform.ios),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
