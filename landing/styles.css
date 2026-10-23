@@ -588,3 +588,50 @@ p code, li code { font-size: .9em; padding: 1px 5px; border-radius: 5px; backgro
 .parcel { top: -30px; }
 .stage { padding-top: 64px; }
 .parcel::after { width: 70px; }
+
+/* ------------------------------------------------------------ branch rules */
+
+.br { display: grid; gap: 20px; align-items: start; }
+.br-console, .br-sim { border: 1px solid var(--line-2); border-radius: 14px; background: var(--paper); overflow: hidden; }
+.br-bar { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--bg); font-size: .78rem; color: var(--ink-3); }
+.br-bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); }
+.br-bar span { margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.br-rules { padding: 14px; display: grid; gap: 10px; }
+.br-rule { display: grid; gap: 10px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; transition: border-color .3s, background .3s, transform .3s var(--ease); }
+.br-rule.is-hit { border-color: var(--signal); background: var(--signal-2); transform: translateX(4px); }
+.br-rule.is-miss { opacity: .45; }
+.br-branch { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .88rem; font-weight: 600; }
+.br-branch svg { width: 16px; height: 16px; color: var(--ink-3); flex: none; }
+.br-rule.is-hit .br-branch svg { color: var(--signal); }
+.br-targets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.br-targets em { font-style: normal; font-size: .76rem; color: var(--ink-3); }
+.br-t { font-size: .78rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-2); background: var(--paper); }
+.br-t.is-prod { border-color: var(--accent); color: var(--accent); }
+.br-keys { display: flex; gap: 10px; align-items: flex-start; margin: 0 14px 14px; padding: 10px 12px; border-radius: 10px; background: var(--fill); font-size: .84rem; color: var(--ink-2); }
+.br-keys svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.br-keys b { font-family: var(--mono); font-size: .8rem; color: var(--ink); font-weight: 600; }
+.br-sim { padding: 18px; }
+.br-sim-title { font-weight: 600; margin: 0 0 12px; }
+.br-push { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.br-push button { font-family: var(--mono); font-size: .8rem; font-weight: 600; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--paper); color: var(--ink-2); cursor: pointer; transition: all .2s; }
+.br-push button:hover { border-color: var(--ink-3); color: var(--ink); }
+.br-push button.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.br-term { border-radius: 10px; background: var(--night); color: #D7DCE5; font-family: var(--mono); font-size: .8rem; padding: 14px 16px; min-height: 132px; }
+.br-cmd span { color: #6B7385; margin-right: 4px; }
+.br-cmd b { color: #fff; font-weight: 600; }
+.br-out div { margin-top: 6px; opacity: 0; transform: translateY(4px); animation: brin .35s var(--ease) forwards; }
+.br-out .ok { color: #6FDCA0; }
+.br-out .dim { color: #6B7385; }
+@keyframes brin { to { opacity: 1; transform: none; } }
+.br-dests { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+@media (max-width: 420px) { .br-dests { grid-template-columns: repeat(2, 1fr); } }
+.br-dest { position: relative; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--line); transition: border-color .35s, background .35s, transform .35s var(--ease); }
+.br-dest b { display: block; font-size: .86rem; }
+.br-dest small { display: block; font-size: .74rem; color: var(--ink-3); }
+.br-dest::after { content: ""; position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); transition: background .35s; }
+.br-dest.is-hit { border-color: var(--signal); background: var(--signal-2); transform: translateY(-3px); }
+.br-dest.is-hit::after { background: var(--signal); }
+.br-dest.is-prod.is-hit { border-color: var(--accent); background: var(--accent-2); }
+.br-dest.is-prod.is-hit::after { background: var(--accent); }
+@media (min-width: 900px) { .br { grid-template-columns: 1fr 1fr; gap: 28px; } }
+@media (prefers-reduced-motion: reduce) { .br-out div { animation: none; opacity: 1; transform: none; } .br-rule, .br-dest { transition: none; } }

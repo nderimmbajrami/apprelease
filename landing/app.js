@@ -374,4 +374,56 @@
       }
     });
   }
+
+  /* --------------------------------------------------------- branch rules
+     Pick a branch, watch which rule matches and where the build lands.
+     Plays through the branches by itself until someone clicks. */
+  var br = document.querySelector('[data-branches]');
+  if (br) {
+    var PLANS = {
+      'develop': { rule: 'develop', out: [['android #58', 'internal'], ['ios #58', 'TestFlight']], dests: ['internal', 'testflight'] },
+      'release/2.1': { rule: 'release/*', out: [['android #59', 'beta'], ['ios #59', 'TestFlight']], dests: ['beta', 'testflight'] },
+      'main': { rule: 'main', out: [['android #60', 'production'], ['ios #60', 'App Store review']], dests: ['production', 'appStore'] },
+      'v1.5.0': { rule: 'tag', out: [['android #61', 'production · 1.5.0'], ['ios #61', 'App Store review · 1.5.0']], dests: ['production', 'appStore'] },
+      'feature/login': { rule: null, out: [], dests: [] }
+    };
+    var order = ['develop', 'release/2.1', 'main', 'v1.5.0', 'feature/login'];
+    var buttons = br.querySelectorAll('[data-push]'), rules = br.querySelectorAll('[data-rule]'), dests = br.querySelectorAll('[data-dest]');
+    var outEl = br.querySelector('[data-sim-out]'), branchEl = br.querySelector('[data-sim-branch]');
+    var timers = [], auto = null, idx = 0;
+    function later(fn, ms) { timers.push(setTimeout(fn, reduceMotion ? 0 : ms)); }
+    function line(text, cls) { var d = document.createElement('div'); if (cls) d.className = cls; d.textContent = text; outEl.appendChild(d); }
+    function play(name) {
+      timers.forEach(clearTimeout); timers = [];
+      var plan = PLANS[name];
+      buttons.forEach(function (b) { b.classList.toggle('is-on', b.getAttribute('data-push') === name); });
+      rules.forEach(function (r) { r.classList.remove('is-hit', 'is-miss'); });
+      dests.forEach(function (d) { d.classList.remove('is-hit'); });
+      branchEl.textContent = /^v\d/.test(name) ? name + ' (tag)' : name;
+      outEl.innerHTML = '';
+      later(function () { line('webhook received · ' + (plan.rule ? 'rule ' + (plan.rule === 'tag' ? 'version tag' : plan.rule) : 'no rule'), 'dim'); }, 250);
+      later(function () {
+        rules.forEach(function (r) {
+          var hit = r.getAttribute('data-rule') === plan.rule;
+          r.classList.toggle('is-hit', hit); r.classList.toggle('is-miss', !hit);
+        });
+      }, 450);
+      if (!plan.rule) { later(function () { line('nothing queued: feature branches stay on your machine', 'dim'); }, 700); return; }
+      plan.out.forEach(function (o, i) { later(function () { line('queued ' + o[0] + ' → ' + o[1]); }, 750 + i * 350); });
+      later(function () {
+        dests.forEach(function (d) { d.classList.toggle('is-hit', plan.dests.indexOf(d.getAttribute('data-dest')) >= 0); });
+        line('✓ signed with mekauto_upload_keystore · uploading', 'ok');
+      }, 1500);
+    }
+    function stopAuto() { if (auto) { clearInterval(auto); auto = null; } }
+    buttons.forEach(function (b) { b.addEventListener('click', function () { stopAuto(); play(b.getAttribute('data-push')); }); });
+    var started = false;
+    function start() {
+      if (started) return; started = true; play(order[0]);
+      if (!reduceMotion) auto = setInterval(function () { idx = (idx + 1) % order.length; play(order[idx]); }, 4200);
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en, obs) { if (en[0].isIntersecting) { start(); obs.disconnect(); } }, { threshold: 0.3 }).observe(br);
+    } else start();
+  }
 })();

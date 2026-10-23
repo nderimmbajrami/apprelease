@@ -26,7 +26,7 @@ SRC = ROOT / 'landing_src'
 OUT = ROOT / 'landing'
 SITE = 'https://apprelease.store'
 APP = 'https://publish.apprelease.store'
-VERSION = '20261016'
+VERSION = '20261023'
 
 
 def read(name):
