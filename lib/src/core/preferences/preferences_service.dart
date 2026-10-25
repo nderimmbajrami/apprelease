@@ -10,6 +10,7 @@ class PreferencesService {
 
   static const _themeKey = 'theme_mode';
   static const _setupKey = 'setup_dismissed';
+  static const _tourKey = 'tour_seen';
 
   final SharedPreferences _prefs;
 
@@ -29,6 +30,11 @@ class PreferencesService {
 
   Future<void> writeSetupDismissed(bool value) =>
       _prefs.setBool(_setupKey, value);
+
+  /// Whether the guided tour ran (or was skipped) on this device.
+  bool readTourSeen() => _prefs.getBool(_tourKey) ?? false;
+
+  Future<void> writeTourSeen(bool value) => _prefs.setBool(_tourKey, value);
 }
 
 /// Overridden in `main()` once [SharedPreferences] has loaded.

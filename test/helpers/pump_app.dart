@@ -44,7 +44,8 @@ Future<void> pumpApp(
   Duration stepDuration = const Duration(milliseconds: 200),
 }) async {
   await initializeDateFormatting();
-  SharedPreferences.setMockInitialValues({});
+  // The guided tour would cover the screen; tests drive the page itself.
+  SharedPreferences.setMockInitialValues({'tour_seen': true});
   final prefs = await SharedPreferences.getInstance();
 
   final auth = LocalAuthRepository();

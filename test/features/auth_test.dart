@@ -51,7 +51,7 @@ void main() {
     expect(find.text('0 of 4 done'), findsOneWidget);
     await tester.tap(find.text('Skip for now'));
     await tester.pumpAndSettle();
-    expect(find.text('Getting started'), findsOneWidget);
+    expect(find.text('Launch checklist'), findsOneWidget);
     expect(find.text('No releases yet'), findsOneWidget);
   });
 

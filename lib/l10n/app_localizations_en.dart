@@ -98,7 +98,8 @@ class AppL10nEn extends AppL10n {
   String get passwordTooShort => 'At least 8 characters';
 
   @override
-  String get invalidRepoUrl => 'Enter a Git URL (https:// or git@)';
+  String get invalidRepoUrl =>
+      'Use the address of one repository, e.g. https://github.com/acme/shop-app';
 
   @override
   String get invalidApplicationId =>
@@ -974,4 +975,222 @@ class AppL10nEn extends AppL10n {
   @override
   String get queueOfflineBody =>
       'Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side.';
+
+  @override
+  String get exampleApplicationId =>
+      'com.example is Flutter\'s placeholder. Use your app\'s real id, as in Google Play or App Store Connect.';
+
+  @override
+  String get readyRepository => 'Repository';
+
+  @override
+  String get readyRepositoryOk => 'The runner can find the code.';
+
+  @override
+  String get readyRepositoryMissing =>
+      'Set the address of one repository, e.g. https://github.com/acme/shop-app.';
+
+  @override
+  String get readyAndroidPackage => 'Android package name';
+
+  @override
+  String get readyAndroidPackageOk => 'Matches the app in Google Play.';
+
+  @override
+  String get readyAndroidPackageMissing =>
+      'Use the package name of the app in Google Play, not com.example.';
+
+  @override
+  String get readyIosBundle => 'iOS bundle identifier';
+
+  @override
+  String get readyIosBundleOk => 'Matches the app in App Store Connect.';
+
+  @override
+  String get readyIosBundleMissing =>
+      'Use the bundle identifier of the app in App Store Connect, not com.example.';
+
+  @override
+  String get readyKeystore => 'Android upload keystore';
+
+  @override
+  String get readyKeystoreOk => 'Signs the app bundle.';
+
+  @override
+  String get readyKeystoreMissing =>
+      'Upload the .jks file the app is signed with.';
+
+  @override
+  String get readyGooglePlay => 'Google Play access';
+
+  @override
+  String get readyGooglePlayOk => 'A service account can upload for you.';
+
+  @override
+  String get readyGooglePlayMissing =>
+      'Add a Google Play service account. The form shows each step.';
+
+  @override
+  String get readyAppStoreConnect => 'App Store Connect key';
+
+  @override
+  String get readyAppStoreConnectOk => 'Apple accepts uploads with this key.';
+
+  @override
+  String get readyAppStoreConnectMissing =>
+      'Add an App Store Connect API key. The form shows each step.';
+
+  @override
+  String get readyFix => 'Fix';
+
+  @override
+  String get readyFixSettings => 'Open settings';
+
+  @override
+  String get readyAll => 'Everything this release needs is in place.';
+
+  @override
+  String readyCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n things to fix before this release can start',
+      one: '1 thing to fix before this release can start',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get startReleaseChecks => 'What it needs';
+
+  @override
+  String get startReleaseWhere => 'Where it goes';
+
+  @override
+  String get invalidBuildNumber => 'A whole number above 0, or leave it empty.';
+
+  @override
+  String tourStepOf(int n, int total) {
+    return '$n of $total';
+  }
+
+  @override
+  String get tourSkip => 'Skip tour';
+
+  @override
+  String get tourBack => 'Back';
+
+  @override
+  String get tourNext => 'Next';
+
+  @override
+  String get tourDone => 'Got it';
+
+  @override
+  String get tourTake => 'Take the tour';
+
+  @override
+  String get tourChecklistTitle => 'Your launch checklist';
+
+  @override
+  String get tourChecklistBody =>
+      'Everything between you and the first build in the stores, in order. Each row opens the form it needs and shows where to get the key.';
+
+  @override
+  String get tourAppsTitle => 'Applications';
+
+  @override
+  String get tourAppsBody =>
+      'One app is one repository. Its settings hold the package name, the branches that release on push and the webhook for GitHub.';
+
+  @override
+  String get tourCredentialsTitle => 'Credentials';
+
+  @override
+  String get tourCredentialsBody =>
+      'Your Android keystore and the access keys for Google Play and the App Store. Encrypted, and opened only on the build machine for one build.';
+
+  @override
+  String get tourAddAppTitle => 'Start here';
+
+  @override
+  String get tourAddAppBody =>
+      'Paste the repository address of your Flutter app. We guess the name; you add the package name and bundle identifier.';
+
+  @override
+  String get tourReleasesTitle => 'Your releases, per app';
+
+  @override
+  String get tourReleasesBody =>
+      'Where each store stands now and the last runs. Anything that would stop a release is listed here with a button to fix it.';
+
+  @override
+  String get launchTitle => 'Launch checklist';
+
+  @override
+  String launchSubtitle(int done, int total) {
+    return '$done of $total done. Each step opens the form it needs and shows where to get the key.';
+  }
+
+  @override
+  String get launchApp => 'Add your application';
+
+  @override
+  String get launchAppBody =>
+      'The repository of your Flutter app, its package name and bundle identifier.';
+
+  @override
+  String launchAppFix(String app) {
+    return '$app: the repository address or a package name needs fixing before it can build.';
+  }
+
+  @override
+  String get launchKeystoreBody =>
+      'The .jks file your Android app is signed with, plus its passwords.';
+
+  @override
+  String get launchPlayBody =>
+      'A service account that may upload to Google Play. About 5 minutes, the form walks you through it.';
+
+  @override
+  String get launchAscBody =>
+      'An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.';
+
+  @override
+  String get launchFirstRelease => 'Publish your first release';
+
+  @override
+  String get launchFirstReleaseBody =>
+      'Pick a platform and a track. You watch the build live.';
+
+  @override
+  String get launchFirstReleaseWaiting =>
+      'Opens once an app has everything a release needs.';
+
+  @override
+  String get launchUpload => 'Upload';
+
+  @override
+  String get launchConnect => 'Connect';
+
+  @override
+  String get appNoReleasesYet => 'No releases yet';
+
+  @override
+  String appBlocked(String platform, int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n things to fix before it can release',
+      one: '1 thing to fix before it can release',
+    );
+    return '$platform: $_temp0';
+  }
+
+  @override
+  String get appReadyFirstRelease => 'Ready for its first release.';
+
+  @override
+  String get appFixFirst =>
+      'Fix the items above, or open the release dialog to see them all.';
 }

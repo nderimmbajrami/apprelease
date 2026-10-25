@@ -29,7 +29,7 @@
   "fieldRequired": "Required",
   "invalidEmail": "Enter a valid email",
   "passwordTooShort": "At least 8 characters",
-  "invalidRepoUrl": "Enter a Git URL (https:// or git@)",
+  "invalidRepoUrl": "Use the address of one repository, e.g. https://github.com/acme/shop-app",
   "invalidApplicationId": "Use reverse-domain form, e.g. com.example.app",
   "invalidVersion": "Use the form 1.2.3",
   "somethingWentWrong": "Something went wrong",
@@ -446,5 +446,108 @@
   "queueStartingTitle": "Starting now",
   "queueStartingBody": "A build machine is free and picks this release up in a few seconds.",
   "queueOfflineTitle": "The build machines are offline for a moment",
-  "queueOfflineBody": "Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side."
+  "queueOfflineBody": "Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side.",
+  "exampleApplicationId": "com.example is Flutter's placeholder. Use your app's real id, as in Google Play or App Store Connect.",
+  "readyRepository": "Repository",
+  "readyRepositoryOk": "The runner can find the code.",
+  "readyRepositoryMissing": "Set the address of one repository, e.g. https://github.com/acme/shop-app.",
+  "readyAndroidPackage": "Android package name",
+  "readyAndroidPackageOk": "Matches the app in Google Play.",
+  "readyAndroidPackageMissing": "Use the package name of the app in Google Play, not com.example.",
+  "readyIosBundle": "iOS bundle identifier",
+  "readyIosBundleOk": "Matches the app in App Store Connect.",
+  "readyIosBundleMissing": "Use the bundle identifier of the app in App Store Connect, not com.example.",
+  "readyKeystore": "Android upload keystore",
+  "readyKeystoreOk": "Signs the app bundle.",
+  "readyKeystoreMissing": "Upload the .jks file the app is signed with.",
+  "readyGooglePlay": "Google Play access",
+  "readyGooglePlayOk": "A service account can upload for you.",
+  "readyGooglePlayMissing": "Add a Google Play service account. The form shows each step.",
+  "readyAppStoreConnect": "App Store Connect key",
+  "readyAppStoreConnectOk": "Apple accepts uploads with this key.",
+  "readyAppStoreConnectMissing": "Add an App Store Connect API key. The form shows each step.",
+  "readyFix": "Fix",
+  "readyFixSettings": "Open settings",
+  "readyAll": "Everything this release needs is in place.",
+  "readyCount": "{n, plural, =1{1 thing to fix before this release can start} other{{n} things to fix before this release can start}}",
+  "@readyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "startReleaseChecks": "What it needs",
+  "startReleaseWhere": "Where it goes",
+  "invalidBuildNumber": "A whole number above 0, or leave it empty.",
+  "tourStepOf": "{n} of {total}",
+  "@tourStepOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tourSkip": "Skip tour",
+  "tourBack": "Back",
+  "tourNext": "Next",
+  "tourDone": "Got it",
+  "tourTake": "Take the tour",
+  "tourChecklistTitle": "Your launch checklist",
+  "tourChecklistBody": "Everything between you and the first build in the stores, in order. Each row opens the form it needs and shows where to get the key.",
+  "tourAppsTitle": "Applications",
+  "tourAppsBody": "One app is one repository. Its settings hold the package name, the branches that release on push and the webhook for GitHub.",
+  "tourCredentialsTitle": "Credentials",
+  "tourCredentialsBody": "Your Android keystore and the access keys for Google Play and the App Store. Encrypted, and opened only on the build machine for one build.",
+  "tourAddAppTitle": "Start here",
+  "tourAddAppBody": "Paste the repository address of your Flutter app. We guess the name; you add the package name and bundle identifier.",
+  "tourReleasesTitle": "Your releases, per app",
+  "tourReleasesBody": "Where each store stands now and the last runs. Anything that would stop a release is listed here with a button to fix it.",
+  "launchTitle": "Launch checklist",
+  "launchSubtitle": "{done} of {total} done. Each step opens the form it needs and shows where to get the key.",
+  "@launchSubtitle": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "launchApp": "Add your application",
+  "launchAppBody": "The repository of your Flutter app, its package name and bundle identifier.",
+  "launchAppFix": "{app}: the repository address or a package name needs fixing before it can build.",
+  "@launchAppFix": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "launchKeystoreBody": "The .jks file your Android app is signed with, plus its passwords.",
+  "launchPlayBody": "A service account that may upload to Google Play. About 5 minutes, the form walks you through it.",
+  "launchAscBody": "An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.",
+  "launchFirstRelease": "Publish your first release",
+  "launchFirstReleaseBody": "Pick a platform and a track. You watch the build live.",
+  "launchFirstReleaseWaiting": "Opens once an app has everything a release needs.",
+  "launchUpload": "Upload",
+  "launchConnect": "Connect",
+  "appNoReleasesYet": "No releases yet",
+  "appBlocked": "{platform}: {n, plural, =1{1 thing to fix before it can release} other{{n} things to fix before it can release}}",
+  "@appBlocked": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "appReadyFirstRelease": "Ready for its first release.",
+  "appFixFirst": "Fix the items above, or open the release dialog to see them all."
 }

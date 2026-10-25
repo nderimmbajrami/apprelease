@@ -112,6 +112,8 @@ void main() {
     expect(find.text('Published'), findsWidgets);
     expect(find.text('Failed'), findsWidgets);
 
+    await tester.ensureVisible(find.text('Failed').last);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Failed').last);
     await tester.pumpAndSettle();
     expect(find.textContaining('No profiles for'), findsWidgets);

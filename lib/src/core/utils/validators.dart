@@ -21,24 +21,37 @@ class Validators {
     return value.length < 8 ? l10n.passwordTooShort : null;
   }
 
-  /// A Git URL the runner can clone: https://, git@ or ssh://.
+  /// A Git URL that names one repository: host, owner and name.
+  /// `https://github.com` alone, or a profile page, is not cloneable.
+  static bool isRepoUrl(String value) => RegExp(
+    // The host ends at the first slash (or colon for git@), so ".com" can
+    // never pass for an owner.
+    r'^(?:https?://[\w.-]+(?::\d+)?/|ssh://[\w.@-]+(?::\d+)?/|git@[\w.-]+:/?)'
+    r'[\w.~-]+(?:/[\w.~-]+)+?(?:\.git)?/?$',
+  ).hasMatch(value.trim());
+
   String? repoUrl(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return l10n.fieldRequired;
-    final ok = RegExp(
-      r'^(https?://|git@|ssh://)[\w.@:/~-]+(\.git)?/?$',
-    ).hasMatch(trimmed);
-    return ok ? null : l10n.invalidRepoUrl;
+    return isRepoUrl(trimmed) ? null : l10n.invalidRepoUrl;
   }
+
+  /// The template ids Flutter generates; no store accepts them.
+  static bool isExampleId(String value) {
+    final v = value.trim().toLowerCase();
+    return v.startsWith('com.example.') || v == 'com.example';
+  }
+
+  static bool isApplicationId(String value) => RegExp(
+    r'^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_-]*)+$',
+  ).hasMatch(value.trim());
 
   /// `com.example.app` — reverse-domain, at least two segments.
   String? applicationId(String? value) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return l10n.fieldRequired;
-    final ok = RegExp(
-      r'^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_-]*)+$',
-    ).hasMatch(trimmed);
-    return ok ? null : l10n.invalidApplicationId;
+    if (!isApplicationId(trimmed)) return l10n.invalidApplicationId;
+    return isExampleId(trimmed) ? l10n.exampleApplicationId : null;
   }
 
   /// `1.4.0` — semantic version without build number.

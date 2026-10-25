@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +17,15 @@ import '../../../core/widgets/stat_tile.dart';
 import '../../../routing/app_routes.dart';
 import '../../apps/data/apps_repository.dart';
 import '../../apps/domain/app_project.dart';
+import '../../../core/preferences/preferences_service.dart';
+import '../../../core/widgets/app_shell.dart';
+import '../../../core/widgets/guided_tour.dart';
 import '../../credentials/data/credentials_repository.dart';
+import '../../credentials/domain/credential.dart';
+import '../../credentials/presentation/add_credential_sheet.dart';
+import '../../releases/domain/readiness.dart';
+import '../../releases/presentation/start_release_sheet.dart';
+import '../../releases/presentation/widgets/readiness_list.dart';
 import '../../releases/data/releases_repository.dart';
 import '../../releases/domain/release.dart';
 import '../../../core/utils/date_format.dart';
@@ -41,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
           data: (releases) => _Dashboard(
             apps: apps,
             releases: releases,
-            hasCredentials: credentials.isNotEmpty,
+            credentials: credentials,
           ),
         ),
       ),
@@ -49,19 +59,77 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _Dashboard extends StatelessWidget {
+// What the guided tour points at on this page.
+final _checklistAnchor = GlobalKey(debugLabel: 'tour-checklist');
+final _addAppAnchor = GlobalKey(debugLabel: 'tour-add-app');
+final _releasesAnchor = GlobalKey(debugLabel: 'tour-releases');
+
+class _Dashboard extends ConsumerStatefulWidget {
   const _Dashboard({
     required this.apps,
     required this.releases,
-    required this.hasCredentials,
+    required this.credentials,
   });
 
   final List<AppProject> apps;
   final List<Release> releases;
-  final bool hasCredentials;
+  final List<Credential> credentials;
+
+  @override
+  ConsumerState<_Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends ConsumerState<_Dashboard> {
+  @override
+  void initState() {
+    super.initState();
+    // First visit on this device: walk through the page once.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prefs = ref.read(preferencesServiceProvider);
+      if (!mounted || prefs.readTourSeen()) return;
+      unawaited(prefs.writeTourSeen(true));
+      unawaited(_tour());
+    });
+  }
+
+  Future<void> _tour() {
+    final l10n = context.l10n;
+    return showGuidedTour(context, [
+      TourStep(
+        target: _checklistAnchor,
+        title: l10n.tourChecklistTitle,
+        body: l10n.tourChecklistBody,
+      ),
+      TourStep(
+        target: _addAppAnchor,
+        title: l10n.tourAddAppTitle,
+        body: l10n.tourAddAppBody,
+      ),
+      if (tourAnchors[AppRoute.apps] case final key?)
+        TourStep(
+          target: key,
+          title: l10n.tourAppsTitle,
+          body: l10n.tourAppsBody,
+        ),
+      if (tourAnchors[AppRoute.credentials] case final key?)
+        TourStep(
+          target: key,
+          title: l10n.tourCredentialsTitle,
+          body: l10n.tourCredentialsBody,
+        ),
+      TourStep(
+        target: _releasesAnchor,
+        title: l10n.tourReleasesTitle,
+        body: l10n.tourReleasesBody,
+      ),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final apps = widget.apps;
+    final releases = widget.releases;
+    final credentials = widget.credentials;
     final l10n = context.l10n;
     final now = DateTime.now();
     final thisMonth = releases
@@ -116,6 +184,7 @@ class _Dashboard extends StatelessWidget {
           subtitle: Text(l10n.dashboardSubtitle),
           actions: [
             OutlinedButton.icon(
+              key: _addAppAnchor,
               onPressed: () => context.goNamed(AppRoute.appNew.name),
               icon: const Icon(Icons.add, size: 18),
               label: Text(l10n.addApplication),
@@ -138,23 +207,22 @@ class _Dashboard extends StatelessWidget {
           },
         ),
         const SizedBox(height: Gap.xxl),
-        if (apps.isEmpty || !hasCredentials || releases.isEmpty) ...[
-          SectionTitle(title: l10n.gettingStarted),
-          _GettingStarted(
-            hasApp: apps.isNotEmpty,
-            hasCredentials: hasCredentials,
-            hasRelease: releases.isNotEmpty,
-          ),
-          const SizedBox(height: Gap.xxl),
-        ],
+        _LaunchChecklist(
+          anchor: _checklistAnchor,
+          apps: apps,
+          releases: releases,
+          credentials: credentials,
+          onTour: _tour,
+        ),
         SectionTitle(
+          key: _releasesAnchor,
           title: l10n.recentReleases,
           action: TextButton(
             onPressed: () => context.goNamed(AppRoute.apps.name),
             child: Text(l10n.viewAllApps),
           ),
         ),
-        if (releases.isEmpty)
+        if (apps.isEmpty)
           AppCard(
             child: EmptyState(
               icon: Icons.rocket_outlined,
@@ -163,12 +231,14 @@ class _Dashboard extends StatelessWidget {
             ),
           )
         else
-          // One block per app, the app with the newest release first.
+          // One block per app: the newest release first, apps without
+          // releases after them.
           for (final app in _appsByActivity(apps, releases))
             Padding(
               padding: const EdgeInsets.only(bottom: Gap.lg),
               child: _AppReleases(
                 app: app,
+                credentials: credentials,
                 releases: [
                   for (final r in releases)
                     if (r.appId == app.id) r,
@@ -190,23 +260,31 @@ class _Dashboard extends StatelessWidget {
       return null;
     }
 
-    final withReleases = [
-      for (final a in apps)
-        if (last(a) != null) a,
-    ];
-    withReleases.sort((a, b) => last(b)!.compareTo(last(a)!));
-    return withReleases;
+    final sorted = [...apps];
+    sorted.sort((a, b) {
+      final la = last(a), lb = last(b);
+      if (la != null && lb != null) return lb.compareTo(la);
+      if (la != null) return -1;
+      if (lb != null) return 1;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return sorted;
   }
 }
 
 /// An app's recent releases: where each platform stands now, then the last
 /// few runs, then a way into the rest.
 class _AppReleases extends StatelessWidget {
-  const _AppReleases({required this.app, required this.releases});
+  const _AppReleases({
+    required this.app,
+    required this.releases,
+    required this.credentials,
+  });
 
   static const _shown = 4;
 
   final AppProject app;
+  final List<Credential> credentials;
 
   /// Newest first.
   final List<Release> releases;
@@ -260,10 +338,12 @@ class _AppReleases extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  l10n.appReleasesSummary(
-                    releases.length,
-                    formatAgo(releases.first.createdAt),
-                  ),
+                  releases.isEmpty
+                      ? l10n.appNoReleasesYet
+                      : l10n.appReleasesSummary(
+                          releases.length,
+                          formatAgo(releases.first.createdAt),
+                        ),
                   style: theme.textTheme.bodySmall,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -379,13 +459,76 @@ class _AppReleases extends StatelessWidget {
       ),
     );
 
+    // What would stop a release, per platform the app ships to.
+    final blocked = [
+      for (final platform in Platform.values)
+        if (app.platforms.contains(platform))
+          (platform, Readiness.missing(app, platform, credentials)),
+    ].where((b) => b.$2.isNotEmpty).toList();
+
     return AppCard(
       padding: EdgeInsets.zero,
+      borderColor: blocked.isNotEmpty
+          ? scheme.error.withValues(alpha: .4)
+          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
+          if (blocked.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.fromLTRB(Gap.lg, 0, Gap.lg, Gap.md),
+              padding: const EdgeInsets.all(Gap.md),
+              decoration: BoxDecoration(
+                color: scheme.errorContainer.withValues(alpha: .3),
+                borderRadius: BorderRadius.circular(Radii.md),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (platform, missing) in blocked) ...[
+                    Row(
+                      children: [
+                        PlatformIcon(platform, size: 22),
+                        const SizedBox(width: Gap.sm),
+                        Expanded(
+                          child: Text(
+                            l10n.appBlocked(platform.label, missing.length),
+                            style: theme.textTheme.labelLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Gap.sm),
+                    ReadinessList(app: app, checks: missing, dense: true),
+                    const SizedBox(height: Gap.sm),
+                  ],
+                ],
+              ),
+            ),
           const Divider(height: 1),
+          if (releases.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(Gap.lg),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      blocked.isEmpty
+                          ? l10n.appReadyFirstRelease
+                          : l10n.appFixFirst,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                  const SizedBox(width: Gap.md),
+                  FilledButton.icon(
+                    onPressed: () => showStartReleaseSheet(context, app),
+                    icon: const Icon(Icons.rocket_launch_outlined, size: 18),
+                    label: Text(l10n.startRelease),
+                  ),
+                ],
+              ),
+            ),
           for (final r in releases.take(_shown)) row(r),
           if (releases.length > _shown) ...[
             const Divider(height: 1),
@@ -403,124 +546,321 @@ class _AppReleases extends StatelessWidget {
   }
 }
 
-/// Three steps with a tick for each one that is done.
-class _GettingStarted extends StatelessWidget {
-  const _GettingStarted({
-    required this.hasApp,
-    required this.hasCredentials,
-    required this.hasRelease,
+/// From nothing to the first build in the stores, in order, with progress.
+/// The next open step gets the filled button. Gone once everything is done.
+class _LaunchChecklist extends StatelessWidget {
+  const _LaunchChecklist({
+    required this.apps,
+    required this.releases,
+    required this.credentials,
+    required this.onTour,
+    required this.anchor,
   });
 
-  final bool hasApp;
-  final bool hasCredentials;
-  final bool hasRelease;
+  final List<AppProject> apps;
+  final List<Release> releases;
+  final List<Credential> credentials;
+  final VoidCallback onTour;
+
+  /// Where the tour points: the card itself, not the space around it.
+  final GlobalKey anchor;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final steps = [
-      (l10n.stepAddApp, l10n.stepAddAppBody, hasApp, AppRoute.appNew),
-      (
-        l10n.stepAddCredentials,
-        l10n.stepAddCredentialsBody,
-        hasCredentials,
-        AppRoute.credentials,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    bool has(CredentialKind k) => credentials.any((c) => c.kind == k);
+    final wantsAndroid = apps.isEmpty || apps.any((a) => a.hasAndroid);
+    final wantsIos = apps.isEmpty || apps.any((a) => a.hasIos);
+    final firstAndroid = apps.where((a) => a.hasAndroid).firstOrNull;
+    // App settings that would fail a release: repository, package ids.
+    bool settingsOk(AppProject a) => [
+      for (final p in a.platforms) ...Readiness.checks(a, p, const []),
+    ].where((c) => _settingItems.contains(c.item)).every((c) => c.ok);
+    final badSettings = [
+      for (final a in apps)
+        if (!settingsOk(a)) a,
+    ];
+    final readyApp = apps
+        .where(
+          (a) => a.platforms.any((p) => Readiness.ready(a, p, credentials)),
+        )
+        .firstOrNull;
+
+    final steps = <_Step>[
+      _Step(
+        icon: Icons.apps_outlined,
+        title: l10n.launchApp,
+        body: badSettings.isEmpty
+            ? l10n.launchAppBody
+            : l10n.launchAppFix(badSettings.first.name),
+        done: apps.isNotEmpty && badSettings.isEmpty,
+        action: badSettings.isEmpty
+            ? l10n.addApplication
+            : l10n.readyFixSettings,
+        onTap: () => badSettings.isEmpty
+            ? context.goNamed(AppRoute.appNew.name)
+            : context.goNamed(
+                AppRoute.appDetail.name,
+                pathParameters: {'appId': badSettings.first.id},
+                queryParameters: {'tab': 'settings'},
+              ),
       ),
-      (l10n.stepRelease, l10n.stepReleaseBody, hasRelease, AppRoute.apps),
-    ];
-    final cards = [
-      for (final (index, step) in steps.indexed)
-        _StepCard(
-          number: index + 1,
-          title: step.$1,
-          body: step.$2,
-          isDone: step.$3,
-          onTap: () => context.goNamed(step.$4.name),
+      if (wantsAndroid) ...[
+        _Step(
+          icon: Icons.key_outlined,
+          title: l10n.readyKeystore,
+          body: l10n.launchKeystoreBody,
+          done: has(CredentialKind.androidKeystore),
+          action: l10n.launchUpload,
+          onTap: () => showAddCredentialSheet(
+            context,
+            kind: CredentialKind.androidKeystore,
+            appId: firstAndroid?.id,
+          ),
         ),
+        _Step(
+          icon: Icons.shop_outlined,
+          title: l10n.readyGooglePlay,
+          body: l10n.launchPlayBody,
+          done: has(CredentialKind.googlePlayServiceAccount),
+          action: l10n.launchConnect,
+          onTap: () => showAddCredentialSheet(
+            context,
+            kind: CredentialKind.googlePlayServiceAccount,
+          ),
+        ),
+      ],
+      if (wantsIos)
+        _Step(
+          icon: Icons.apple,
+          title: l10n.readyAppStoreConnect,
+          body: l10n.launchAscBody,
+          done: has(CredentialKind.appStoreConnectKey),
+          action: l10n.launchConnect,
+          onTap: () => showAddCredentialSheet(
+            context,
+            kind: CredentialKind.appStoreConnectKey,
+          ),
+        ),
+      _Step(
+        icon: Icons.rocket_launch_outlined,
+        title: l10n.launchFirstRelease,
+        body: readyApp == null
+            ? l10n.launchFirstReleaseWaiting
+            : l10n.launchFirstReleaseBody,
+        done: releases.any((r) => r.status == ReleaseStatus.succeeded),
+        action: l10n.startRelease,
+        onTap: readyApp == null
+            ? null
+            : () => showStartReleaseSheet(context, readyApp),
+      ),
     ];
-    if (context.isCompact) {
-      return Column(
-        children: [
-          for (final (index, card) in cards.indexed)
+    final done = steps.where((s) => s.done).length;
+    if (done == steps.length) return const SizedBox.shrink();
+    final next = steps.indexWhere((s) => !s.done);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Gap.xxl),
+      child: AppCard(
+        key: anchor,
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
             Padding(
-              padding: EdgeInsets.only(bottom: index < 2 ? Gap.md : 0),
-              child: card,
+              padding: const EdgeInsets.fromLTRB(
+                Gap.xl,
+                Gap.xl,
+                Gap.lg,
+                Gap.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.launchTitle,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              l10n.launchSubtitle(done, steps.length),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: onTour,
+                        icon: const Icon(Icons.tour_outlined, size: 18),
+                        label: Text(l10n.tourTake),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Gap.md),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(end: done / steps.length),
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutCubic,
+                      builder: (context, v, _) => LinearProgressIndicator(
+                        value: v,
+                        minHeight: 6,
+                        backgroundColor: scheme.surfaceContainerHigh,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-        ],
-      );
-    }
-    // Equal heights across the row, whatever the text lengths.
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final (index, card) in cards.indexed) ...[
-            if (index > 0) const SizedBox(width: Gap.md),
-            Expanded(child: card),
+            const Divider(height: 1),
+            for (final (i, s) in steps.indexed) ...[
+              if (i > 0) const Divider(height: 1, indent: Gap.xl),
+              _StepRow(step: s, number: i + 1, isNext: i == next),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
-class _StepCard extends StatelessWidget {
-  const _StepCard({
-    required this.number,
+const _settingItems = {
+  ReadinessItem.repository,
+  ReadinessItem.androidPackage,
+  ReadinessItem.iosBundle,
+};
+
+class _Step {
+  const _Step({
+    required this.icon,
     required this.title,
     required this.body,
-    required this.isDone,
+    required this.done,
+    required this.action,
     required this.onTap,
   });
 
-  final int number;
+  final IconData icon;
   final String title;
   final String body;
-  final bool isDone;
-  final VoidCallback onTap;
+  final bool done;
+  final String action;
+  final VoidCallback? onTap;
+}
+
+class _StepRow extends StatelessWidget {
+  const _StepRow({
+    required this.step,
+    required this.number,
+    required this.isNext,
+  });
+
+  final _Step step;
+  final int number;
+  final bool isNext;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return AppCard(
-      onTap: onTap,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: isDone
-                  ? scheme.tertiaryContainer
-                  : scheme.secondaryContainer,
-              shape: BoxShape.circle,
+    final isCompact = context.isCompact;
+    final badge = Container(
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: step.done
+            ? scheme.tertiary
+            : isNext
+            ? scheme.primary
+            : scheme.surfaceContainerHigh,
+      ),
+      child: step.done
+          ? Icon(Icons.check, size: 17, color: scheme.onTertiary)
+          : Text(
+              '$number',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: isNext ? scheme.onPrimary : scheme.onSurfaceVariant,
+              ),
             ),
-            child: isDone
-                ? Icon(Icons.check, size: 16, color: scheme.onTertiaryContainer)
-                : Center(
-                    child: Text(
-                      '$number',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: scheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ),
-          ),
-          const SizedBox(width: Gap.md),
-          Expanded(
-            child: Column(
+    );
+    final button = step.done
+        ? Text(
+            l10n.setupDoneLabel,
+            style: theme.textTheme.labelLarge?.copyWith(color: scheme.tertiary),
+          )
+        : isNext
+        ? FilledButton(onPressed: step.onTap, child: Text(step.action))
+        : OutlinedButton(onPressed: step.onTap, child: Text(step.action));
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(step.icon, size: 16, color: scheme.onSurfaceVariant),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                step.title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  decoration: step.done ? TextDecoration.lineThrough : null,
+                  color: step.done ? scheme.onSurfaceVariant : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (!step.done) ...[
+          const SizedBox(height: 2),
+          Text(step.body, style: theme.textTheme.bodySmall),
+        ],
+      ],
+    );
+
+    return Container(
+      color: isNext ? scheme.primary.withValues(alpha: .05) : null,
+      padding: const EdgeInsets.symmetric(horizontal: Gap.xl, vertical: Gap.md),
+      child: isCompact
+          ? Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 3),
-                Text(body, style: theme.textTheme.bodySmall),
+                badge,
+                const SizedBox(width: Gap.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      text,
+                      if (!step.done) ...[
+                        const SizedBox(height: Gap.sm),
+                        button,
+                      ],
+                    ],
+                  ),
+                ),
+                if (step.done) button,
+              ],
+            )
+          : Row(
+              children: [
+                badge,
+                const SizedBox(width: Gap.md),
+                Expanded(child: text),
+                const SizedBox(width: Gap.md),
+                button,
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

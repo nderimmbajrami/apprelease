@@ -270,7 +270,7 @@ abstract class AppL10n {
   /// No description provided for @invalidRepoUrl.
   ///
   /// In en, this message translates to:
-  /// **'Enter a Git URL (https:// or git@)'**
+  /// **'Use the address of one repository, e.g. https://github.com/acme/shop-app'**
   String get invalidRepoUrl;
 
   /// No description provided for @invalidApplicationId.
@@ -1802,6 +1802,360 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Your release is safe in the queue and starts by itself as soon as a machine is back. Nothing to do on your side.'**
   String get queueOfflineBody;
+
+  /// No description provided for @exampleApplicationId.
+  ///
+  /// In en, this message translates to:
+  /// **'com.example is Flutter\'s placeholder. Use your app\'s real id, as in Google Play or App Store Connect.'**
+  String get exampleApplicationId;
+
+  /// No description provided for @readyRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository'**
+  String get readyRepository;
+
+  /// No description provided for @readyRepositoryOk.
+  ///
+  /// In en, this message translates to:
+  /// **'The runner can find the code.'**
+  String get readyRepositoryOk;
+
+  /// No description provided for @readyRepositoryMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the address of one repository, e.g. https://github.com/acme/shop-app.'**
+  String get readyRepositoryMissing;
+
+  /// No description provided for @readyAndroidPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Android package name'**
+  String get readyAndroidPackage;
+
+  /// No description provided for @readyAndroidPackageOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches the app in Google Play.'**
+  String get readyAndroidPackageOk;
+
+  /// No description provided for @readyAndroidPackageMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the package name of the app in Google Play, not com.example.'**
+  String get readyAndroidPackageMissing;
+
+  /// No description provided for @readyIosBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'iOS bundle identifier'**
+  String get readyIosBundle;
+
+  /// No description provided for @readyIosBundleOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches the app in App Store Connect.'**
+  String get readyIosBundleOk;
+
+  /// No description provided for @readyIosBundleMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the bundle identifier of the app in App Store Connect, not com.example.'**
+  String get readyIosBundleMissing;
+
+  /// No description provided for @readyKeystore.
+  ///
+  /// In en, this message translates to:
+  /// **'Android upload keystore'**
+  String get readyKeystore;
+
+  /// No description provided for @readyKeystoreOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Signs the app bundle.'**
+  String get readyKeystoreOk;
+
+  /// No description provided for @readyKeystoreMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload the .jks file the app is signed with.'**
+  String get readyKeystoreMissing;
+
+  /// No description provided for @readyGooglePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play access'**
+  String get readyGooglePlay;
+
+  /// No description provided for @readyGooglePlayOk.
+  ///
+  /// In en, this message translates to:
+  /// **'A service account can upload for you.'**
+  String get readyGooglePlayOk;
+
+  /// No description provided for @readyGooglePlayMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a Google Play service account. The form shows each step.'**
+  String get readyGooglePlayMissing;
+
+  /// No description provided for @readyAppStoreConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store Connect key'**
+  String get readyAppStoreConnect;
+
+  /// No description provided for @readyAppStoreConnectOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple accepts uploads with this key.'**
+  String get readyAppStoreConnectOk;
+
+  /// No description provided for @readyAppStoreConnectMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an App Store Connect API key. The form shows each step.'**
+  String get readyAppStoreConnectMissing;
+
+  /// No description provided for @readyFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get readyFix;
+
+  /// No description provided for @readyFixSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get readyFixSettings;
+
+  /// No description provided for @readyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything this release needs is in place.'**
+  String get readyAll;
+
+  /// No description provided for @readyCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 thing to fix before this release can start} other{{n} things to fix before this release can start}}'**
+  String readyCount(int n);
+
+  /// No description provided for @startReleaseChecks.
+  ///
+  /// In en, this message translates to:
+  /// **'What it needs'**
+  String get startReleaseChecks;
+
+  /// No description provided for @startReleaseWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it goes'**
+  String get startReleaseWhere;
+
+  /// No description provided for @invalidBuildNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'A whole number above 0, or leave it empty.'**
+  String get invalidBuildNumber;
+
+  /// No description provided for @tourStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {total}'**
+  String tourStepOf(int n, int total);
+
+  /// No description provided for @tourSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tour'**
+  String get tourSkip;
+
+  /// No description provided for @tourBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get tourBack;
+
+  /// No description provided for @tourNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tourNext;
+
+  /// No description provided for @tourDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get tourDone;
+
+  /// No description provided for @tourTake.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the tour'**
+  String get tourTake;
+
+  /// No description provided for @tourChecklistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your launch checklist'**
+  String get tourChecklistTitle;
+
+  /// No description provided for @tourChecklistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything between you and the first build in the stores, in order. Each row opens the form it needs and shows where to get the key.'**
+  String get tourChecklistBody;
+
+  /// No description provided for @tourAppsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Applications'**
+  String get tourAppsTitle;
+
+  /// No description provided for @tourAppsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'One app is one repository. Its settings hold the package name, the branches that release on push and the webhook for GitHub.'**
+  String get tourAppsBody;
+
+  /// No description provided for @tourCredentialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials'**
+  String get tourCredentialsTitle;
+
+  /// No description provided for @tourCredentialsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Android keystore and the access keys for Google Play and the App Store. Encrypted, and opened only on the build machine for one build.'**
+  String get tourCredentialsBody;
+
+  /// No description provided for @tourAddAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start here'**
+  String get tourAddAppTitle;
+
+  /// No description provided for @tourAddAppBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the repository address of your Flutter app. We guess the name; you add the package name and bundle identifier.'**
+  String get tourAddAppBody;
+
+  /// No description provided for @tourReleasesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your releases, per app'**
+  String get tourReleasesTitle;
+
+  /// No description provided for @tourReleasesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Where each store stands now and the last runs. Anything that would stop a release is listed here with a button to fix it.'**
+  String get tourReleasesBody;
+
+  /// No description provided for @launchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch checklist'**
+  String get launchTitle;
+
+  /// No description provided for @launchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done. Each step opens the form it needs and shows where to get the key.'**
+  String launchSubtitle(int done, int total);
+
+  /// No description provided for @launchApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your application'**
+  String get launchApp;
+
+  /// No description provided for @launchAppBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The repository of your Flutter app, its package name and bundle identifier.'**
+  String get launchAppBody;
+
+  /// No description provided for @launchAppFix.
+  ///
+  /// In en, this message translates to:
+  /// **'{app}: the repository address or a package name needs fixing before it can build.'**
+  String launchAppFix(String app);
+
+  /// No description provided for @launchKeystoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The .jks file your Android app is signed with, plus its passwords.'**
+  String get launchKeystoreBody;
+
+  /// No description provided for @launchPlayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A service account that may upload to Google Play. About 5 minutes, the form walks you through it.'**
+  String get launchPlayBody;
+
+  /// No description provided for @launchAscBody.
+  ///
+  /// In en, this message translates to:
+  /// **'An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.'**
+  String get launchAscBody;
+
+  /// No description provided for @launchFirstRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish your first release'**
+  String get launchFirstRelease;
+
+  /// No description provided for @launchFirstReleaseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a platform and a track. You watch the build live.'**
+  String get launchFirstReleaseBody;
+
+  /// No description provided for @launchFirstReleaseWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens once an app has everything a release needs.'**
+  String get launchFirstReleaseWaiting;
+
+  /// No description provided for @launchUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get launchUpload;
+
+  /// No description provided for @launchConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get launchConnect;
+
+  /// No description provided for @appNoReleasesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No releases yet'**
+  String get appNoReleasesYet;
+
+  /// No description provided for @appBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{platform}: {n, plural, =1{1 thing to fix before it can release} other{{n} things to fix before it can release}}'**
+  String appBlocked(String platform, int n);
+
+  /// No description provided for @appReadyFirstRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for its first release.'**
+  String get appReadyFirstRelease;
+
+  /// No description provided for @appFixFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the items above, or open the release dialog to see them all.'**
+  String get appFixFirst;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

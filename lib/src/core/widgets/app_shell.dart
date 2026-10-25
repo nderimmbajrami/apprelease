@@ -111,7 +111,10 @@ class AppShell extends ConsumerWidget {
           destinations: [
             for (final item in items)
               NavigationDestination(
-                icon: Icon(item.icon),
+                icon: KeyedSubtree(
+                  key: tourAnchors[item.route],
+                  child: Icon(item.icon),
+                ),
                 selectedIcon: Icon(item.selectedIcon),
                 label: item.label,
               ),
@@ -139,6 +142,12 @@ class AppShell extends ConsumerWidget {
     );
   }
 }
+
+/// Anchors for the guided tour: the sidebar entries it points at.
+final tourAnchors = <AppRoute, GlobalKey>{
+  AppRoute.apps: GlobalKey(debugLabel: 'tour-apps'),
+  AppRoute.credentials: GlobalKey(debugLabel: 'tour-credentials'),
+};
 
 class _Rail extends StatelessWidget {
   const _Rail({required this.items, required this.selected});
@@ -216,6 +225,7 @@ class _RailEntry extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Padding(
+      key: tourAnchors[item.route],
       padding: const EdgeInsets.symmetric(horizontal: Gap.md, vertical: 2),
       child: Material(
         color: isSelected ? scheme.secondaryContainer : Colors.transparent,

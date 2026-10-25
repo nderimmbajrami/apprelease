@@ -19,11 +19,18 @@ Future<void> showAddCredentialSheet(
   BuildContext context, {
   CredentialKind? kind,
   String? appId,
-}) => showModalBottomSheet<void>(
+}) => showDialog<void>(
   context: context,
-  isScrollControlled: true,
-  constraints: const BoxConstraints(maxWidth: 600),
-  builder: (context) => _AddCredentialSheet(initialKind: kind, appId: appId),
+  builder: (context) => Dialog(
+    insetPadding: const EdgeInsets.all(Gap.lg),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 640,
+        maxHeight: MediaQuery.sizeOf(context).height * .9,
+      ),
+      child: _AddCredentialSheet(initialKind: kind, appId: appId),
+    ),
+  ),
 );
 
 class _AddCredentialSheet extends ConsumerStatefulWidget {
@@ -41,6 +48,20 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
   final _formKey = GlobalKey<FormState>();
   late var _kind = widget.initialKind ?? CredentialKind.androidKeystore;
   late String? _appId = widget.appId;
+  var _nameEdited = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _suggestName();
+    _name.addListener(() {
+      final suggested = _name.text;
+      // Any change not made by _suggestName counts as the user's own.
+      if (suggested.isNotEmpty && !_suggesting) _nameEdited = true;
+    });
+  }
+
+  var _suggesting = false;
   final _name = TextEditingController();
   final _keystorePassword = TextEditingController();
   final _keyAlias = TextEditingController();
@@ -157,81 +178,154 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
     final validators = Validators(l10n);
     final isBusy = ref.watch(credentialsControllerProvider).isLoading;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        Gap.xl,
-        Gap.sm,
-        Gap.xl,
-        Gap.xl + MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final scheme = theme.colorScheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(Gap.xl, Gap.lg, Gap.sm, Gap.sm),
+          child: Row(
             children: [
-              Text(l10n.addCredential, style: theme.textTheme.headlineSmall),
-              const SizedBox(height: Gap.lg),
-              DropdownButtonFormField<CredentialKind>(
-                initialValue: _kind,
-                items: [
-                  for (final kind in CredentialKind.values)
-                    DropdownMenuItem(
-                      value: kind,
-                      child: Text(kindLabel(context, kind)),
-                    ),
-                ],
-                onChanged: (value) => setState(() {
-                  _kind = value!;
-                  _file = null;
-                  _fileError = null;
-                }),
-              ),
-              const SizedBox(height: 6),
-              Text(kindBody(context, _kind), style: theme.textTheme.bodySmall),
-              const SizedBox(height: Gap.lg),
-              TextFormField(
-                controller: _name,
-                decoration: InputDecoration(
-                  labelText: l10n.credentialName,
-                  helperText: l10n.credentialNameHint,
+              Expanded(
+                child: Text(
+                  l10n.addCredential,
+                  style: theme.textTheme.titleLarge,
                 ),
-                validator: validators.required,
               ),
-              if (_kind == CredentialKind.androidKeystore) ...[
-                const SizedBox(height: Gap.lg),
-                DropdownButtonFormField<String?>(
-                  initialValue: _appId,
-                  decoration: InputDecoration(
-                    labelText: l10n.credentialApp,
-                    helperText: l10n.credentialAppHelper,
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text(l10n.credentialShared),
-                    ),
-                    for (final app
-                        in ref.watch(appsStreamProvider).value ?? const [])
-                      DropdownMenuItem(value: app.id, child: Text(app.name)),
-                  ],
-                  onChanged: (v) => setState(() => _appId = v),
-                ),
-              ],
-              const SizedBox(height: Gap.lg),
-              ..._fieldsFor(_kind, validators),
-              const SizedBox(height: Gap.xl),
-              FilledButton.icon(
-                onPressed: isBusy ? null : _submit,
-                icon: const Icon(Icons.lock_outline, size: 18),
-                label: Text(l10n.addCredential),
+              IconButton(
+                tooltip: l10n.close,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
               ),
             ],
           ),
         ),
-      ),
+        const Divider(height: 1),
+        Flexible(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              Gap.xl,
+              Gap.lg,
+              Gap.xl,
+              Gap.xl + MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // The three kinds as cards: what each one is for, at a glance.
+                  LayoutBuilder(
+                    builder: (context, c) {
+                      final narrow = c.maxWidth < 480;
+                      final cards = [
+                        for (final kind in CredentialKind.values)
+                          _KindCard(
+                            kind: kind,
+                            selected: kind == _kind,
+                            onTap: () => setState(() {
+                              _kind = kind;
+                              _file = null;
+                              _fileError = null;
+                              _suggestName();
+                            }),
+                          ),
+                      ];
+                      return narrow
+                          ? Column(
+                              children: [
+                                for (final card in cards) ...[
+                                  card,
+                                  const SizedBox(height: Gap.sm),
+                                ],
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (final (i, card) in cards.indexed) ...[
+                                  if (i > 0) const SizedBox(width: Gap.sm),
+                                  Expanded(child: card),
+                                ],
+                              ],
+                            );
+                    },
+                  ),
+                  const SizedBox(height: Gap.md),
+                  Text(
+                    kindBody(context, _kind),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: Gap.lg),
+                  TextFormField(
+                    controller: _name,
+                    decoration: InputDecoration(
+                      labelText: l10n.credentialName,
+                      helperText: l10n.credentialNameHint,
+                    ),
+                    validator: validators.required,
+                  ),
+                  if (_kind == CredentialKind.androidKeystore) ...[
+                    const SizedBox(height: Gap.lg),
+                    DropdownButtonFormField<String?>(
+                      initialValue: _appId,
+                      decoration: InputDecoration(
+                        labelText: l10n.credentialApp,
+                        helperText: l10n.credentialAppHelper,
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: Text(l10n.credentialShared),
+                        ),
+                        for (final app
+                            in ref.watch(appsStreamProvider).value ?? const [])
+                          DropdownMenuItem(
+                            value: app.id,
+                            child: Text(app.name),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() {
+                        _appId = v;
+                        _suggestName();
+                      }),
+                    ),
+                  ],
+                  const SizedBox(height: Gap.lg),
+                  ..._fieldsFor(_kind, validators),
+                  const SizedBox(height: Gap.xl),
+                  FilledButton.icon(
+                    onPressed: isBusy ? null : _submit,
+                    icon: const Icon(Icons.lock_outline, size: 18),
+                    label: Text(l10n.addCredential),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  /// A sensible reference name for the kind (and app), until the user types
+  /// their own.
+  void _suggestName() {
+    if (_nameEdited) return;
+    _suggesting = true;
+    final apps = ref.read(appsStreamProvider).value ?? const [];
+    final app = apps.where((a) => a.id == _appId).firstOrNull;
+    final prefix = app == null ? '' : '${app.slug.replaceAll('-', '_')}_';
+    _name.text = switch (_kind) {
+      CredentialKind.androidKeystore => '${prefix}upload_keystore',
+      CredentialKind.googlePlayServiceAccount => 'google_play',
+      CredentialKind.appStoreConnectKey => 'app_store_connect',
+    };
+    _suggesting = false;
   }
 
   List<Widget> _fieldsFor(CredentialKind kind, Validators validators) {
@@ -618,6 +712,62 @@ class _AscGuide extends StatelessWidget {
           ),
           Text(l10n.ascGuideAfter, style: theme.textTheme.bodySmall),
         ],
+      ),
+    );
+  }
+}
+
+class _KindCard extends StatelessWidget {
+  const _KindCard({
+    required this.kind,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final CredentialKind kind;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: selected ? scheme.secondaryContainer : Colors.transparent,
+      borderRadius: BorderRadius.circular(Radii.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(Radii.md),
+        child: Container(
+          padding: const EdgeInsets.all(Gap.md),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Radii.md),
+            border: Border.all(
+              color: selected ? scheme.primary : scheme.outline,
+              width: selected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                kindIcon(kind),
+                size: 20,
+                color: selected
+                    ? scheme.onSecondaryContainer
+                    : scheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: Gap.sm),
+              Expanded(
+                child: Text(
+                  kindLabel(context, kind),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              if (selected)
+                Icon(Icons.check_circle, size: 16, color: scheme.primary),
+            ],
+          ),
+        ),
       ),
     );
   }
