@@ -101,6 +101,100 @@ class SupabaseApi {
     _check(response);
   }
 
+  /// Ends releases left 'running' by a machine that stopped: this runner's
+  /// own after a restart ([runnerId]), or any runner silent for [silentFor].
+  /// Returns how many were closed.
+  Future<int> failStranded({
+    String? runnerId,
+    Duration silentFor = const Duration(minutes: 15),
+  }) async {
+    final List<String> runners;
+    if (runnerId != null) {
+      runners = [runnerId];
+    } else {
+      final since = DateTime.now()
+          .toUtc()
+          .subtract(silentFor)
+          .toIso8601String();
+      final response = await _client.get(
+        Uri.parse('$url/rest/v1/runners?last_seen_at=lt.$since&select=id'),
+        headers: _headers,
+      );
+      _check(response);
+      runners = [
+        for (final r in jsonDecode(response.body) as List) '${r['id']}',
+      ];
+    }
+    if (runners.isEmpty) return 0;
+    final now = DateTime.now().toUtc().toIso8601String();
+    final response = await _client.patch(
+      Uri.parse(
+        '$url/rest/v1/releases?status=eq.running&runner_id=in.(${runners.join(',')})&select=id',
+      ),
+      headers: {..._headers, 'Prefer': 'return=representation'},
+      body: jsonEncode({
+        'status': 'failed',
+        'finished_at': now,
+        'error_message':
+            'The build machine stopped during this release. Run it again.',
+      }),
+    );
+    _check(response);
+    final ids = [
+      for (final r in jsonDecode(response.body) as List) '${r['id']}',
+    ];
+    for (final id in ids) {
+      await _closeSteps(id, 'failed');
+    }
+    return ids.length;
+  }
+
+  /// The number of a newer push release still waiting for the same app,
+  /// platform and branch, if any.
+  Future<int?> newerQueuedPush(Map<String, dynamic> release) async {
+    final query = {
+      'app_id': 'eq.${release['app_id']}',
+      'platform': 'eq.${release['platform']}',
+      'branch': 'eq.${release['branch']}',
+      'status': 'eq.queued',
+      'created_at': 'gt.${release['created_at']}',
+      'started_by_name': 'like.GitHub push*',
+      'select': 'number',
+      'order': 'created_at.desc',
+      'limit': '1',
+    };
+    final response = await _client.get(
+      Uri.parse('$url/rest/v1/releases').replace(queryParameters: query),
+      headers: _headers,
+    );
+    _check(response);
+    final rows = jsonDecode(response.body) as List;
+    return rows.isEmpty ? null : (rows.first['number'] as num).toInt();
+  }
+
+  /// Marks a claimed release as replaced by a newer push, without building.
+  Future<void> markReplaced(String id, int newer) async {
+    await updateRelease(id, {
+      'status': 'cancelled',
+      'finished_at': DateTime.now().toUtc().toIso8601String(),
+      'error_message':
+          'Replaced by release #$newer, a newer push to the same branch.',
+    });
+    await _closeSteps(id, 'skipped');
+  }
+
+  /// Steps still pending or running end as [status].
+  Future<void> _closeSteps(String releaseId, String status) async {
+    final response = await _client.patch(
+      Uri.parse(
+        '$url/rest/v1/release_steps?release_id=eq.$releaseId&status=in.(pending,running)',
+      ),
+      headers: {..._headers, 'Prefer': 'return=minimal'},
+      body: jsonEncode({'status': status}),
+    );
+    _check(response);
+  }
+
   Future<bool> cancelRequested(String id) async {
     final response = await _client.get(
       Uri.parse('$url/rest/v1/releases?id=eq.$id&select=cancel_requested'),

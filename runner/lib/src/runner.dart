@@ -46,7 +46,14 @@ class Runner {
     }
 
     await beat();
+    // Anything this machine left half-done before a restart is over.
+    await _sweep(own: true);
     final timer = Timer.periodic(const Duration(seconds: 30), (_) => beat());
+    // And every few minutes: releases stuck on any machine that went quiet.
+    final sweeper = Timer.periodic(
+      const Duration(minutes: 3),
+      (_) => _sweep(own: false),
+    );
     try {
       while (true) {
         final ran = await runOne();
@@ -54,6 +61,7 @@ class Runner {
       }
     } finally {
       timer.cancel();
+      sweeper.cancel();
     }
   }
 
@@ -61,6 +69,19 @@ class Runner {
   Future<bool> runOne() async {
     final release = await api.claimRelease(runnerId: id, platforms: platforms);
     if (release == null) return false;
+    // Ten pushes in a row are one build: the newest. The runner builds the
+    // head of the branch anyway, so an older push would build the same code.
+    final startedBy = '${release['started_by_name'] ?? ''}';
+    if (startedBy.startsWith('GitHub push')) {
+      final newer = await api.newerQueuedPush(release);
+      if (newer != null) {
+        await api.markReplaced(release['id'] as String, newer);
+        stdout.writeln(
+          'release #${release['number']} replaced by #$newer (newer push)',
+        );
+        return true;
+      }
+    }
     // The claim returns the row alone; the steps come separately.
     release['release_steps'] = await api.steps(release['id'] as String);
     final app = await api.app(release['app_id'] as String);
@@ -73,6 +94,19 @@ class Runner {
     );
     await pipeline.run();
     return true;
+  }
+
+  Future<void> _sweep({required bool own}) async {
+    try {
+      final closed = await api.failStranded(runnerId: own ? id : null);
+      if (closed > 0) {
+        stdout.writeln(
+          'closed $closed release(s) left running by a stopped machine',
+        );
+      }
+    } catch (error) {
+      stderr.writeln('sweep failed: $error');
+    }
   }
 
   String _stableId() {
