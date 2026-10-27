@@ -2156,6 +2156,66 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Fix the items above, or open the release dialog to see them all.'**
   String get appFixFirst;
+
+  /// No description provided for @releaseLatestOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest on {branch}'**
+  String releaseLatestOn(String branch);
+
+  /// No description provided for @removeFromQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from queue'**
+  String get removeFromQueue;
+
+  /// No description provided for @queueWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 release waiting} other{{n} releases waiting}}'**
+  String queueWaiting(int n);
+
+  /// No description provided for @queueOlder.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 of them is an older push. The newest one builds the same branch, so it is not needed.} other{{n} of them are older pushes. The newest ones build the same branches, so they are not needed.}}'**
+  String queueOlder(int n);
+
+  /// No description provided for @queueAllLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Each one is the latest of its branch and platform.'**
+  String get queueAllLatest;
+
+  /// No description provided for @queueKeepLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep latest only'**
+  String get queueKeepLatest;
+
+  /// No description provided for @queueClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear queue'**
+  String get queueClear;
+
+  /// No description provided for @queueClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the queue?'**
+  String get queueClearTitle;
+
+  /// No description provided for @queueClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{The waiting release of {app} is removed.} other{All {n} waiting releases of {app} are removed.}} A build already running carries on.'**
+  String queueClearBody(int n, String app);
+
+  /// No description provided for @queueRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Removed 1 release from the queue} other{Removed {n} releases from the queue}}'**
+  String queueRemoved(int n);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

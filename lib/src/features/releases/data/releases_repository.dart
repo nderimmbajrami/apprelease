@@ -24,6 +24,10 @@ abstract interface class ReleasesRepository {
 
   Future<void> cancelRelease(String releaseId);
 
+  /// Takes waiting releases out of the queue. One that started in the
+  /// meantime is left alone.
+  Future<void> removeFromQueue(List<String> releaseIds);
+
   /// Removes the releases of an app that is being deleted.
   Future<void> deleteReleasesOfApp(String appId);
 

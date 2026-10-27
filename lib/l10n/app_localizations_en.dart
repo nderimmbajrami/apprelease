@@ -1193,4 +1193,71 @@ class AppL10nEn extends AppL10n {
   @override
   String get appFixFirst =>
       'Fix the items above, or open the release dialog to see them all.';
+
+  @override
+  String releaseLatestOn(String branch) {
+    return 'Latest on $branch';
+  }
+
+  @override
+  String get removeFromQueue => 'Remove from queue';
+
+  @override
+  String queueWaiting(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n releases waiting',
+      one: '1 release waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String queueOlder(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          '$n of them are older pushes. The newest ones build the same branches, so they are not needed.',
+      one:
+          '1 of them is an older push. The newest one builds the same branch, so it is not needed.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get queueAllLatest =>
+      'Each one is the latest of its branch and platform.';
+
+  @override
+  String get queueKeepLatest => 'Keep latest only';
+
+  @override
+  String get queueClear => 'Clear queue';
+
+  @override
+  String get queueClearTitle => 'Clear the queue?';
+
+  @override
+  String queueClearBody(int n, String app) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'All $n waiting releases of $app are removed.',
+      one: 'The waiting release of $app is removed.',
+    );
+    return '$_temp0 A build already running carries on.';
+  }
+
+  @override
+  String queueRemoved(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Removed $n releases from the queue',
+      one: 'Removed 1 release from the queue',
+    );
+    return '$_temp0';
+  }
 }

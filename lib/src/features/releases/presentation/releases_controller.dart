@@ -56,6 +56,10 @@ class ReleasesController extends _$ReleasesController {
   Future<bool> cancelRelease(String releaseId) =>
       _run(() => ref.read(releasesRepositoryProvider).cancelRelease(releaseId));
 
+  Future<bool> removeFromQueue(List<String> releaseIds) => _run(
+    () => ref.read(releasesRepositoryProvider).removeFromQueue(releaseIds),
+  );
+
   Future<bool> _run(Future<void> Function() action) async {
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(action);

@@ -185,6 +185,15 @@ class LocalReleasesRepository implements ReleasesRepository {
     _log(releaseId, 'Cancelled by user', level: LogLevel.warning);
   }
 
+  @override
+  Future<void> removeFromQueue(List<String> releaseIds) async {
+    for (final id in releaseIds) {
+      if (_releases.find((r) => r.id == id)?.status == ReleaseStatus.queued) {
+        await cancelRelease(id);
+      }
+    }
+  }
+
   /// The simulated runner is always there.
   @override
   Stream<bool> watchRunnerOnline() => Stream.value(true);

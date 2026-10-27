@@ -114,6 +114,30 @@ class SupabaseReleasesRepository implements ReleasesRepository {
     _touch();
   }
 
+  @override
+  Future<void> removeFromQueue(List<String> releaseIds) async {
+    if (releaseIds.isEmpty) return;
+    final removed = await _client
+        .from('releases')
+        .update({
+          'status': ReleaseStatus.cancelled.name,
+          'finished_at': DateTime.now().toUtc().toIso8601String(),
+          'error_message': 'Removed from the queue.',
+        })
+        .inFilter('id', releaseIds)
+        .eq('status', ReleaseStatus.queued.name)
+        .select('id');
+    final ids = [for (final row in removed) row['id'] as String];
+    if (ids.isNotEmpty) {
+      await _client
+          .from('release_steps')
+          .update({'status': StepStatus.skipped.name})
+          .inFilter('release_id', ids)
+          .eq('status', StepStatus.pending.name);
+    }
+    _touch();
+  }
+
   /// Runners heartbeat every 20 seconds; two minutes of silence counts as
   /// gone. Re-checked every 30 seconds on top of the realtime events, so a
   /// machine that simply stopped is noticed too.

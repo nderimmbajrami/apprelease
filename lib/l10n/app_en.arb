@@ -549,5 +549,53 @@
     }
   },
   "appReadyFirstRelease": "Ready for its first release.",
-  "appFixFirst": "Fix the items above, or open the release dialog to see them all."
+  "appFixFirst": "Fix the items above, or open the release dialog to see them all.",
+  "releaseLatestOn": "Latest on {branch}",
+  "@releaseLatestOn": {
+    "placeholders": {
+      "branch": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromQueue": "Remove from queue",
+  "queueWaiting": "{n, plural, =1{1 release waiting} other{{n} releases waiting}}",
+  "@queueWaiting": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "queueOlder": "{n, plural, =1{1 of them is an older push. The newest one builds the same branch, so it is not needed.} other{{n} of them are older pushes. The newest ones build the same branches, so they are not needed.}}",
+  "@queueOlder": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "queueAllLatest": "Each one is the latest of its branch and platform.",
+  "queueKeepLatest": "Keep latest only",
+  "queueClear": "Clear queue",
+  "queueClearTitle": "Clear the queue?",
+  "queueClearBody": "{n, plural, =1{The waiting release of {app} is removed.} other{All {n} waiting releases of {app} are removed.}} A build already running carries on.",
+  "@queueClearBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "queueRemoved": "{n, plural, =1{Removed 1 release from the queue} other{Removed {n} releases from the queue}}",
+  "@queueRemoved": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -12,6 +12,8 @@ import '../../../core/widgets/page_header.dart';
 import '../../../routing/app_routes.dart';
 import '../../config/presentation/config_panel.dart';
 import '../../releases/data/releases_repository.dart';
+import '../../releases/domain/release.dart';
+import '../../releases/presentation/releases_controller.dart';
 import '../../releases/presentation/start_release_sheet.dart';
 import '../../releases/presentation/widgets/release_row.dart';
 import '../data/apps_repository.dart';
@@ -156,21 +158,139 @@ class _ReleasesTab extends ConsumerWidget {
       );
     }
 
+    final queued = [
+      for (final r in releases)
+        if (r.status == ReleaseStatus.queued) r,
+    ];
+    final hasBar = queued.isNotEmpty;
+
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: Gap.xxl),
-      itemCount: releases.length,
+      itemCount: releases.length + (hasBar ? 1 : 0),
       separatorBuilder: (_, _) => const SizedBox(height: Gap.sm),
       itemBuilder: (context, index) {
-        final release = releases[index];
+        if (hasBar && index == 0) {
+          return _QueueBar(app: app, queued: queued);
+        }
+        final release = releases[index - (hasBar ? 1 : 0)];
         return ReleaseRow(
           release: release,
           onTap: () => context.goNamed(
             AppRoute.release.name,
             pathParameters: {'appId': app.id, 'releaseId': release.id},
           ),
+          onRemove: () => _remove(context, ref, [release.id]),
         );
       },
     );
+  }
+}
+
+Future<void> _remove(
+  BuildContext context,
+  WidgetRef ref,
+  List<String> releaseIds,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final text = context.l10n.queueRemoved(releaseIds.length);
+  final ok = await ref
+      .read(releasesControllerProvider.notifier)
+      .removeFromQueue(releaseIds);
+  if (ok) messenger.showSnackBar(SnackBar(content: Text(text)));
+}
+
+/// How many releases of this app wait, and one tap to drop the older pushes
+/// the newest ones make pointless, or the whole line.
+class _QueueBar extends ConsumerWidget {
+  const _QueueBar({required this.app, required this.queued});
+
+  final AppProject app;
+  final List<Release> queued;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final older = olderQueued(queued);
+    final isBusy = ref.watch(releasesControllerProvider).isLoading;
+
+    final keepLatest = FilledButton.icon(
+      onPressed: older.isEmpty || isBusy
+          ? null
+          : () => _remove(context, ref, [for (final r in older) r.id]),
+      icon: const Icon(Icons.filter_list, size: 18),
+      label: Text(l10n.queueKeepLatest),
+    );
+    final clear = TextButton(
+      onPressed: isBusy ? null : () => _clear(context, ref),
+      child: Text(l10n.queueClear),
+    );
+
+    return AppCard(
+      borderColor: older.isEmpty ? null : theme.colorScheme.primary,
+      child: Wrap(
+        spacing: Gap.lg,
+        runSpacing: Gap.md,
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.queueWaiting(queued.length),
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  older.isEmpty
+                      ? l10n.queueAllLatest
+                      : l10n.queueOlder(older.length),
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              clear,
+              const SizedBox(width: Gap.sm),
+              keepLatest,
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _clear(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.queueClearTitle),
+        content: Text(l10n.queueClearBody(queued.length, app.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.queueClear),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await _remove(context, ref, [for (final r in queued) r.id]);
   }
 }
 

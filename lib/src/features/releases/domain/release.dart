@@ -273,3 +273,23 @@ class QueueInfo {
     );
   }
 }
+
+/// Waiting releases a newer waiting release of the same platform and branch
+/// makes pointless: the runner builds the branch head, so only the newest of
+/// each platform and branch is worth keeping.
+List<Release> olderQueued(Iterable<Release> releases) {
+  final newest = <String, Release>{};
+  final older = <Release>[];
+  final queued =
+      releases.where((r) => r.status == ReleaseStatus.queued).toList()
+        ..sort((a, b) => b.number.compareTo(a.number));
+  for (final release in queued) {
+    final key = '${release.platform.name}|${release.branch}';
+    if (newest.containsKey(key)) {
+      older.add(release);
+    } else {
+      newest[key] = release;
+    }
+  }
+  return older;
+}

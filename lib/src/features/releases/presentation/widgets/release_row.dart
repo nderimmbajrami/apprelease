@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/l10n_extension.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/date_format.dart';
@@ -15,6 +16,7 @@ class ReleaseRow extends StatelessWidget {
     required this.release,
     required this.onTap,
     this.appName,
+    this.onRemove,
     super.key,
   });
 
@@ -24,11 +26,19 @@ class ReleaseRow extends StatelessWidget {
   /// Shown on the dashboard, where releases of several apps mix.
   final String? appName;
 
+  /// Takes a waiting release out of the queue. Shown while it waits.
+  final VoidCallback? onRemove;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isCompact = context.isCompact;
-    final title = [?appName, release.versionLabel].join(' · ');
+    // A push builds whatever version pubspec.yaml holds; until the runner
+    // read it, the branch says more than a placeholder.
+    final version = release.versionName == Release.autoVersion
+        ? context.l10n.releaseLatestOn(release.branch)
+        : release.versionLabel;
+    final title = [?appName, version].join(' · ');
     final meta = [
       '#${release.number}',
       trackLabel(context, release.track),
@@ -67,6 +77,15 @@ class ReleaseRow extends StatelessWidget {
             const SizedBox(width: Gap.sm),
           ],
           StatusPill(release.status),
+          if (onRemove != null && release.status == ReleaseStatus.queued) ...[
+            const SizedBox(width: Gap.xs),
+            IconButton(
+              onPressed: onRemove,
+              tooltip: context.l10n.removeFromQueue,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.close, size: 18),
+            ),
+          ],
         ],
       ),
     );
