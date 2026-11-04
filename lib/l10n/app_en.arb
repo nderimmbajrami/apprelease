@@ -620,5 +620,36 @@
       }
     }
   },
-  "releaseStartFailed": "The release could not be queued. Check your connection and try again."
+  "releaseStartFailed": "The release could not be queued. Check your connection and try again.",
+  "guideTitle": "How to get it",
+  "guideMinutes": "about {n} min",
+  "@guideMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "guideFull": "Full guide",
+  "guideVideo": "Watch a video",
+  "guideWithUs": "Set it up with us",
+  "guideKeystore1": "Already on Google Play? Use the same upload keystore (.jks) you used before. Google accepts only that key.",
+  "guideKeystore2": "New app? Create one in a terminal: keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload",
+  "guideKeystore3": "Write down the keystore password, the key alias (upload) and the key password.",
+  "guideKeystore4": "Drop the .jks file below and type the three values. We check them against the file before saving.",
+  "guideKeystoreNote": "Keep a copy of the file somewhere safe. Losing it means asking Google to reset your upload key.",
+  "guidePlay1": "In Google Cloud Console, pick or create a project and enable the Google Play Android Developer API.",
+  "guidePlay2": "IAM & Admin → Service accounts → Create service account. It needs no roles there.",
+  "guidePlay3": "Open the new account → Keys → Add key → JSON. A .json file downloads.",
+  "guidePlay4": "In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.",
+  "guidePlay5": "Upload the .json file below.",
+  "guidePlayNote": "The app must already exist in Play Console, with its first build uploaded by hand once. A new key can take a few hours before Google accepts it.",
+  "guideAsc1": "App Store Connect → Users and Access → Integrations → App Store Connect API.",
+  "guideAsc2": "Generate a key with the App Manager role.",
+  "guideAsc3": "Download the .p8 file. Apple lets you download it only once.",
+  "guideAsc4": "Copy the Key ID (next to the key) and the Issuer ID (top of the page).",
+  "guideAsc5": "Upload the .p8 file below with both IDs.",
+  "guideAscNote": "The app must already exist in App Store Connect with the same bundle ID as your project.",
+  "setupHelpTitle": "Stuck on the keys? We set it up with you.",
+  "setupHelpBody": "A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together."
 }

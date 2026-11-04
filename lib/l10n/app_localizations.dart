@@ -2234,6 +2234,150 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'The release could not be queued. Check your connection and try again.'**
   String get releaseStartFailed;
+
+  /// No description provided for @guideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get it'**
+  String get guideTitle;
+
+  /// No description provided for @guideMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'about {n} min'**
+  String guideMinutes(int n);
+
+  /// No description provided for @guideFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full guide'**
+  String get guideFull;
+
+  /// No description provided for @guideVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch a video'**
+  String get guideVideo;
+
+  /// No description provided for @guideWithUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Set it up with us'**
+  String get guideWithUs;
+
+  /// No description provided for @guideKeystore1.
+  ///
+  /// In en, this message translates to:
+  /// **'Already on Google Play? Use the same upload keystore (.jks) you used before. Google accepts only that key.'**
+  String get guideKeystore1;
+
+  /// No description provided for @guideKeystore2.
+  ///
+  /// In en, this message translates to:
+  /// **'New app? Create one in a terminal: keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload'**
+  String get guideKeystore2;
+
+  /// No description provided for @guideKeystore3.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down the keystore password, the key alias (upload) and the key password.'**
+  String get guideKeystore3;
+
+  /// No description provided for @guideKeystore4.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop the .jks file below and type the three values. We check them against the file before saving.'**
+  String get guideKeystore4;
+
+  /// No description provided for @guideKeystoreNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a copy of the file somewhere safe. Losing it means asking Google to reset your upload key.'**
+  String get guideKeystoreNote;
+
+  /// No description provided for @guidePlay1.
+  ///
+  /// In en, this message translates to:
+  /// **'In Google Cloud Console, pick or create a project and enable the Google Play Android Developer API.'**
+  String get guidePlay1;
+
+  /// No description provided for @guidePlay2.
+  ///
+  /// In en, this message translates to:
+  /// **'IAM & Admin → Service accounts → Create service account. It needs no roles there.'**
+  String get guidePlay2;
+
+  /// No description provided for @guidePlay3.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the new account → Keys → Add key → JSON. A .json file downloads.'**
+  String get guidePlay3;
+
+  /// No description provided for @guidePlay4.
+  ///
+  /// In en, this message translates to:
+  /// **'In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.'**
+  String get guidePlay4;
+
+  /// No description provided for @guidePlay5.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload the .json file below.'**
+  String get guidePlay5;
+
+  /// No description provided for @guidePlayNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The app must already exist in Play Console, with its first build uploaded by hand once. A new key can take a few hours before Google accepts it.'**
+  String get guidePlayNote;
+
+  /// No description provided for @guideAsc1.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store Connect → Users and Access → Integrations → App Store Connect API.'**
+  String get guideAsc1;
+
+  /// No description provided for @guideAsc2.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a key with the App Manager role.'**
+  String get guideAsc2;
+
+  /// No description provided for @guideAsc3.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the .p8 file. Apple lets you download it only once.'**
+  String get guideAsc3;
+
+  /// No description provided for @guideAsc4.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the Key ID (next to the key) and the Issuer ID (top of the page).'**
+  String get guideAsc4;
+
+  /// No description provided for @guideAsc5.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload the .p8 file below with both IDs.'**
+  String get guideAsc5;
+
+  /// No description provided for @guideAscNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The app must already exist in App Store Connect with the same bundle ID as your project.'**
+  String get guideAscNote;
+
+  /// No description provided for @setupHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stuck on the keys? We set it up with you.'**
+  String get setupHelpTitle;
+
+  /// No description provided for @setupHelpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.'**
+  String get setupHelpBody;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

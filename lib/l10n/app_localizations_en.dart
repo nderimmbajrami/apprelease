@@ -1274,4 +1274,93 @@ class AppL10nEn extends AppL10n {
   @override
   String get releaseStartFailed =>
       'The release could not be queued. Check your connection and try again.';
+
+  @override
+  String get guideTitle => 'How to get it';
+
+  @override
+  String guideMinutes(int n) {
+    return 'about $n min';
+  }
+
+  @override
+  String get guideFull => 'Full guide';
+
+  @override
+  String get guideVideo => 'Watch a video';
+
+  @override
+  String get guideWithUs => 'Set it up with us';
+
+  @override
+  String get guideKeystore1 =>
+      'Already on Google Play? Use the same upload keystore (.jks) you used before. Google accepts only that key.';
+
+  @override
+  String get guideKeystore2 =>
+      'New app? Create one in a terminal: keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload';
+
+  @override
+  String get guideKeystore3 =>
+      'Write down the keystore password, the key alias (upload) and the key password.';
+
+  @override
+  String get guideKeystore4 =>
+      'Drop the .jks file below and type the three values. We check them against the file before saving.';
+
+  @override
+  String get guideKeystoreNote =>
+      'Keep a copy of the file somewhere safe. Losing it means asking Google to reset your upload key.';
+
+  @override
+  String get guidePlay1 =>
+      'In Google Cloud Console, pick or create a project and enable the Google Play Android Developer API.';
+
+  @override
+  String get guidePlay2 =>
+      'IAM & Admin → Service accounts → Create service account. It needs no roles there.';
+
+  @override
+  String get guidePlay3 =>
+      'Open the new account → Keys → Add key → JSON. A .json file downloads.';
+
+  @override
+  String get guidePlay4 =>
+      'In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.';
+
+  @override
+  String get guidePlay5 => 'Upload the .json file below.';
+
+  @override
+  String get guidePlayNote =>
+      'The app must already exist in Play Console, with its first build uploaded by hand once. A new key can take a few hours before Google accepts it.';
+
+  @override
+  String get guideAsc1 =>
+      'App Store Connect → Users and Access → Integrations → App Store Connect API.';
+
+  @override
+  String get guideAsc2 => 'Generate a key with the App Manager role.';
+
+  @override
+  String get guideAsc3 =>
+      'Download the .p8 file. Apple lets you download it only once.';
+
+  @override
+  String get guideAsc4 =>
+      'Copy the Key ID (next to the key) and the Issuer ID (top of the page).';
+
+  @override
+  String get guideAsc5 => 'Upload the .p8 file below with both IDs.';
+
+  @override
+  String get guideAscNote =>
+      'The app must already exist in App Store Connect with the same bundle ID as your project.';
+
+  @override
+  String get setupHelpTitle => 'Stuck on the keys? We set it up with you.';
+
+  @override
+  String get setupHelpBody =>
+      'A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.';
 }

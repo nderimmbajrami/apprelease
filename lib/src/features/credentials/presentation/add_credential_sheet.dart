@@ -14,6 +14,7 @@ import '../../apps/data/apps_repository.dart';
 import '../domain/credential.dart';
 import 'credentials_controller.dart';
 import 'credentials_screen.dart';
+import 'credential_guide.dart';
 
 Future<void> showAddCredentialSheet(
   BuildContext context, {
@@ -260,6 +261,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
+                  const SizedBox(height: Gap.md),
+                  CredentialGuide(kind: _kind),
                   const SizedBox(height: Gap.lg),
                   TextFormField(
                     controller: _name,

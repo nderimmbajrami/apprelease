@@ -52,6 +52,11 @@ void main() {
     await tester.tap(find.text('Skip for now'));
     await tester.pumpAndSettle();
     expect(find.text('Launch checklist'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('No releases yet'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('No releases yet'), findsOneWidget);
   });
 

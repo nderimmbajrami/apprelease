@@ -23,6 +23,7 @@ import '../../../core/widgets/guided_tour.dart';
 import '../../credentials/data/credentials_repository.dart';
 import '../../credentials/domain/credential.dart';
 import '../../credentials/presentation/add_credential_sheet.dart';
+import '../../credentials/presentation/credential_guide.dart';
 import '../../releases/domain/readiness.dart';
 import '../../releases/presentation/start_release_sheet.dart';
 import '../../releases/presentation/widgets/readiness_list.dart';
@@ -726,6 +727,10 @@ class _LaunchChecklist extends StatelessWidget {
               if (i > 0) const Divider(height: 1, indent: Gap.xl),
               _StepRow(step: s, number: i + 1, isNext: i == next),
             ],
+            const Padding(
+              padding: EdgeInsets.fromLTRB(Gap.lg, Gap.sm, Gap.lg, Gap.lg),
+              child: SetupHelpCard(),
+            ),
           ],
         ),
       ),

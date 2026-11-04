@@ -108,6 +108,11 @@ void main() {
 
     // Grouped by app: the store chips on top repeat the newest state of
     // each platform, then the rows.
+    await tester.scrollUntilVisible(
+      find.text('Acme Shop'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Acme Shop'), findsOneWidget);
     expect(find.text('Published'), findsWidgets);
     expect(find.text('Failed'), findsWidgets);

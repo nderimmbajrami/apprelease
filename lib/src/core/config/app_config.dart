@@ -33,6 +33,16 @@ abstract final class AppConfig {
   static const siteUrl = 'https://apprelease.store';
   static const docsUrl = '$siteUrl/docs/';
 
+  /// A setup session with us: the mail app opens with this prefilled.
+  static final setupHelpMailto = Uri(
+    scheme: 'mailto',
+    path: 'publish@apprelease.store',
+    query:
+        'subject=${Uri.encodeComponent('Help me set up my store keys')}'
+        '&body=${Uri.encodeComponent('Hi, I would like a setup session.\n\n'
+        'App name:\nWhat I am stuck on:\nTimes that suit me:\n')}',
+  ).toString();
+
   /// Where GitHub posts push events for an app.
   static String webhookUrl(String appId) =>
       '$supabaseUrl/functions/v1/github-webhook?app=$appId';
