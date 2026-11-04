@@ -79,11 +79,7 @@ class Versioning {
         );
         final appId = await asc.appId(bundle);
         env['AR_ASC_APP_ID'] = appId;
-        await _checkVersionIsOpen(
-          asc,
-          appId,
-          release['version_name'] as String,
-        );
+        await _checkVersionIsOpen(asc, release, appId);
         final latest = await asc.latestBuildNumber(appId);
         await log(
           'Latest build number on App Store Connect: $latest',
@@ -98,11 +94,13 @@ class Versioning {
   }
 
   /// Apple refuses any build for a version at or below the last approved
-  /// one, but only after the upload. Asking first saves the whole build.
+  /// one, and only says so after the upload. Asked first, and a version
+  /// that would be refused is moved past the approved one, so a customer
+  /// who does not know the rule still gets a release.
   Future<void> _checkVersionIsOpen(
     AppStoreConnectClient asc,
+    Map<String, dynamic> release,
     String appId,
-    String version,
   ) async {
     final String? approved;
     try {
@@ -117,21 +115,26 @@ class Versioning {
     }
     if (approved == null) return;
     await log('Highest approved App Store version: $approved', stepId: stepId);
-    if (compareVersions(version, approved) <= 0) {
-      throw StepFailed(versionClosedMessage(version, approved));
-    }
+    final version = release['version_name'] as String;
+    if (compareVersions(version, approved) > 0) return;
+    final next = nextVersionAfter(approved);
+    await log(
+      'Version $version is already approved on the App Store and Apple takes '
+      'no new builds for it. Releasing as $next instead.',
+      stepId: stepId,
+      level: 'warning',
+    );
+    release['version_name'] = next;
+    await api.updateRelease(release['id'] as String, {'version_name': next});
   }
 }
 
-/// Why Apple will refuse [version], and the version that would pass.
-String versionClosedMessage(String version, String approved) {
+/// The patch after [approved]: `1.1.1` → `1.1.2`, `2.0` → `2.0.1`.
+String nextVersionAfter(String approved) {
   final parts = approved.split('.').map((e) => int.tryParse(e) ?? 0).toList();
   while (parts.length < 3) {
     parts.add(0);
   }
   parts[2] += 1;
-  return 'Version $version is not above $approved, which is already approved '
-      'on the App Store, so Apple will refuse it. Raise the version in '
-      'pubspec.yaml or in the release dialog to ${parts.join('.')} and '
-      'release again.';
+  return parts.take(3).join('.');
 }

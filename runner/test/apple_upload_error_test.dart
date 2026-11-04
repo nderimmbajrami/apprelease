@@ -1,3 +1,4 @@
+import 'package:apprelease_runner/src/pipeline.dart';
 import 'package:apprelease_runner/src/steps/publish.dart';
 import 'package:apprelease_runner/src/steps/versioning.dart';
 import 'package:apprelease_runner/src/stores/app_store_connect.dart';
@@ -37,7 +38,20 @@ void main() {
     expect(compareVersions('1.1', '1.1.1'), -1);
   });
 
-  test('a closed version names the next one', () {
-    expect(versionClosedMessage('1.1.1', '1.1.1'), contains('to 1.1.2'));
+  test('the version after an approved one', () {
+    expect(nextVersionAfter('1.1.1'), '1.1.2');
+    expect(nextVersionAfter('2.0'), '2.0.1');
+  });
+
+  test('the release version is written into pubspec.yaml', () {
+    const pubspec = 'name: mekauto\nversion: 1.1.1+7\n\nenvironment:\n';
+    expect(
+      setPubspecVersion(pubspec, '1.1.2', 12),
+      'name: mekauto\nversion: 1.1.2+12\n\nenvironment:\n',
+    );
+    expect(
+      setPubspecVersion('name: x\n', '1.0.0', 1),
+      'version: 1.0.0+1\nname: x\n',
+    );
   });
 }

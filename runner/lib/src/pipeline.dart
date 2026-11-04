@@ -10,6 +10,7 @@ import 'steps/checkout.dart';
 import 'steps/publish.dart';
 import 'steps/signing.dart';
 import 'steps/versioning.dart';
+import 'stores/app_store_connect.dart';
 
 /// Streams a release's log to Supabase, with secrets masked.
 class LogSink {
@@ -306,6 +307,39 @@ class Pipeline {
     env['AR_BUILD_NUMBER'] = '$next';
     await api.updateRelease(releaseId, {'build_number': next});
     await log('AR_BUILD_NUMBER=$next', stepId: stepId, level: 'command');
+    await _writeVersion(stepId, release['version_name'] as String, next);
+  }
+
+  /// `flutter build` takes the version from pubspec.yaml; the release's own
+  /// version (typed in the console, or moved past an approved one) has to
+  /// be written there to reach the store.
+  Future<void> _writeVersion(String stepId, String version, int build) async {
+    final pubspec = File(p.join(env['AR_BUILD_DIR']!, 'pubspec.yaml'));
+    if (!pubspec.existsSync()) return;
+    final text = pubspec.readAsStringSync();
+    final line = RegExp(r'^version:.*$', multiLine: true);
+    // Never lower it: a version typed in the console that is behind the
+    // project's own gives way to the project's.
+    final own = RegExp(
+      r'^version:\s*(\d+(?:\.\d+)*)',
+      multiLine: true,
+    ).firstMatch(text)?.group(1);
+    if (own != null && compareVersions(own, version) > 0) {
+      await log(
+        'pubspec.yaml already has $own, above $version; releasing as $own',
+        stepId: stepId,
+      );
+      version = own;
+      release['version_name'] = own;
+      await api.updateRelease(releaseId, {'version_name': own});
+    }
+    final updated = setPubspecVersion(text, version, build);
+    if (updated == text) return;
+    pubspec.writeAsStringSync(updated);
+    await log(
+      'pubspec.yaml: ${line.firstMatch(text)?.group(0) ?? 'no version'} → version: $version+$build',
+      stepId: stepId,
+    );
   }
 
   Future<void> _iosSigning(String stepId) async {
@@ -483,4 +517,13 @@ RegExp _globToRegExp(String glob) {
   }
   buffer.write(r'$');
   return RegExp(buffer.toString());
+}
+
+/// [pubspec] with its `version:` line set to `[version]+[build]`, added
+/// when missing.
+String setPubspecVersion(String pubspec, String version, int build) {
+  final line = RegExp(r'^version:.*$', multiLine: true);
+  final value = 'version: $version+$build';
+  if (line.hasMatch(pubspec)) return pubspec.replaceFirst(line, value);
+  return '$value\n$pubspec';
 }
