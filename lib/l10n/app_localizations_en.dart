@@ -1363,4 +1363,14 @@ class AppL10nEn extends AppL10n {
   @override
   String get setupHelpBody =>
       'A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.';
+
+  @override
+  String get credentialSecurityTitle => 'Encrypted and never shown again';
+
+  @override
+  String get credentialSecurityBody =>
+      'Encrypted with AES before it is stored, with a key that is not in the database. Not even this console can read it back. Only the build machine decrypts it, for one release, then deletes it. Passwords never appear in logs.';
+
+  @override
+  String get credentialSecurityMore => 'How we protect it';
 }

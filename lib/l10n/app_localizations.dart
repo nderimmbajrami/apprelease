@@ -2378,6 +2378,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.'**
   String get setupHelpBody;
+
+  /// No description provided for @credentialSecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted and never shown again'**
+  String get credentialSecurityTitle;
+
+  /// No description provided for @credentialSecurityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted with AES before it is stored, with a key that is not in the database. Not even this console can read it back. Only the build machine decrypts it, for one release, then deletes it. Passwords never appear in logs.'**
+  String get credentialSecurityBody;
+
+  /// No description provided for @credentialSecurityMore.
+  ///
+  /// In en, this message translates to:
+  /// **'How we protect it'**
+  String get credentialSecurityMore;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

@@ -651,5 +651,8 @@
   "guideAsc5": "Upload the .p8 file below with both IDs.",
   "guideAscNote": "The app must already exist in App Store Connect with the same bundle ID as your project.",
   "setupHelpTitle": "Stuck on the keys? We set it up with you.",
-  "setupHelpBody": "A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together."
+  "setupHelpBody": "A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.",
+  "credentialSecurityTitle": "Encrypted and never shown again",
+  "credentialSecurityBody": "Encrypted with AES before it is stored, with a key that is not in the database. Not even this console can read it back. Only the build machine decrypts it, for one release, then deletes it. Passwords never appear in logs.",
+  "credentialSecurityMore": "How we protect it"
 }

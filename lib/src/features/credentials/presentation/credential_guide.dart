@@ -196,5 +196,57 @@ class SetupHelpCard extends StatelessWidget {
   }
 }
 
+/// What happens to a secret once saved, said where it is handed over.
+class CredentialSecurityNote extends StatelessWidget {
+  const CredentialSecurityNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(Gap.md),
+      decoration: BoxDecoration(
+        border: Border.all(color: scheme.outlineVariant),
+        borderRadius: BorderRadius.circular(Radii.md),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.lock_outline, size: 20, color: scheme.tertiary),
+          const SizedBox(width: Gap.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.credentialSecurityTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.credentialSecurityBody,
+                  style: theme.textTheme.bodySmall,
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => _open(
+                    '${AppConfig.siteUrl}/privacy/#how-your-keys-are-protected',
+                  ),
+                  child: Text(l10n.credentialSecurityMore),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 void _open(String url) =>
     launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);

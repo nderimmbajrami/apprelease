@@ -300,6 +300,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                   ],
                   const SizedBox(height: Gap.lg),
                   ..._fieldsFor(_kind, validators),
+                  const SizedBox(height: Gap.lg),
+                  const CredentialSecurityNote(),
                   const SizedBox(height: Gap.xl),
                   FilledButton.icon(
                     onPressed: isBusy ? null : _submit,
