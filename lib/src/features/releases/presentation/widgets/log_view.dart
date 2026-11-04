@@ -48,7 +48,7 @@ class _LogViewState extends State<LogView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final time = DateFormat('HH:mm:ss');
+    final time = DateFormat('HH:mm:ss', 'en_US');
 
     return Container(
       decoration: BoxDecoration(

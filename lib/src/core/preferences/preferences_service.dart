@@ -10,7 +10,8 @@ class PreferencesService {
 
   static const _themeKey = 'theme_mode';
   static const _setupKey = 'setup_dismissed';
-  static const _tourKey = 'tour_seen';
+  // v2: the first key was burnt by a tour that fired on the sign-in page.
+  static const _tourKey = 'tour_seen_v2';
 
   final SharedPreferences _prefs;
 

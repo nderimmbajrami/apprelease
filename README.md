@@ -63,8 +63,13 @@ tool/build_web.sh                 # → dist/apprelease-console-<stamp>.zip
 ```
 
 Upload that zip's contents to the `public_html` of the `publish` subdomain.
-The script stamps `main.dart.js` per build so no browser serves a stale one,
-and writes the `.htaccess` the Flutter web app needs on Apache.
+The script builds to WebAssembly (with the JavaScript build as the fallback
+for older browsers), stamps the app and renderer files per build so no
+browser serves a stale one, and writes the `.htaccess` the Flutter web app
+needs on Apache, with the cache rules those stamps allow.
+
+To see what a cold load costs (bytes, requests, time to the first frame):
+`node tool/measure_web.mjs https://publish.apprelease.store/`.
 
 ### Architecture
 

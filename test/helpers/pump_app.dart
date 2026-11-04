@@ -45,7 +45,7 @@ Future<void> pumpApp(
 }) async {
   await initializeDateFormatting();
   // The guided tour would cover the screen; tests drive the page itself.
-  SharedPreferences.setMockInitialValues({'tour_seen': true});
+  SharedPreferences.setMockInitialValues({'tour_seen_v2': true});
   final prefs = await SharedPreferences.getInstance();
 
   final auth = LocalAuthRepository();

@@ -1,5 +1,7 @@
 /// Every route in the console, declared once.
 enum AppRoute {
+  /// Shown until the session is known, so nothing else flashes first.
+  starting('/starting'),
   signIn('/sign-in'),
   signUp('/sign-up'),
 

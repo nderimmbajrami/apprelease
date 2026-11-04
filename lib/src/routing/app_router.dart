@@ -17,6 +17,7 @@ import '../features/releases/presentation/release_detail_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'app_routes.dart';
 import 'not_found_screen.dart';
+import '../core/widgets/starting_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -47,6 +48,9 @@ GoRouter goRouter(Ref ref) {
       fireImmediately: true,
     );
 
+  // The address asked for while the session was still being restored.
+  String? requested;
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: ref.watch(initialLocationProvider),
@@ -54,11 +58,28 @@ GoRouter goRouter(Ref ref) {
     errorBuilder: (context, state) => const NotFoundScreen(),
     redirect: (context, state) {
       final auth = ref.read(authStateChangesProvider);
-      // Wait for the first auth event before deciding anything.
-      if (auth.isLoading && !auth.hasValue) return null;
+      final location = state.matchedLocation;
+      final isStarting = location == AppRoute.starting.path;
+
+      // Until the first auth event nothing is known. The starting screen
+      // holds the place: a dashboard built now would flash, start the tour,
+      // and then be replaced by the sign-in page.
+      if (auth.isLoading && !auth.hasValue) {
+        if (isStarting) return null;
+        requested = state.uri.toString();
+        return AppRoute.starting.path;
+      }
 
       final user = auth.value;
-      final location = state.matchedLocation;
+      if (isStarting) {
+        final target = requested;
+        requested = null;
+        if (user == null) return AppRoute.signIn.path;
+        return target == null || target == AppRoute.starting.path
+            ? AppRoute.home.path
+            : target;
+      }
+
       final isOnAuthScreen =
           location == AppRoute.signIn.path || location == AppRoute.signUp.path;
 
@@ -72,6 +93,12 @@ GoRouter goRouter(Ref ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: AppRoute.starting.path,
+        name: AppRoute.starting.name,
+        pageBuilder: (context, state) =>
+            _instant(state, const StartingScreen()),
+      ),
       GoRoute(
         path: AppRoute.signIn.path,
         name: AppRoute.signIn.name,

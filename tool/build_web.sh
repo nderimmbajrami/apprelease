@@ -23,15 +23,28 @@ fi
 
 # --no-web-resources-cdn keeps CanvasKit on our own host, so a network that
 # blocks Google does not leave the app on its splash.
-flutter build web --release --base-href=/ --pwa-strategy=none \
+# --wasm: Dart compiled to WebAssembly with the Skwasm renderer, which reaches
+# the first frame in about half the time of the JavaScript build. Browsers
+# without WasmGC (older Safari) get the JavaScript build the loader keeps
+# next to it.
+flutter build web --release --wasm --base-href=/ --pwa-strategy=none \
   --no-web-resources-cdn "${DEFINES[@]}"
 
 cd build/web
 
 STAMP="$(date +%Y%m%d%H%M%S)"
 mv main.dart.js "main.$STAMP.js"
-perl -pi -e "s/main\.dart\.js/main.$STAMP.js/g" flutter_bootstrap.js
+mv main.dart.wasm "main.$STAMP.wasm"
+mv main.dart.mjs "main.$STAMP.mjs"
+perl -pi -e "s/main\.dart\.js/main.$STAMP.js/g; s/main\.dart\.wasm/main.$STAMP.wasm/g; s/main\.dart\.mjs/main.$STAMP.mjs/g" flutter_bootstrap.js
 perl -pi -e "s/flutter_bootstrap\.js/flutter_bootstrap.js?v=$STAMP/g" index.html
+
+# CanvasKit changes only with the Flutter engine, so its folder carries the
+# engine revision and is cached for a year; a new engine is a new folder.
+ENGINE="$(perl -ne 'print $1 if /"engineRevision":"([0-9a-f]{8})/' flutter_bootstrap.js)"
+mv canvaskit "canvaskit-$ENGINE"
+perl -pi -e "s/_flutter\.loader\.load\(\);/_flutter.loader.load({config: {canvasKitBaseUrl: \"canvaskit-$ENGINE\/\"}});/" flutter_bootstrap.js
+grep -q "canvasKitBaseUrl" flutter_bootstrap.js || { echo "could not set canvasKitBaseUrl"; exit 1; }
 
 cat > .htaccess <<HT
 # AppRelease console (publish.apprelease.store)
@@ -48,6 +61,7 @@ RewriteRule ^ index.html [L]
 # Hostinger serves .wasm as text/plain, and CanvasKit refuses that.
 AddType application/wasm .wasm
 AddType text/javascript .js
+AddType text/javascript .mjs
 AddType application/json .json
 AddType font/woff2 .woff2
 AddType font/ttf .ttf
@@ -59,10 +73,25 @@ AddType image/svg+xml .svg
   <FilesMatch "(index\.html|flutter_bootstrap\.js|flutter\.js|version\.json|manifest\.json)\$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
   </FilesMatch>
+  # The app and CanvasKit carry a stamp in their path: a new build is a new
+  # URL, so these can stay in the browser and on the CDN for a year.
+  <FilesMatch "^main\.[0-9]+\.(js|wasm|mjs)\$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+<IfModule mod_headers.c>
+  # The renderer files live in the stamped canvaskit-<engine> folder.
+  <FilesMatch "^(canvaskit|skwasm|skwasm_heavy|wimp)\.(js|wasm)\$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # Fonts and images: a week, then revalidated.
+  <FilesMatch "\.(ttf|otf|woff2|png|svg)\$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
 </IfModule>
 
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml application/wasm font/ttf
 </IfModule>
 HT
 

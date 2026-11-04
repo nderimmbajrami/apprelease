@@ -15,15 +15,19 @@ class SupabaseReleasesRepository implements ReleasesRepository {
   final SupabaseClient _client;
   final _writes = StreamController<void>.broadcast();
 
+  /// Lists show a release's status, version and timing, never its steps,
+  /// so those stay out: a running build touches its steps every few
+  /// seconds, and each touch would re-send every release of the team.
+  /// [watchRelease] carries the steps for the one screen that shows them.
   @override
   Stream<List<Release>> watchReleases() => watchQuery(
     client: _client,
-    tables: const ['releases', 'release_steps'],
+    tables: const ['releases'],
     refresh: _writes.stream,
     fetch: () async {
       final rows = await _client
           .from('releases')
-          .select('*, release_steps(*)')
+          .select()
           .order('created_at', ascending: false);
       return [for (final row in rows) _fromRow(row)];
     },

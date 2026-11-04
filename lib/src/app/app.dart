@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -23,12 +22,9 @@ class AppReleaseApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       supportedLocales: AppL10n.supportedLocales,
-      localizationsDelegates: const [
-        AppL10n.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      // English only: Material's built-in strings do, and the translations
+      // of every other language stay out of the download.
+      localizationsDelegates: const [AppL10n.delegate],
       routerConfig: router,
     );
   }

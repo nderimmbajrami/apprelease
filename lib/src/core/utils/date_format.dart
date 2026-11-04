@@ -1,11 +1,16 @@
 import 'package:intl/intl.dart';
 
+// English only, so the date symbols of every other locale stay out of the
+// bundle. The built-in locale needs no initializeDateFormatting().
+const _locale = 'en_US';
+
 /// "15 Oct 2026, 11:42".
 String formatDateTime(DateTime value) =>
-    DateFormat('d MMM yyyy, HH:mm').format(value.toLocal());
+    DateFormat('d MMM yyyy, HH:mm', _locale).format(value.toLocal());
 
 /// "15 Oct".
-String formatDay(DateTime value) => DateFormat('d MMM').format(value.toLocal());
+String formatDay(DateTime value) =>
+    DateFormat('d MMM', _locale).format(value.toLocal());
 
 /// "4m 12s" / "38s".
 String formatDuration(Duration value) {

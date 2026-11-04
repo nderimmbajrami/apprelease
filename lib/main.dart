@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,7 +13,6 @@ Future<void> main() async {
 
   // Everything that must be ready before the first frame is loaded here and
   // injected through `overrides` — providers stay synchronous as a result.
-  await initializeDateFormatting();
   final prefs = await SharedPreferences.getInstance();
 
   if (AppConfig.isSupabaseEnabled) {
