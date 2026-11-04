@@ -20,14 +20,15 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- The engine asks for the fonts only once it runs; fetched now, they are
-       already here by then. -->
-  <link rel="preload" href="assets/assets/fonts/Inter-400.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/assets/fonts/Inter-500.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/assets/fonts/Inter-600.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/assets/fonts/Inter-700.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/assets/fonts/JetBrainsMono-400.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/assets/fonts/JetBrainsMono-600.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" href="assets/fonts/MaterialIcons-Regular.otf" as="font" type="font/otf" crossorigin>
+       already here by then. as="fetch", not "font": the engine loads them
+       with fetch(), and only a preload of the same kind is reused. -->
+  <link rel="preload" href="assets/assets/fonts/Inter-400.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/assets/fonts/Inter-500.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/assets/fonts/Inter-600.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/assets/fonts/Inter-700.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/assets/fonts/JetBrainsMono-400.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/assets/fonts/JetBrainsMono-600.ttf" as="fetch" crossorigin>
+  <link rel="preload" href="assets/fonts/MaterialIcons-Regular.otf" as="fetch" crossorigin>
   <!--WASM_PRELOAD: build_web.sh puts the stamped wasm files here, for the
       browsers that will use them. -->
 
