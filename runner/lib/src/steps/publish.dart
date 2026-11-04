@@ -248,11 +248,13 @@ class Publish {
       args,
       environment: {...Platform.environment, ...env},
     );
+    final output = <String>[];
     Future<void> pipe(Stream<List<int>> stream, String level) => stream
         .transform(const SystemEncoding().decoder)
         .transform(const LineSplitter())
         .forEach((line) async {
           if (line.trim().isNotEmpty) {
+            output.add(line);
             await log(line, stepId: stepId, level: level);
           }
         });
@@ -261,6 +263,53 @@ class Publish {
       pipe(process.stderr, 'warning'),
     ]);
     final code = await process.exitCode;
-    if (code != 0) throw StepFailed('xcrun altool exited with code $code');
+    if (code != 0) {
+      throw StepFailed(
+        appleUploadError(output) ?? 'xcrun altool exited with code $code',
+      );
+    }
   }
+}
+
+/// What Apple's refusal means and what to do about it, in one line, from
+/// altool's output; null when the output says nothing recognisable.
+String? appleUploadError(List<String> output) {
+  final text = output.join('\n');
+  final version = RegExp(
+    r'CFBundleShortVersionString \[([^\]]+)\]',
+  ).firstMatch(text)?.group(1);
+  final train = RegExp(r"train version '([^']+)'").firstMatch(text)?.group(1);
+  if (text.contains('90062') || text.contains('90186')) {
+    final v = version ?? train;
+    return 'Version ${v ?? 'of this build'} is already approved on the App '
+        'Store. Raise the version in pubspec.yaml (for example '
+        '${_nextPatch(v) ?? 'to the next number'}) and release again.';
+  }
+  if (text.contains('90189') ||
+      text.contains('bundle version must be higher')) {
+    return 'This build number was already uploaded to App Store Connect. '
+        'Release again; the next number is taken from App Store Connect.';
+  }
+  if (text.contains('No suitable application records') ||
+      text.contains('Cannot determine the Apple ID')) {
+    return 'App Store Connect has no app with this bundle ID. Create the app '
+        'there first, with the same bundle ID as the project.';
+  }
+  if (text.contains('NOT_AUTHORIZED') ||
+      text.contains('Authentication failed') ||
+      text.contains('-19209')) {
+    return 'App Store Connect refused the API key. Check the Key ID and '
+        'Issuer ID, and that the key has the App Manager role.';
+  }
+  final description = RegExp(
+    r'description : (.+)',
+  ).firstMatch(text)?.group(1)?.trim();
+  return description == null ? null : 'App Store Connect: $description';
+}
+
+/// `1.1.1` → `1.1.2`.
+String? _nextPatch(String? version) {
+  final m = RegExp(r'^(\d+)\.(\d+)\.(\d+)$').firstMatch(version ?? '');
+  if (m == null) return null;
+  return '${m[1]}.${m[2]}.${int.parse(m[3]!) + 1}';
 }
