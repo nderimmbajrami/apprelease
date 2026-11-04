@@ -46,6 +46,13 @@ mv canvaskit "canvaskit-$ENGINE"
 perl -pi -e "s/_flutter\.loader\.load\(\);/_flutter.loader.load({config: {canvasKitBaseUrl: \"canvaskit-$ENGINE\/\"}});/" flutter_bootstrap.js
 grep -q "canvasKitBaseUrl" flutter_bootstrap.js || { echo "could not set canvasKitBaseUrl"; exit 1; }
 
+# Chromium takes the WebAssembly build (the loader's default allow-list), so
+# only there do the two wasm files start downloading with the page instead of
+# after the bootstrap has run. Other browsers would waste the bytes.
+PRELOAD="<script>if(navigator.vendor===\"Google Inc.\"){for(const h of [\"main.$STAMP.wasm\",\"canvaskit-$ENGINE/skwasm.wasm\"]){const l=document.createElement(\"link\");l.rel=\"preload\";l.as=\"fetch\";l.href=h;l.crossOrigin=\"anonymous\";document.head.appendChild(l);}}</script>"
+PRELOAD="$PRELOAD" perl -0pi -e 's/<!--WASM_PRELOAD:.*?-->/$ENV{PRELOAD}/s' index.html
+grep -q "rel=\"preload\";l.as" index.html || { echo "could not add the wasm preload"; exit 1; }
+
 cat > .htaccess <<HT
 # AppRelease console (publish.apprelease.store)
 RewriteEngine On

@@ -2,9 +2,13 @@
 // downloaded, when Flutter drew its first frame, and any console errors.
 //
 //   node tool/measure_web.mjs https://publish.apprelease.store/ shot.png
+//   UA=1 WATERFALL=1 node tool/measure_web.mjs https://publish.apprelease.store/
 //   LS='{"flutter.tour_seen_v2":"true"}' H=2000 node tool/measure_web.mjs http://127.0.0.1:8077/ tall.png
 //
-// Needs Google Chrome in /Applications and Node 22 or newer.
+// UA=1 presents a regular Chrome: the CDN challenges headless browsers with
+// a 3 s bot check that real visitors never see. WATERFALL=1 prints every
+// request with its start and end. Needs Google Chrome in /Applications and
+// Node 22 or newer.
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -52,8 +56,11 @@ const responses = new Map();
 const bytes = new Map();
 const errors = [];
 let loadAt = null;
+const starts = new Map();
+const ends = new Map();
+handlers['Network.requestWillBeSent'] = (p) => starts.set(p.requestId, p.timestamp);
 handlers['Network.responseReceived'] = (p) => responses.set(p.requestId, { url: p.response.url, type: p.type });
-handlers['Network.loadingFinished'] = (p) => bytes.set(p.requestId, p.encodedDataLength);
+handlers['Network.loadingFinished'] = (p) => { bytes.set(p.requestId, p.encodedDataLength); ends.set(p.requestId, p.timestamp); };
 handlers['Page.loadEventFired'] = (p) => (loadAt = p.timestamp);
 handlers['Runtime.consoleAPICalled'] = (p) => {
   if (p.type === 'error' || p.type === 'warning') errors.push(`${p.type}: ${p.args.map((a) => a.value ?? a.description ?? '').join(' ').slice(0, 200)}`);
@@ -64,6 +71,12 @@ await send('Network.enable');
 await send('Page.enable');
 await send('Runtime.enable');
 await send('Network.setCacheDisabled', { cacheDisabled: true });
+// UA=1 presents a regular desktop Chrome instead of the headless one.
+if (process.env.UA) {
+  await send('Network.setUserAgentOverride', {
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
+  });
+}
 await send('Page.addScriptToEvaluateOnNewDocument', {
   source: `for(const [k,v] of Object.entries(${preset}))localStorage.setItem(k,v);window.__ff=null;window.__t0=performance.timeOrigin;window.addEventListener('flutter-first-frame',()=>{window.__ff=performance.now()});`,
 });
@@ -86,7 +99,17 @@ if (shot) {
   writeFileSync(shot, Buffer.from(img.result.data, 'base64'));
 }
 
-const rows = [...responses].map(([rid, r]) => ({ ...r, bytes: bytes.get(rid) ?? 0 }));
+const rows = [...responses].map(([rid, r]) => ({ ...r, bytes: bytes.get(rid) ?? 0, start: starts.get(rid), end: ends.get(rid) }));
+if (process.env.WATERFALL) {
+  const t0 = Math.min(...rows.filter((r) => r.start).map((r) => r.start));
+  console.log('waterfall (start → end, ms since first request):');
+  for (const r of [...rows].sort((a, b) => (a.start ?? 0) - (b.start ?? 0))) {
+    const s = r.start ? Math.round((r.start - t0) * 1000) : '?';
+    const e = r.end ? Math.round((r.end - t0) * 1000) : '?';
+    console.log(`  ${String(s).padStart(6)} → ${String(e).padStart(6)}  ${(r.bytes / 1024).toFixed(0).padStart(5)} KB  ${r.url.replace(/^https?:\/\/[^/]+/, '').slice(0, 70)}`);
+  }
+  console.log(`  first frame at ${firstFrame ? Math.round(firstFrame) : '?'} ms since navigation`);
+}
 const total = rows.reduce((s, r) => s + r.bytes, 0);
 const byType = {};
 for (const r of rows) byType[r.type] = (byType[r.type] ?? 0) + r.bytes;
