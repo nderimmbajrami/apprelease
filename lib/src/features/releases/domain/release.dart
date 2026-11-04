@@ -293,3 +293,39 @@ List<Release> olderQueued(Iterable<Release> releases) {
   }
   return older;
 }
+
+/// How many releases the team used this month, out of how many.
+class ReleaseUsage {
+  const ReleaseUsage({
+    required this.used,
+    required this.limit,
+    required this.resetsAt,
+  });
+
+  final int used;
+  final int limit;
+
+  /// The first day of next month, when the count starts over.
+  final DateTime resetsAt;
+
+  bool get exhausted => used >= limit;
+  int get left => exhausted ? 0 : limit - used;
+
+  static ReleaseUsage? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final limit = json['limit'];
+    if (limit is! num) return null;
+    return ReleaseUsage(
+      used: (json['used'] as num? ?? 0).toInt(),
+      limit: limit.toInt(),
+      resetsAt:
+          DateTime.tryParse('${json['resets_at']}')?.toLocal() ??
+          DateTime.now(),
+    );
+  }
+}
+
+/// The database refused a release: the team used its monthly allowance.
+class ReleaseLimitReached implements Exception {
+  const ReleaseLimitReached();
+}

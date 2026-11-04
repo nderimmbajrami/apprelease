@@ -39,6 +39,9 @@ abstract interface class ReleasesRepository {
   /// queued or not visible.
   Future<QueueInfo?> queueInfo(String releaseId);
 
+  /// This month's releases against the team's allowance; null when unknown.
+  Future<ReleaseUsage?> usage();
+
   void dispose();
 }
 
@@ -69,6 +72,11 @@ Stream<List<Release>> releasesStream(Ref ref) {
         ],
       );
 }
+
+/// Re-read after every release the console starts.
+@riverpod
+Future<ReleaseUsage?> releaseUsage(Ref ref) =>
+    ref.watch(releasesRepositoryProvider).usage();
 
 /// The releases of one app, newest first.
 @riverpod

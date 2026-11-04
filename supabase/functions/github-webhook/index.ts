@@ -6,6 +6,7 @@
 // (X-Hub-Signature-256) and that is what we check. Deployed with
 // --no-verify-jwt.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { alertQueued, send, shell, TEAM_INBOX } from "../_shared/mail.ts";
 
 // Must match pipelineSteps() in the console and the runner.
 const STEPS: Record<string, string[]> = {
@@ -108,6 +109,7 @@ Deno.serve(async (req) => {
   }
 
   const queued: string[] = [];
+  const queuedIds: string[] = [];
   const replaced: number[] = [];
   const isTag = ref.startsWith("refs/tags/");
   for (const { platform, track } of plan) {
@@ -138,11 +140,24 @@ Deno.serve(async (req) => {
       version_name: version, status: "queued", branch, commit: sha,
       started_by_name: `GitHub push by ${pusher}`,
     });
+    if (error?.message === "release_limit_reached") {
+      // Out of releases this month: tell the team, and GitHub that it was
+      // seen, so the delivery is not retried.
+      await send(TEAM_INBOX, `${app.name}: push to ${branch} skipped, monthly limit reached`, shell(
+        "Release limit reached",
+        `<p>A push to <b>${branch}</b> (${sha}) of <b>${app.name}</b> did not queue a release: the team used its monthly releases (${error.details ?? ""}).</p>`,
+      )).catch(() => {});
+      await alertQueued(admin, queuedIds).catch(() => {});
+      return json(200, { ok: true, queued, replaced, ignored: "release limit reached" });
+    }
     if (error) return json(500, { error: error.message });
     await admin.from("release_steps").insert(
       STEPS[platform].map((name, i) => ({ id: `${id}-${i}`, release_id: id, name, position: i, status: "pending" })),
     );
     queued.push(`${platform} #${number} → ${track}`);
+    queuedIds.push(id);
   }
+  // One mail per push, however many platforms it queued.
+  await alertQueued(admin, queuedIds).catch((e) => console.error(e));
   return json(200, { ok: true, queued, replaced });
 });

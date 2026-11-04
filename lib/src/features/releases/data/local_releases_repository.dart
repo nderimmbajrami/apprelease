@@ -194,6 +194,10 @@ class LocalReleasesRepository implements ReleasesRepository {
     }
   }
 
+  /// The demo has no allowance.
+  @override
+  Future<ReleaseUsage?> usage() async => null;
+
   /// The simulated runner is always there.
   @override
   Stream<bool> watchRunnerOnline() => Stream.value(true);

@@ -96,6 +96,50 @@ final class ReleasesStreamProvider
 
 String _$releasesStreamHash() => r'506665358bec4fec367ad6d0cb34ffd72da8c597';
 
+/// Re-read after every release the console starts.
+
+@ProviderFor(releaseUsage)
+final releaseUsageProvider = ReleaseUsageProvider._();
+
+/// Re-read after every release the console starts.
+
+final class ReleaseUsageProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ReleaseUsage?>,
+          ReleaseUsage?,
+          FutureOr<ReleaseUsage?>
+        >
+    with $FutureModifier<ReleaseUsage?>, $FutureProvider<ReleaseUsage?> {
+  /// Re-read after every release the console starts.
+  ReleaseUsageProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'releaseUsageProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$releaseUsageHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<ReleaseUsage?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ReleaseUsage?> create(Ref ref) {
+    return releaseUsage(ref);
+  }
+}
+
+String _$releaseUsageHash() => r'8142ad96c3de4be7088d3bc3e9bf4563f8b8be0f';
+
 /// The releases of one app, newest first.
 
 @ProviderFor(releasesOfApp)

@@ -443,3 +443,6 @@ verify_jwt = false
 
 [functions.check-credential]
 verify_jwt = false
+
+[functions.notify-release]
+verify_jwt = false

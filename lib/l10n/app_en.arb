@@ -597,5 +597,28 @@
         "type": "int"
       }
     }
-  }
+  },
+  "usageLine": "{used} of {limit} releases used this month",
+  "@usageLine": {
+    "placeholders": {
+      "used": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "usageExhausted": "All {limit} releases of this month are used. More on {date}, or ask us for a bigger plan.",
+  "@usageExhausted": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseStartFailed": "The release could not be queued. Check your connection and try again."
 }

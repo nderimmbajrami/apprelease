@@ -34,7 +34,7 @@ final class ReleasesControllerProvider
 }
 
 String _$releasesControllerHash() =>
-    r'9163825433a43a9bd7a6b47b62588c972d0deb9e';
+    r'b51527f057848221d1c7c36e0cd9a643c9fe6d52';
 
 abstract class _$ReleasesController extends $AsyncNotifier<void> {
   FutureOr<void> build();

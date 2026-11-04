@@ -1260,4 +1260,18 @@ class AppL10nEn extends AppL10n {
     );
     return '$_temp0';
   }
+
+  @override
+  String usageLine(int used, int limit) {
+    return '$used of $limit releases used this month';
+  }
+
+  @override
+  String usageExhausted(int limit, String date) {
+    return 'All $limit releases of this month are used. More on $date, or ask us for a bigger plan.';
+  }
+
+  @override
+  String get releaseStartFailed =>
+      'The release could not be queued. Check your connection and try again.';
 }

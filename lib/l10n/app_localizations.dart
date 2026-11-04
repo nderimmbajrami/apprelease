@@ -2216,6 +2216,24 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'{n, plural, =1{Removed 1 release from the queue} other{Removed {n} releases from the queue}}'**
   String queueRemoved(int n);
+
+  /// No description provided for @usageLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {limit} releases used this month'**
+  String usageLine(int used, int limit);
+
+  /// No description provided for @usageExhausted.
+  ///
+  /// In en, this message translates to:
+  /// **'All {limit} releases of this month are used. More on {date}, or ask us for a bigger plan.'**
+  String usageExhausted(int limit, String date);
+
+  /// No description provided for @releaseStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The release could not be queued. Check your connection and try again.'**
+  String get releaseStartFailed;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

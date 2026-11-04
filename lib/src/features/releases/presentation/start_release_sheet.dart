@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n_extension.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/date_format.dart';
 import '../../../core/utils/validators.dart';
 import '../../apps/domain/app_project.dart';
 import '../../credentials/data/credentials_repository.dart';
@@ -43,6 +44,7 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
       ? Platform.android
       : Platform.ios;
   late ReleaseTrack _track = ReleaseTrack.forPlatform(_platform).first;
+  String? _error;
 
   /// The version of the app's newest release, so a rerun needs no typing.
   String _lastVersion() {
@@ -72,6 +74,17 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
           buildNumber: int.tryParse(_buildNumber.text.trim()),
         );
     if (!mounted) return;
+    ref.invalidate(releaseUsageProvider);
+    if (id == null) {
+      // Stay open and say why: the allowance (re-read above) or the network.
+      final error = ref.read(releasesControllerProvider).error;
+      setState(
+        () => _error = error is ReleaseLimitReached
+            ? null
+            : context.l10n.releaseStartFailed,
+      );
+      return;
+    }
     Navigator.of(context).pop(id);
   }
 
@@ -91,6 +104,8 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
     final checks = Readiness.checks(app, _platform, credentials);
     final missing = checks.where((c) => !c.ok).length;
     final ready = missing == 0;
+    final usage = ref.watch(releaseUsageProvider).value;
+    final exhausted = usage?.exhausted ?? false;
 
     return Dialog(
       insetPadding: const EdgeInsets.all(Gap.lg),
@@ -267,6 +282,25 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
                   ),
                 ),
               ),
+              if (exhausted || _error != null)
+                Container(
+                  color: scheme.errorContainer,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Gap.xl,
+                    vertical: Gap.md,
+                  ),
+                  child: Text(
+                    exhausted
+                        ? l10n.usageExhausted(
+                            usage!.limit,
+                            formatDay(usage.resetsAt),
+                          )
+                        : _error!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
+                  ),
+                ),
               const Divider(height: 1),
               // Footer.
               Padding(
@@ -279,11 +313,22 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        ready ? l10n.readyAll : l10n.readyCount(missing),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: ready ? scheme.tertiary : scheme.error,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            ready ? l10n.readyAll : l10n.readyCount(missing),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: ready ? scheme.tertiary : scheme.error,
+                            ),
+                          ),
+                          if (usage != null)
+                            Text(
+                              l10n.usageLine(usage.used, usage.limit),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: Gap.md),
@@ -293,7 +338,7 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
                     ),
                     const SizedBox(width: Gap.sm),
                     FilledButton.icon(
-                      onPressed: isBusy || !ready ? null : _submit,
+                      onPressed: isBusy || !ready || exhausted ? null : _submit,
                       icon: const Icon(Icons.rocket_launch_outlined, size: 18),
                       label: Text(l10n.startRelease),
                     ),

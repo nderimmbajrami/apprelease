@@ -68,6 +68,25 @@ class SupabaseReleasesRepository implements ReleasesRepository {
 
   @override
   Future<Release> startRelease(Release release) async {
+    try {
+      await _insertRelease(release);
+    } on PostgrestException catch (e) {
+      if (e.message.contains('release_limit_reached')) {
+        throw const ReleaseLimitReached();
+      }
+      rethrow;
+    }
+    // Mails the team that someone is releasing. Never holds up the release.
+    unawaited(
+      _client.functions
+          .invoke('notify-release', body: {'release_id': release.id})
+          .then<void>((_) {}, onError: (_) {}),
+    );
+    _touch();
+    return release;
+  }
+
+  Future<void> _insertRelease(Release release) async {
     await _client.from('releases').insert({
       'id': release.id,
       'app_id': release.appId,
@@ -91,8 +110,6 @@ class SupabaseReleasesRepository implements ReleasesRepository {
           'status': step.status.name,
         },
     ]);
-    _touch();
-    return release;
   }
 
   @override
@@ -167,6 +184,17 @@ class SupabaseReleasesRepository implements ReleasesRepository {
   Future<QueueInfo?> queueInfo(String releaseId) async => QueueInfo.fromJson(
     await _client.rpc('release_queue', params: {'p_release': releaseId}),
   );
+
+  /// Null until the release_limit migration is in; the console then shows
+  /// no allowance instead of failing.
+  @override
+  Future<ReleaseUsage?> usage() async {
+    try {
+      return ReleaseUsage.fromJson(await _client.rpc('release_usage'));
+    } on Object {
+      return null;
+    }
+  }
 
   @override
   Future<void> deleteReleasesOfApp(String appId) async {
