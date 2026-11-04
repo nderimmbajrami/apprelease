@@ -122,8 +122,7 @@ void main() {
   test(
     'workflow selection prefers the platform-track id, then the signing section',
     () {
-      const yaml =
-          r'''
+      const yaml = r'''
 workflows:
   ios-testflight:
     name: iOS

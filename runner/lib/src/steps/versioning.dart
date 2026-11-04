@@ -79,6 +79,11 @@ class Versioning {
         );
         final appId = await asc.appId(bundle);
         env['AR_ASC_APP_ID'] = appId;
+        await _checkVersionIsOpen(
+          asc,
+          appId,
+          release['version_name'] as String,
+        );
         final latest = await asc.latestBuildNumber(appId);
         await log(
           'Latest build number on App Store Connect: $latest',
@@ -91,4 +96,42 @@ class Versioning {
     await log('Using the release sequence number $number', stepId: stepId);
     return number;
   }
+
+  /// Apple refuses any build for a version at or below the last approved
+  /// one, but only after the upload. Asking first saves the whole build.
+  Future<void> _checkVersionIsOpen(
+    AppStoreConnectClient asc,
+    String appId,
+    String version,
+  ) async {
+    final String? approved;
+    try {
+      approved = await asc.highestApprovedVersion(appId);
+    } on Object catch (error) {
+      await log(
+        'Could not check approved versions ($error); going on',
+        stepId: stepId,
+        level: 'warning',
+      );
+      return;
+    }
+    if (approved == null) return;
+    await log('Highest approved App Store version: $approved', stepId: stepId);
+    if (compareVersions(version, approved) <= 0) {
+      throw StepFailed(versionClosedMessage(version, approved));
+    }
+  }
+}
+
+/// Why Apple will refuse [version], and the version that would pass.
+String versionClosedMessage(String version, String approved) {
+  final parts = approved.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  while (parts.length < 3) {
+    parts.add(0);
+  }
+  parts[2] += 1;
+  return 'Version $version is not above $approved, which is already approved '
+      'on the App Store, so Apple will refuse it. Raise the version in '
+      'pubspec.yaml or in the release dialog to ${parts.join('.')} and '
+      'release again.';
 }

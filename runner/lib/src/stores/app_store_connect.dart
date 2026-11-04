@@ -82,6 +82,37 @@ class AppStoreConnectClient {
     return highest;
   }
 
+  /// The highest App Store version Apple has approved for the app, or null.
+  /// Apple takes new builds only for a version above it.
+  Future<String?> highestApprovedVersion(String appId) async {
+    final body = await _get('/apps/$appId/appStoreVersions', {
+      'filter[platform]': 'IOS',
+      'fields[appStoreVersions]': 'versionString,appStoreState',
+      'limit': '200',
+    });
+    String? highest;
+    for (final v in (body['data'] as List? ?? const [])) {
+      final attributes = ((v as Map)['attributes'] as Map?) ?? const {};
+      if (!_approvedStates.contains(attributes['appStoreState'])) continue;
+      final version = attributes['versionString'] as String?;
+      if (version == null) continue;
+      if (highest == null || compareVersions(version, highest) > 0) {
+        highest = version;
+      }
+    }
+    return highest;
+  }
+
+  static const _approvedStates = {
+    'READY_FOR_SALE',
+    'PENDING_DEVELOPER_RELEASE',
+    'PENDING_APPLE_RELEASE',
+    'PROCESSING_FOR_APP_STORE',
+    'REPLACED_WITH_NEW_VERSION',
+    'DEVELOPER_REMOVED_FROM_SALE',
+    'REMOVED_FROM_SALE',
+  };
+
   /// Waits until the build with [buildNumber] has been processed. Returns
   /// the build id. Apple usually takes two to ten minutes.
   Future<String> waitForBuild({
@@ -361,6 +392,17 @@ class AppStoreConnectClient {
     if (!expectBody || response.body.isEmpty) return const {};
     return (jsonDecode(response.body) as Map).cast<String, dynamic>();
   }
+}
+
+/// `1.10.0` > `1.9.3`: compares dotted numbers part by part.
+int compareVersions(String a, String b) {
+  final x = a.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  final y = b.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+  for (var i = 0; i < x.length || i < y.length; i++) {
+    final d = (i < x.length ? x[i] : 0) - (i < y.length ? y[i] : 0);
+    if (d != 0) return d.sign;
+  }
+  return 0;
 }
 
 class AppStoreConnectException implements Exception {

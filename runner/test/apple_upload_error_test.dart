@@ -1,4 +1,6 @@
 import 'package:apprelease_runner/src/steps/publish.dart';
+import 'package:apprelease_runner/src/steps/versioning.dart';
+import 'package:apprelease_runner/src/stores/app_store_connect.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -27,5 +29,15 @@ void main() {
       'App Store Connect: Something unusual happened',
     );
     expect(appleUploadError(['plain noise']), isNull);
+  });
+
+  test('versions compare part by part', () {
+    expect(compareVersions('1.10.0', '1.9.3'), 1);
+    expect(compareVersions('1.1.1', '1.1.1'), 0);
+    expect(compareVersions('1.1', '1.1.1'), -1);
+  });
+
+  test('a closed version names the next one', () {
+    expect(versionClosedMessage('1.1.1', '1.1.1'), contains('to 1.1.2'));
   });
 }
