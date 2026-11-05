@@ -90,7 +90,7 @@
 <p class="lead">AppRelease uploads the <code>.ipa</code> to App Store Connect, waits for processing, and can add it to TestFlight groups or submit it for App Store review.</p>
 <h2 id="requirements">Requirements</h2>
 <ul>
- <li>An App Store Connect API key added under <strong>Integrations</strong> (see <a href="/docs/ios-signing/#api-key">iOS code signing</a>).</li>
+ <li>An App Store Connect API key added under <strong>Credentials</strong> (see <a href="/docs/ios-signing/#api-key">iOS code signing</a>).</li>
  <li>The app created in App Store Connect with the same bundle identifier.</li>
  <li>A build signed for <code>app_store</code> distribution.</li>
 </ul>
@@ -99,7 +99,7 @@
   <span class="k">ios-workflow</span>:
     <span class="k">publishing</span>:
       <span class="k">app_store_connect</span>:
-        <span class="k">auth</span>: integration             <span class="c"> # the key from Team settings → Integrations</span>
+        <span class="k">auth</span>: integration             <span class="c"> # the App Store Connect key under Credentials</span>
         <span class="k">submit_to_testflight</span>: <span class="n">true</span>
         <span class="k">beta_groups</span>:                  <span class="c"> # optional</span>
           - Beta testers

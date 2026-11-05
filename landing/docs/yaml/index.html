@@ -119,7 +119,7 @@
 <table><thead><tr><th>Key</th><th>Description</th></tr></thead><tbody>
  <tr><td><code>flutter</code></td><td>Channel, version or <code>fvm</code>. Omit to use the runner's preinstalled version.</td></tr>
  <tr><td><code>xcode</code></td><td>macOS runners only. <code>latest</code> or a version.</td></tr>
- <tr><td><code>groups</code></td><td>Variable groups from the app's <strong>Environment variables</strong> page. Secrets are masked in logs.</td></tr>
+ <tr><td><code>groups</code></td><td>Reference names of Google Play service accounts under <strong>Credentials</strong>. The JSON becomes <code>GOOGLE_PLAY_SERVICE_ACCOUNT</code>, masked in logs.</td></tr>
  <tr><td><code>vars</code></td><td>Inline variables. Never put secrets here; the file is in your repository.</td></tr>
  <tr><td><code>android_signing</code></td><td>Keystore reference names. See <a href="/docs/android-signing/">Android code signing</a>.</td></tr>
  <tr><td><code>ios_signing</code></td><td>Automatic or manual signing. See <a href="/docs/ios-signing/">iOS code signing</a>.</td></tr>

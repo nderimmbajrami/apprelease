@@ -21,12 +21,14 @@ keytool -genkey -v -keystore upload.keystore -storetype JKS \
 <p>Keytool asks for a keystore password, then for a key password, then for your name and organisation. The values do not matter to the stores; the passwords do.</p>
 <h2 id="uploading">Uploading the keystore</h2>
 <ol class="docs-steps">
- <li>Open <strong>Team settings</strong> → <strong>Code signing identities</strong> → <strong>Android keystores</strong>.</li>
- <li>Drop the <code>.keystore</code> or <code>.jks</code> file into the box.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Android keystore</strong>.</li>
+ <li>Pick the <code>.keystore</code> or <code>.jks</code> file.</li>
  <li>Enter the keystore password, the key alias and the key password. AppRelease checks them against the file before saving.</li>
- <li>Choose a reference name, for example <code>upload_keystore</code>.</li>
- <li>Click <strong>Add keystore</strong>.</li>
+ <li>Choose the application it signs, or leave it shared.</li>
+ <li>The <strong>reference name</strong> is filled in for you, for example <code>shop_upload_keystore</code>. It is the name <code>apprelease.yaml</code> would use; the file's own name is not.</li>
+ <li>Click <strong>Save</strong>.</li>
 </ol>
+<div class="note">You need the file only if you write <code>apprelease.yaml</code> yourself. Without the file, the runner signs with the keystore linked to the application, or the shared one.</div>
 <div class="note note-warn"><b>Keep your own copy.</b> The uploaded keystore cannot be downloaded. Store the file and the passwords in a password manager; every future release has to be signed with the same key.</div>
 <h2 id="referencing">Referencing it in apprelease.yaml</h2>
 <div class="code"><pre data-lang="yaml">

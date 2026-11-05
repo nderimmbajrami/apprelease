@@ -54,4 +54,12 @@ void main() {
       'version: 1.0.0+1\nname: x\n',
     );
   });
+
+  test('publishing values expand workflow vars', () {
+    final env = {'GOOGLE_PLAY_TRACK': 'internal'};
+    expect(expandVars(r'$GOOGLE_PLAY_TRACK', env), 'internal');
+    expect(expandVars(r'${GOOGLE_PLAY_TRACK}', env), 'internal');
+    expect(expandVars('production', env), 'production');
+    expect(expandVars(r'$UNKNOWN', env), r'$UNKNOWN');
+  });
 }

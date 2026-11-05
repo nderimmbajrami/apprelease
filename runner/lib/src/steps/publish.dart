@@ -74,7 +74,7 @@ class Publish {
       throw StepFailed('Set vars.PACKAGE_NAME in the workflow');
     }
 
-    final track = '${config['track'] ?? release['track']}';
+    final track = expandVars('${config['track'] ?? release['track']}', env);
     final play = GooglePlayClient(
       (jsonDecode(json) as Map).cast<String, dynamic>(),
     );
@@ -313,3 +313,11 @@ String? _nextPatch(String? version) {
   if (m == null) return null;
   return '${m[1]}.${m[2]}.${int.parse(m[3]!) + 1}';
 }
+
+/// `$NAME` and `${NAME}` in a yaml value, from the build environment (which
+/// holds the workflow's `vars`). Unknown names are left as they are.
+String expandVars(String value, Map<String, String> env) =>
+    value.replaceAllMapped(
+      RegExp(r'\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?'),
+      (m) => env[m[1]!] ?? m[0]!,
+    );

@@ -104,10 +104,11 @@
 </ol>
 <h2 id="adding-the-key">Adding the key to AppRelease</h2>
 <ol class="docs-steps">
- <li>Open <strong>Team settings</strong> → <strong>Integrations</strong> → <strong>Apple Developer Portal</strong>.</li>
- <li>Click <strong>Add key</strong>, give it a name, paste the Issuer ID and Key ID, and upload the <code>.p8</code> file.</li>
- <li>Click <strong>Save</strong>. AppRelease makes one test call to App Store Connect to confirm the key works.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>App Store Connect API key</strong>.</li>
+ <li>Pick the <code>.p8</code> file, enter the Key ID and the Issuer ID.</li>
+ <li>Click <strong>Save</strong>. The key is encrypted and never shown again; the runner uses it for signing, for the build number and for the upload.</li>
 </ol>
+<div class="note">Only the <strong>Account Holder</strong> or an <strong>Admin</strong> of the Apple developer account sees the App Store Connect API page; other roles have to ask them for the key.</div>
 <h2 id="automatic-signing">Automatic signing</h2>
 <p>Before the scripts run, the runner asks App Store Connect for a distribution certificate (creating one if there is none that AppRelease holds the private key for) and for a provisioning profile matching the bundle identifier and distribution type. Both are installed into a temporary keychain that is deleted when the build ends.</p>
 <div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
@@ -123,12 +124,7 @@
           - com.example.app
           - com.example.app.widget</code></pre></div>
 <h2 id="manual-signing">Manual signing</h2>
-<p>If you already manage certificates yourself, upload the <code>.p12</code> (with its password) and the <code>.mobileprovision</code> under <strong>Code signing identities</strong> → <strong>iOS</strong> and reference them by name:</p>
-<div class="code"><pre data-lang="yaml"><code>      <span class="k">ios_signing</span>:
-        <span class="k">provisioning_profiles</span>:
-          - app_store_profile
-        <span class="k">certificates</span>:
-          - distribution_cert</code></pre></div>
+<p>Not needed and not supported: with the API key in place, Xcode resolves the certificate and the provisioning profile itself, for App Store, ad hoc and development builds alike. There is nothing to upload besides the key.</p>
 <h2 id="export-options">Export options</h2>
 <p>Either way the runner writes an export options plist and exposes it as <code>AR_EXPORT_OPTIONS</code>. Pass it to the build:</p>
 <div class="code"><pre data-lang="bash"><code>flutter build ipa <span class="k">--release</span> <span class="k">--export-options-plist</span>=<span class=<span class="s">"v"</span>>$AR_EXPORT_OPTIONS</span></code></pre></div>

@@ -104,11 +104,12 @@
 <div class="note">It can take a few minutes, sometimes longer, before Google Play accepts calls from a freshly invited account. A "The current user has insufficient permissions" error on the first release is usually just that.</div>
 <h2 id="storing-the-key">Storing the key in AppRelease</h2>
 <ol class="docs-steps">
- <li>Open the app in the console → <strong>Environment variables</strong>.</li>
- <li>Variable name <code>GOOGLE_PLAY_SERVICE_ACCOUNT</code>, value: the entire contents of the JSON file.</li>
- <li>Group name <code>google_play</code>. Click to create the group.</li>
- <li>Make sure <strong>Secret</strong> is checked, then <strong>Add</strong>.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Google Play service account</strong>.</li>
+ <li>Pick the JSON file, or paste its contents. The form then shows the service account's email to invite in Play Console.</li>
+ <li>Keep the <strong>reference name</strong> <code>google_play</code>, or choose your own. It is the name <code>apprelease.yaml</code> would list under <code>groups</code>.</li>
+ <li>Click <strong>Save</strong>, then <strong>Check</strong> on the saved credential: it calls Google and says which step, if any, is still missing.</li>
 </ol>
+<p>During a build the JSON is available to the scripts as <code>GOOGLE_PLAY_SERVICE_ACCOUNT</code> and masked in the log. Without an <code>apprelease.yaml</code>, the runner uses the service account linked to the application, or the shared one.</p>
 <h2 id="yaml">Configuration</h2>
 <div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
   <span class="k">android-workflow</span>:

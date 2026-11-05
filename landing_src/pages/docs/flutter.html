@@ -1,6 +1,6 @@
 ---
 title: Flutter apps – AppRelease Docs
-description: How to build and publish a Flutter app with apprelease.yaml: adding the app, Flutter version, Android and iOS code signing, build scripts, versioning and publishing to Google Play and App Store Connect.
+description: How to build and publish a Flutter app with AppRelease: adding the app, the credentials each store needs, and the optional apprelease.yaml for Flutter version, scripts, versioning and publishing.
 path: /docs/flutter/
 nav: docs
 layout: docs
@@ -8,31 +8,21 @@ crumbs: Quick start guides > Flutter apps
 priority: 0.9
 ---
 <h1>Flutter apps</h1>
-<p class="lead">How to build and publish a Flutter app with <code>apprelease.yaml</code>.</p>
-<p>This guide walks through every step needed to build and publish a Flutter app with AppRelease: adding the app, picking a Flutter version, code signing, build scripts, versioning and publishing to Google Play and App Store Connect.</p>
-<p>You can find a complete project showing these steps in the <a href="https://github.com/apprelease/samples">sample projects repository</a>.</p>
+<p class="lead">From a Git repository to Google Play and the App Store, step by step. No pipeline to write.</p>
+<p>AppRelease builds with the settings you enter in the console. An <code>apprelease.yaml</code> in the repository is optional, for teams that want to change how the app is built; everything below the first two sections is about that file.</p>
 
 <h2 id="adding-the-app">Adding the app to AppRelease</h2>
-<p>The apps you have on AppRelease are listed on the <strong>Applications</strong> page. Click <strong>Add application</strong> to add a new one.</p>
+<p>Open <strong>Applications</strong> → <strong>Add application</strong>. The wizard has three short steps:</p>
 <ol class="docs-steps">
- <li>If you belong to more than one team, choose the team the app belongs to.</li>
- <li>Enter the repository address. A public HTTPS URL works as is; for a private repository paste a deploy token or let AppRelease generate an SSH key you add to the repository.</li>
- <li>Choose the default branch and the project type (<strong>Flutter</strong>).</li>
- <li>Click <strong>Finish: Add application</strong>.</li>
+ <li><strong>Repository</strong>: the Git address of the Flutter project (for example <code>https://github.com/acme/shop-app</code>) and the branch to build.</li>
+ <li><strong>Details</strong>: the app's name and the Flutter version (<code>stable</code> is right for most projects).</li>
+ <li><strong>Stores</strong>: Google Play, the App Store, or both, with the Android package name and the iOS bundle identifier exactly as the stores know them.</li>
 </ol>
+<p>Then add the credentials the chosen stores need under <strong>Credentials</strong> (the sections below show where each one comes from), and press <strong>Publish</strong> on the app. The dashboard's launch plan lists the same steps in order and opens each form.</p>
 
-<h2 id="creating-apprelease-yaml">Creating apprelease.yaml</h2>
-<p><code>apprelease.yaml</code> is the configuration file that describes how to build, sign and publish the app. It lives in the root of the repository and is committed like any other file, so a change to the release process is reviewed in a pull request.</p>
-<div class="note"><b>Tip</b> The console can generate a first <code>apprelease.yaml</code> from the app's settings: open the app, go to <strong>Config</strong> and click <strong>Generate</strong>. Commit the result and adjust from there.</div>
-<p>If you prefer to write the file from scratch, start with this minimal configuration:</p>
-<div class="code"><pre data-lang="yaml">
-workflows:
-  sample-workflow:
-    name: AppRelease sample workflow
-    max_build_duration: 60
-    instance_type: mac_m2
-</pre></div>
-<div class="note"><b>Tip</b> You can have more than one workflow in the same file. If you build for both Android and iOS, enter both:</div>
+<h2 id="creating-apprelease-yaml">apprelease.yaml, if you want it</h2>
+<p>Without the file, a release does what the console says: check out the branch, fetch the next build number from the store, build, sign with the credentials linked to the app and upload to the track you chose. Add <code>apprelease.yaml</code> to the root of the repository only to change that: extra scripts, a different Flutter version, several workflows, release notes, beta groups.</p>
+<div class="note"><b>Tip</b> The app's <strong>Config</strong> tab shows the file the console would write for the current settings and credentials. Copy it, commit it, and adjust from there; the reference names in it are the ones from Credentials.</div>
 <div class="code"><pre data-lang="yaml">
 workflows:
   android-workflow:
@@ -42,7 +32,7 @@ workflows:
     name: iOS workflow
     # ......
 </pre></div>
-<p>After committing, open the app in the console, pick the branch and click <strong>Check for configuration file</strong>. The workflows found in the file appear as buttons. Different branches can carry different files.</p>
+<p>The runner picks the workflow whose id matches the platform and track (<code>android-production</code>), else one named after the platform (<code>android</code>, <code>android-workflow</code>), else the first one that signs for that platform.</p>
 
 <h2 id="setting-the-flutter-version">Setting the Flutter version</h2>
 <p>The <code>environment</code> section chooses the Flutter channel or version the build uses. If nothing is specified, the version preinstalled on the runner is used.</p>
@@ -82,14 +72,13 @@ keytool -genkey -v -keystore apprelease.keystore -storetype JKS \
   <p>Keytool asks for a password for the keystore and the key alias, and for some information about you and your organisation. Note the <strong>keystore password</strong>, the <strong>key alias</strong> and the <strong>key password</strong>; you need them in the next step.</p>
   <h3 id="uploading-a-keystore">Uploading a keystore</h3>
   <ol class="docs-steps">
-   <li>Open <strong>Team settings</strong> → <strong>Code signing identities</strong>.</li>
-   <li>Open the <strong>Android keystores</strong> tab.</li>
-   <li>Upload the keystore file by clicking <strong>Choose a file</strong> or by dragging it into the box.</li>
-   <li>Enter the keystore password, the key alias and the key password.</li>
-   <li>Enter a <strong>reference name</strong> for the keystore. This is the name used in <code>apprelease.yaml</code>.</li>
-   <li>Click <strong>Add keystore</strong>.</li>
+   <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Android keystore</strong>.</li>
+   <li>Pick the keystore file.</li>
+   <li>Enter the keystore password, the key alias and the key password. They are checked against the file before saving.</li>
+   <li>Choose the application it signs, or leave it shared.</li>
+   <li>The <strong>reference name</strong> is filled in for you. It is the name <code>apprelease.yaml</code> uses, if you write that file; the file's own name is not.</li>
+   <li>Click <strong>Save</strong>.</li>
   </ol>
-  <p>For each keystore, its common name, issuer and expiry date are shown.</p>
   <div class="note note-warn"><b>Note</b> An uploaded keystore cannot be downloaded again. Keep your own copy somewhere safe: every future Google Play release has to be signed with the same key. Keep the file private and never commit it to the repository.</div>
   <h3 id="referencing-keystores">Referencing keystores in apprelease.yaml</h3>
   <p>To have AppRelease fetch the keystore during the build, list its reference name under <code>android_signing</code> in the <code>environment</code> section:</p>
@@ -187,10 +176,9 @@ android {
   <div class="note">Take note of the <b>Issuer ID</b> above the table and the <b>Key ID</b> of the generated key; both are needed in the next step.</div>
   <h3 id="adding-the-api-key">Adding the App Store Connect API key to AppRelease</h3>
   <ol class="docs-steps">
-   <li>Open <strong>Team settings</strong> → <strong>Integrations</strong> → <strong>Apple Developer Portal</strong>.</li>
-   <li>Click <strong>Add key</strong> and enter a <strong>name</strong> for the key. This is the name used in <code>apprelease.yaml</code>.</li>
-   <li>Enter the <strong>Issuer ID</strong> and the <strong>Key ID</strong>.</li>
-   <li>Upload the <code>.p8</code> file.</li>
+   <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>App Store Connect API key</strong>.</li>
+   <li>Pick the <code>.p8</code> file.</li>
+   <li>Enter the <strong>Key ID</strong> and the <strong>Issuer ID</strong>.</li>
    <li>Click <strong>Save</strong>.</li>
   </ol>
   <h3 id="automatic-vs-manual">Automatic vs manual code signing</h3>
@@ -205,15 +193,7 @@ workflows:
         distribution_type: app_store   # app_store | ad_hoc | development
         bundle_identifier: com.example.app
 </pre></div>
-  <p>For <strong>manual signing</strong>, upload a certificate (<code>.p12</code>) and a provisioning profile under <strong>Code signing identities</strong> → <strong>iOS</strong> and reference them instead:</p>
-  <div class="code"><pre data-lang="yaml">
-    environment:
-      ios_signing:
-        provisioning_profiles:
-          - profile_reference
-        certificates:
-          - certificate_reference
-</pre></div>
+  <p>Manual signing with a <code>.p12</code> and a <code>.mobileprovision</code> is not needed and not supported: the API key covers App Store, ad hoc and development builds.</p>
   <p>Either way, the runner writes an export options plist and exposes its path as <code>AR_EXPORT_OPTIONS</code> for the build command.</p>
  </div>
 </div>
