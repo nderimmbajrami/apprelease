@@ -61,6 +61,7 @@ workflows:
  <tr><td>Version code 57 has already been used</td><td>Use <code>versioning: source: google_play</code> so the build number comes from the store.</td></tr>
  <tr><td>Only releases with status draft may be created on draft app</td><td>Add <code>submit_as_draft: true</code>.</td></tr>
  <tr><td>The Android App Bundle was signed with the wrong key</td><td>The keystore is not the upload key. See <a href="/docs/android-signing/#checking-the-signature">checking the signature</a>.</td></tr>
+ <tr><td>Service account key creation is disabled (iam.disableServiceAccountKeyCreation)</td><td>Your Google account belongs to a company organization, and new organizations block service-account keys by default. An organization admin switches it off: select the organization in the project picker → IAM &amp; Admin → Organization Policies → "Disable service account key creation" → Manage policy → Override parent's policy → Enforcement off. Or create the Cloud project from a personal Gmail account instead: any project works, it need not be the one that owns Play Console.</td></tr>
  <tr><td>Google Play Android Developer API has not been used in project … or it is disabled</td><td>Enable that API in the Cloud project that owns the service account (step 4 above), then wait a minute.</td></tr>
 </tbody></table>
 <div class="docs-next">

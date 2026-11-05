@@ -802,7 +802,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get playGuide2 =>
-      'Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents.';
+      'Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents. If Google says key creation is disabled, your company organization blocks it: an admin turns off the \"Disable service account key creation\" policy, or you create the project from a personal Gmail account instead.';
 
   @override
   String get playGuide3 =>

@@ -329,7 +329,7 @@
   "playGuideTitle": "How to get this file",
   "playGuide1": "Create a service account in Google Cloud. Any project works; the name does not matter.",
   "playGuide1Link": "Open Google Cloud → Service accounts",
-  "playGuide2": "Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents.",
+  "playGuide2": "Open the account → Keys → Add key → Create new key → JSON. Pick that file below or paste its contents. If Google says key creation is disabled, your company organization blocks it: an admin turns off the \"Disable service account key creation\" policy, or you create the project from a personal Gmail account instead.",
   "playGuide3": "Enable the Google Play Android Developer API in the same Cloud project.",
   "playGuide3Link": "Enable the API for project {project}",
   "@playGuide3Link": {
