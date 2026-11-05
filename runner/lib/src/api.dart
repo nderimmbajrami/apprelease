@@ -183,6 +183,16 @@ class SupabaseApi {
     await _closeSteps(id, 'skipped');
   }
 
+  /// Ends a claimed release that could not start, with the reason.
+  Future<void> failRelease(String id, String message) async {
+    await updateRelease(id, {
+      'status': 'failed',
+      'finished_at': DateTime.now().toUtc().toIso8601String(),
+      'error_message': message,
+    });
+    await _closeSteps(id, 'skipped');
+  }
+
   /// Steps still pending or running end as [status].
   Future<void> _closeSteps(String releaseId, String status) async {
     final response = await _client.patch(

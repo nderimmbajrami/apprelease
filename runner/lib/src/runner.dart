@@ -56,7 +56,16 @@ class Runner {
     );
     try {
       while (true) {
-        final ran = await runOne();
+        final bool ran;
+        try {
+          ran = await runOne();
+        } catch (error) {
+          // A dropped connection while asking for work is no reason to die:
+          // launchd would start us again, but not a build in progress.
+          stderr.writeln('poll failed: $error');
+          await Future<void>.delayed(const Duration(seconds: 15));
+          continue;
+        }
         if (!ran) await Future<void>.delayed(pollInterval);
       }
     } finally {
@@ -69,22 +78,35 @@ class Runner {
   Future<bool> runOne() async {
     final release = await api.claimRelease(runnerId: id, platforms: platforms);
     if (release == null) return false;
-    // Ten pushes in a row are one build: the newest. The runner builds the
-    // head of the branch anyway, so an older push would build the same code.
-    final startedBy = '${release['started_by_name'] ?? ''}';
-    if (startedBy.startsWith('GitHub push')) {
-      final newer = await api.newerQueuedPush(release);
-      if (newer != null) {
-        await api.markReplaced(release['id'] as String, newer);
-        stdout.writeln(
-          'release #${release['number']} replaced by #$newer (newer push)',
-        );
-        return true;
+    final releaseId = release['id'] as String;
+    final Map<String, dynamic> app;
+    try {
+      // Ten pushes in a row are one build: the newest. The runner builds the
+      // head of the branch anyway, so an older push would build the same
+      // code.
+      final startedBy = '${release['started_by_name'] ?? ''}';
+      if (startedBy.startsWith('GitHub push')) {
+        final newer = await api.newerQueuedPush(release);
+        if (newer != null) {
+          await api.markReplaced(releaseId, newer);
+          stdout.writeln(
+            'release #${release['number']} replaced by #$newer (newer push)',
+          );
+          return true;
+        }
       }
+      // The claim returns the row alone; the steps come separately.
+      release['release_steps'] = await api.steps(releaseId);
+      app = await api.app(release['app_id'] as String);
+    } catch (error) {
+      // Claimed, so nobody else will take it: close it with the reason
+      // rather than leave it 'running' with nothing building it.
+      await api.failRelease(
+        releaseId,
+        'Could not start the build: ${'$error'.split('\n').first}',
+      );
+      return true;
     }
-    // The claim returns the row alone; the steps come separately.
-    release['release_steps'] = await api.steps(release['id'] as String);
-    final app = await api.app(release['app_id'] as String);
     final pipeline = Pipeline(
       api: api,
       release: release,
