@@ -599,7 +599,12 @@ class _PlayGuide extends StatelessWidget {
             linkLabel: l10n.playGuide4Link,
             url: 'https://play.google.com/console/developers',
             extra: email == null
-                ? null
+                ? Text(
+                    l10n.playGuideEmailPending,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
                 : Row(
                     children: [
                       Expanded(

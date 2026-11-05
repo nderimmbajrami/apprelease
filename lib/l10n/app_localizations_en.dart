@@ -818,7 +818,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get playGuide4 =>
-      'In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.';
+      'In Google Play Console → Users and permissions → Invite new users, invite the service account\'s own email, the one ending in .iam.gserviceaccount.com from the JSON file, not your Google account. Give it \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.';
 
   @override
   String get playGuide4Link => 'Open Play Console → Users and permissions';
@@ -1326,7 +1326,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get guidePlay4 =>
-      'In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.';
+      'In Play Console → Users and permissions → Invite new users: paste the service account\'s email (ends in .iam.gserviceaccount.com, from the JSON), not your own, and give it release permissions for your app.';
 
   @override
   String get guidePlay5 => 'Upload the .json file below.';
@@ -1373,4 +1373,8 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get credentialSecurityMore => 'How we protect it';
+
+  @override
+  String get playGuideEmailPending =>
+      'The email to invite appears here once you pick the JSON file.';
 }

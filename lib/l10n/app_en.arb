@@ -340,7 +340,7 @@
     }
   },
   "playGuide3LinkGeneric": "Enable the API",
-  "playGuide4": "In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.",
+  "playGuide4": "In Google Play Console → Users and permissions → Invite new users, invite the service account's own email, the one ending in .iam.gserviceaccount.com from the JSON file, not your Google account. Give it \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.",
   "playGuide4Link": "Open Play Console → Users and permissions",
   "playGuideEmail": "Service account email",
   "playGuideAfter": "Press Check on the saved credential afterwards; it tells you if a step is still missing.",
@@ -641,7 +641,7 @@
   "guidePlay1": "In Google Cloud Console, pick or create a project and enable the Google Play Android Developer API.",
   "guidePlay2": "IAM & Admin → Service accounts → Create service account. It needs no roles there.",
   "guidePlay3": "Open the new account → Keys → Add key → JSON. A .json file downloads.",
-  "guidePlay4": "In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.",
+  "guidePlay4": "In Play Console → Users and permissions → Invite new users: paste the service account's email (ends in .iam.gserviceaccount.com, from the JSON), not your own, and give it release permissions for your app.",
   "guidePlay5": "Upload the .json file below.",
   "guidePlayNote": "The app must already exist in Play Console, with its first build uploaded by hand once. A new key can take a few hours before Google accepts it.",
   "guideAsc1": "App Store Connect → Users and Access → Integrations → App Store Connect API.",
@@ -654,5 +654,6 @@
   "setupHelpBody": "A free 20-minute screen share: we create the keystore, the Google Play and App Store keys with you, and run your first release together.",
   "credentialSecurityTitle": "Encrypted and never shown again",
   "credentialSecurityBody": "Encrypted with AES before it is stored, with a key that is not in the database. Not even this console can read it back. Only the build machine decrypts it, for one release, then deletes it. Passwords never appear in logs.",
-  "credentialSecurityMore": "How we protect it"
+  "credentialSecurityMore": "How we protect it",
+  "playGuideEmailPending": "The email to invite appears here once you pick the JSON file."
 }

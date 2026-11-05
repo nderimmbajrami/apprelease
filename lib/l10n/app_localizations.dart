@@ -1554,7 +1554,7 @@ abstract class AppL10n {
   /// No description provided for @playGuide4.
   ///
   /// In en, this message translates to:
-  /// **'In Google Play Console → Users and permissions → Invite new users, invite this email with \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.'**
+  /// **'In Google Play Console → Users and permissions → Invite new users, invite the service account\'s own email, the one ending in .iam.gserviceaccount.com from the JSON file, not your Google account. Give it \"Release to production, exclude devices, and use Play App Signing\" and \"Release apps to testing tracks\" for your app.'**
   String get playGuide4;
 
   /// No description provided for @playGuide4Link.
@@ -2316,7 +2316,7 @@ abstract class AppL10n {
   /// No description provided for @guidePlay4.
   ///
   /// In en, this message translates to:
-  /// **'In Play Console → Users and permissions → Invite new users: paste the service account email and give it release permissions for your app.'**
+  /// **'In Play Console → Users and permissions → Invite new users: paste the service account\'s email (ends in .iam.gserviceaccount.com, from the JSON), not your own, and give it release permissions for your app.'**
   String get guidePlay4;
 
   /// No description provided for @guidePlay5.
@@ -2396,6 +2396,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'How we protect it'**
   String get credentialSecurityMore;
+
+  /// No description provided for @playGuideEmailPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The email to invite appears here once you pick the JSON file.'**
+  String get playGuideEmailPending;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {
