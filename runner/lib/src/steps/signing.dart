@@ -39,9 +39,16 @@ class SigningFiles {
     final all = await api.credentials(release['team_id'] as String);
     return all.firstWhere(
       (c) => c['name'] == name,
-      orElse: () => throw StepFailed(
-        'Credential "$name" does not exist under Credentials',
-      ),
+      orElse: () {
+        // The names that do exist, so the yaml can be corrected (or dropped:
+        // without it the console settings are used).
+        final names = [for (final c in all) '"${c['name']}"'].join(', ');
+        throw StepFailed(
+          'apprelease.yaml names the credential "$name", but under Credentials '
+          'the reference names are: $names. Use one of those in the yaml, or '
+          'remove apprelease.yaml to build with the console settings.',
+        );
+      },
     );
   }
 
