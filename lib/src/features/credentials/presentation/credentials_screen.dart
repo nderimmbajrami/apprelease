@@ -257,13 +257,13 @@ class _CredentialRow extends ConsumerWidget {
               ],
             ),
           ),
-          if (credential.kind != CredentialKind.androidKeystore)
+          if (credential.kind == CredentialKind.googlePlayServiceAccount ||
+              credential.kind == CredentialKind.appStoreConnectKey)
             OutlinedButton(
               onPressed: () => _check(context, ref),
               child: Text(l10n.checkCredential),
             ),
-          if (credential.kind == CredentialKind.androidKeystore &&
-              apps.isNotEmpty)
+          if (credential.kind.isPerApp && apps.isNotEmpty)
             PopupMenuButton<String>(
               tooltip: l10n.linkToApp,
               icon: const Icon(Icons.link, size: 20),
@@ -433,6 +433,7 @@ String kindLabel(BuildContext context, CredentialKind kind) {
     CredentialKind.androidKeystore => l10n.kindAndroidKeystore,
     CredentialKind.googlePlayServiceAccount => l10n.kindGooglePlay,
     CredentialKind.appStoreConnectKey => l10n.kindAppStoreConnect,
+    CredentialKind.buildFile => l10n.kindBuildFile,
   };
 }
 
@@ -442,6 +443,7 @@ String kindBody(BuildContext context, CredentialKind kind) {
     CredentialKind.androidKeystore => l10n.kindAndroidKeystoreBody,
     CredentialKind.googlePlayServiceAccount => l10n.kindGooglePlayBody,
     CredentialKind.appStoreConnectKey => l10n.kindAppStoreConnectBody,
+    CredentialKind.buildFile => l10n.kindBuildFileBody,
   };
 }
 
@@ -449,4 +451,5 @@ IconData kindIcon(CredentialKind kind) => switch (kind) {
   CredentialKind.androidKeystore => Icons.android,
   CredentialKind.googlePlayServiceAccount => Icons.shop_outlined,
   CredentialKind.appStoreConnectKey => Icons.apple,
+  CredentialKind.buildFile => Icons.description_outlined,
 };

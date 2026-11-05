@@ -2510,6 +2510,66 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'What happens next: we download your code, build it, sign it with your key and upload it to {where}. About {minutes} minutes; you can watch every step. Nothing reaches your users until you release it in the store.'**
   String releaseWhatHappens(String where, int minutes);
+
+  /// No description provided for @kindBuildFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Build file'**
+  String get kindBuildFile;
+
+  /// No description provided for @kindBuildFileBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A file the build needs that is not in the repository: google-services.json, GoogleService-Info.plist, a .env. Kept encrypted; written into the checkout right before the build and deleted with it.'**
+  String get kindBuildFileBody;
+
+  /// No description provided for @anyFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Any file'**
+  String get anyFile;
+
+  /// No description provided for @buildFilePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it goes in the repository'**
+  String get buildFilePath;
+
+  /// No description provided for @buildFilePathHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Relative to the repository root, as the build expects it.'**
+  String get buildFilePathHelper;
+
+  /// No description provided for @buildFilePathInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a path inside the repository, without a leading slash or ..'**
+  String get buildFilePathInside;
+
+  /// No description provided for @guideFile1.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the file from your project, for example android/app/google-services.json from Firebase.'**
+  String get guideFile1;
+
+  /// No description provided for @guideFile2.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the path: it is where the file sits in the repository, relative to its root. Common files are filled in for you.'**
+  String get guideFile2;
+
+  /// No description provided for @guideFile3.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the application it belongs to, or leave it shared, and save. Every build of that app gets the file.'**
+  String get guideFile3;
+
+  /// No description provided for @guideFileNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.'**
+  String get guideFileNote;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

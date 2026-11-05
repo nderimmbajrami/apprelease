@@ -1442,4 +1442,41 @@ class AppL10nEn extends AppL10n {
   String releaseWhatHappens(String where, int minutes) {
     return 'What happens next: we download your code, build it, sign it with your key and upload it to $where. About $minutes minutes; you can watch every step. Nothing reaches your users until you release it in the store.';
   }
+
+  @override
+  String get kindBuildFile => 'Build file';
+
+  @override
+  String get kindBuildFileBody =>
+      'A file the build needs that is not in the repository: google-services.json, GoogleService-Info.plist, a .env. Kept encrypted; written into the checkout right before the build and deleted with it.';
+
+  @override
+  String get anyFile => 'Any file';
+
+  @override
+  String get buildFilePath => 'Where it goes in the repository';
+
+  @override
+  String get buildFilePathHelper =>
+      'Relative to the repository root, as the build expects it.';
+
+  @override
+  String get buildFilePathInside =>
+      'Use a path inside the repository, without a leading slash or ..';
+
+  @override
+  String get guideFile1 =>
+      'Pick the file from your project, for example android/app/google-services.json from Firebase.';
+
+  @override
+  String get guideFile2 =>
+      'Check the path: it is where the file sits in the repository, relative to its root. Common files are filled in for you.';
+
+  @override
+  String get guideFile3 =>
+      'Choose the application it belongs to, or leave it shared, and save. Every build of that app gets the file.';
+
+  @override
+  String get guideFileNote =>
+      'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.';
 }

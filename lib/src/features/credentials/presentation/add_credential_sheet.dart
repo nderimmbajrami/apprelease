@@ -70,6 +70,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
   final _json = TextEditingController();
   final _issuerId = TextEditingController();
   final _keyId = TextEditingController();
+  final _path = TextEditingController();
   PlatformFile? _file;
   String? _fileError;
 
@@ -83,6 +84,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       _json,
       _issuerId,
       _keyId,
+      _path,
     ]) {
       c.dispose();
     }
@@ -94,9 +96,10 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       CredentialKind.androidKeystore => ['jks', 'keystore'],
       CredentialKind.appStoreConnectKey => ['p8'],
       CredentialKind.googlePlayServiceAccount => ['json'],
+      CredentialKind.buildFile => null,
     };
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
+      type: extensions == null ? FileType.any : FileType.custom,
       allowedExtensions: extensions,
       withData: true,
     );
@@ -107,6 +110,12 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       if (_kind == CredentialKind.googlePlayServiceAccount &&
           _file!.bytes != null) {
         _json.text = utf8.decode(_file!.bytes!);
+      }
+      if (_kind == CredentialKind.buildFile) {
+        if (_path.text.trim().isEmpty) {
+          _path.text = suggestedBuildFilePath(_file!.name);
+        }
+        _suggestName();
       }
     });
   }
@@ -148,6 +157,9 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         meta['fileName'] = _file!.name;
         fields['issuerId'] = _issuerId.text.trim();
         fields['keyId'] = _keyId.text.trim();
+      case CredentialKind.buildFile:
+        meta['fileName'] = _file!.name;
+        meta['path'] = _path.text.trim();
     }
 
     final ok = await ref
@@ -155,7 +167,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         .addCredential(
           kind: _kind,
           name: _name.text,
-          appId: _kind == CredentialKind.androidKeystore ? _appId : null,
+          appId: _kind.isPerApp ? _appId : null,
           meta: meta,
           secret: CredentialSecret(
             fileBytes: _file?.bytes,
@@ -272,7 +284,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                     ),
                     validator: validators.required,
                   ),
-                  if (_kind == CredentialKind.androidKeystore) ...[
+                  if (_kind.isPerApp) ...[
                     const SizedBox(height: Gap.lg),
                     DropdownButtonFormField<String?>(
                       initialValue: _appId,
@@ -329,8 +341,19 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       CredentialKind.androidKeystore => '${prefix}upload_keystore',
       CredentialKind.googlePlayServiceAccount => 'google_play',
       CredentialKind.appStoreConnectKey => 'app_store_connect',
+      CredentialKind.buildFile => '$prefix${_fileSlug()}',
     };
     _suggesting = false;
+  }
+
+  /// `google-services.json` → `google_services_json`.
+  String _fileSlug() {
+    final name = _file?.name;
+    if (name == null) return 'build_file';
+    return name
+        .replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '')
+        .toLowerCase();
   }
 
   List<Widget> _fieldsFor(CredentialKind kind, Validators validators) {
@@ -340,6 +363,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         CredentialKind.androidKeystore => '.jks / .keystore',
         CredentialKind.appStoreConnectKey => l10n.privateKeyP8,
         CredentialKind.googlePlayServiceAccount => '.json',
+        CredentialKind.buildFile => l10n.anyFile,
       },
       file: _file,
       error: _fileError,
@@ -412,9 +436,39 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         const SizedBox(height: Gap.md),
         filePicker,
       ],
+      CredentialKind.buildFile => [
+        filePicker,
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _path,
+          decoration: InputDecoration(
+            labelText: l10n.buildFilePath,
+            hintText: 'android/app/google-services.json',
+            helperText: l10n.buildFilePathHelper,
+          ),
+          style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12.5),
+          validator: (v) {
+            final path = (v ?? '').trim();
+            if (path.isEmpty) return validators.required(path);
+            if (path.startsWith('/') || path.contains('..')) {
+              return l10n.buildFilePathInside;
+            }
+            return null;
+          },
+        ),
+      ],
     };
   }
 }
+
+/// Where a file of that name usually lives in a Flutter project.
+String suggestedBuildFilePath(String fileName) => switch (fileName) {
+  'google-services.json' => 'android/app/google-services.json',
+  'GoogleService-Info.plist' => 'ios/Runner/GoogleService-Info.plist',
+  'firebase_options.dart' => 'lib/firebase_options.dart',
+  'key.properties' => 'android/key.properties',
+  _ => fileName,
+};
 
 /// A "choose file" row that shows what was picked.
 class _FilePickerField extends StatelessWidget {

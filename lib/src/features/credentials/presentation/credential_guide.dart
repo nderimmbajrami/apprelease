@@ -44,6 +44,13 @@ class CredentialGuide extends StatelessWidget {
         'google-play',
         'google play console service account json key api access',
       ),
+      CredentialKind.buildFile => (
+        1,
+        [l10n.guideFile1, l10n.guideFile2, l10n.guideFile3],
+        l10n.guideFileNote,
+        'flutter',
+        'flutter firebase google-services.json android setup',
+      ),
       CredentialKind.appStoreConnectKey => (
         5,
         [

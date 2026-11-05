@@ -215,6 +215,7 @@ class Pipeline {
     env['AR_COMMIT'] = commit;
     env['AR_COMMIT_SHORT'] = commit.substring(0, 7);
     await api.updateRelease(releaseId, {'commit': commit.substring(0, 7)});
+    await _writeBuildFiles(stepId);
 
     // A pushed release has no version yet; pubspec.yaml knows it.
     if (release['version_name'] == 'auto') {
@@ -272,6 +273,37 @@ class Pipeline {
     }
     env['AR_WORKFLOW'] = workflow.id;
     env.addAll(workflow.vars);
+  }
+
+  /// Files the build needs that the repository leaves out
+  /// (google-services.json, .env): kept encrypted under Credentials and
+  /// written into the checkout here. They go when the checkout goes.
+  Future<void> _writeBuildFiles(String stepId) async {
+    final all = await api.credentials(release['team_id'] as String);
+    for (final c in all) {
+      if (c['kind'] != 'buildFile') continue;
+      if (c['app_id'] != null && c['app_id'] != app['id']) continue;
+      final meta = (c['meta'] as Map?)?.cast<String, dynamic>() ?? const {};
+      final path = '${meta['path'] ?? ''}'.trim();
+      if (path.isEmpty || path.startsWith('/') || path.contains('..')) {
+        await log(
+          'Build file "${c['name']}": path "$path" is not inside the repository; skipped',
+          stepId: stepId,
+          level: 'warning',
+        );
+        continue;
+      }
+      final secret = await api.readSecret(c['id'] as String, secretsKey);
+      final bytes = secret.fileBytes;
+      if (bytes == null) continue;
+      final file = File(p.join(buildDir.path, path));
+      file.parent.createSync(recursive: true);
+      file.writeAsBytesSync(bytes);
+      await log(
+        'Wrote $path (${bytes.length} bytes) from Credentials',
+        stepId: stepId,
+      );
+    }
   }
 
   Future<void> _toolchain(String stepId) async {

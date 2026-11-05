@@ -19,6 +19,7 @@ priority: 0.9
  <li><strong>Stores</strong>: Google Play, the App Store, or both, with the Android package name and the iOS bundle identifier exactly as the stores know them.</li>
 </ol>
 <p>Then add the credentials the chosen stores need under <strong>Credentials</strong> (the sections below show where each one comes from), and press <strong>Publish</strong> on the app. The dashboard's launch plan lists the same steps in order and opens each form.</p>
+<div class="note"><b>Files that are not in Git.</b> If the project needs a file the repository leaves out, such as Firebase's <code>android/app/google-services.json</code> or <code>ios/Runner/GoogleService-Info.plist</code>, or a <code>.env</code>, add it under <strong>Credentials</strong> → <strong>Build file</strong> with its path. The runner writes it into the checkout before every build. A build that fails with "google-services.json is missing" needs exactly this.</div>
 
 <h2 id="creating-apprelease-yaml">apprelease.yaml, if you want it</h2>
 <p>Without the file, a release does what the console says: check out the branch, fetch the next build number from the store, build, sign with the credentials linked to the app and upload to the track you chose. Add <code>apprelease.yaml</code> to the root of the repository only to change that: extra scripts, a different Flutter version, several workflows, release notes, beta groups.</p>

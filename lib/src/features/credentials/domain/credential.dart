@@ -2,13 +2,22 @@
 enum CredentialKind {
   androidKeystore,
   googlePlayServiceAccount,
-  appStoreConnectKey;
+  appStoreConnectKey,
+
+  /// A file the build needs that the repository leaves out
+  /// (google-services.json, GoogleService-Info.plist, .env), with the path
+  /// where the runner writes it before building.
+  buildFile;
+
+  /// Kinds that belong to one app (or are shared), not to the team as such.
+  bool get isPerApp => this == androidKeystore || this == buildFile;
 
   /// The yaml section the credential belongs under.
   String get yamlRole => switch (this) {
     CredentialKind.androidKeystore => 'android_signing',
     CredentialKind.googlePlayServiceAccount => 'google_play',
     CredentialKind.appStoreConnectKey => 'app_store_connect',
+    CredentialKind.buildFile => 'files',
   };
 }
 
@@ -60,6 +69,7 @@ class Credential {
       if (meta['alias'] != null) 'alias ${meta['alias']}',
     ].whereType<String>().join(' · '),
     CredentialKind.googlePlayServiceAccount => meta['email'] ?? '',
+    CredentialKind.buildFile => meta['path'] ?? meta['fileName'] ?? '',
     CredentialKind.appStoreConnectKey => [
       if (meta['keyId'] != null) 'key ${meta['keyId']}',
       if (meta['issuerId'] != null) 'issuer ${_short(meta['issuerId']!)}',

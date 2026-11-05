@@ -690,5 +690,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "kindBuildFile": "Build file",
+  "kindBuildFileBody": "A file the build needs that is not in the repository: google-services.json, GoogleService-Info.plist, a .env. Kept encrypted; written into the checkout right before the build and deleted with it.",
+  "anyFile": "Any file",
+  "buildFilePath": "Where it goes in the repository",
+  "buildFilePathHelper": "Relative to the repository root, as the build expects it.",
+  "buildFilePathInside": "Use a path inside the repository, without a leading slash or ..",
+  "guideFile1": "Pick the file from your project, for example android/app/google-services.json from Firebase.",
+  "guideFile2": "Check the path: it is where the file sits in the repository, relative to its root. Common files are filled in for you.",
+  "guideFile3": "Choose the application it belongs to, or leave it shared, and save. Every build of that app gets the file.",
+  "guideFileNote": "A build that fails with 'google-services.json is missing' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git."
 }
