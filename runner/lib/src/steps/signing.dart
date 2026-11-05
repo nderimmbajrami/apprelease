@@ -40,7 +40,7 @@ class SigningFiles {
     return all.firstWhere(
       (c) => c['name'] == name,
       orElse: () => throw StepFailed(
-        'Credential "$name" referenced in apprelease.yaml does not exist',
+        'Credential "$name" does not exist under Credentials',
       ),
     );
   }

@@ -235,23 +235,43 @@ class Pipeline {
       env['AR_TAG'] = env['AR_BRANCH']!;
     }
 
+    // apprelease.yaml is for teams that want to change the build. Without
+    // it, the settings from the console are the workflow: most customers
+    // never need the file.
     final file = File(p.join(buildDir.path, 'apprelease.yaml'));
-    if (!file.existsSync()) {
-      throw StepFailed('apprelease.yaml not found in the repository root');
+    final track = release['track'] as String;
+    if (file.existsSync()) {
+      final selected = WorkflowConfig.select(
+        file.readAsStringSync(),
+        platform: platform,
+        track: track,
+      );
+      if (selected == null) {
+        throw StepFailed(
+          'apprelease.yaml has no workflows. Remove the file to build with '
+          'the settings from the console, or add a workflow to it.',
+        );
+      }
+      workflow = selected;
+      await log(
+        'apprelease.yaml found · workflow ${workflow.id}',
+        stepId: stepId,
+      );
+    } else {
+      workflow = WorkflowConfig.defaults(
+        platform: platform,
+        track: track,
+        app: app,
+        credentials: await api.credentials(release['team_id'] as String),
+      );
+      await log(
+        'No apprelease.yaml in the repository: building with the settings '
+        'from the console (${workflow.name} → $track)',
+        stepId: stepId,
+      );
     }
-    final selected = WorkflowConfig.select(
-      file.readAsStringSync(),
-      platform: platform,
-      track: release['track'] as String,
-    );
-    if (selected == null) throw StepFailed('apprelease.yaml has no workflows');
-    workflow = selected;
     env['AR_WORKFLOW'] = workflow.id;
     env.addAll(workflow.vars);
-    await log(
-      'apprelease.yaml found · workflow ${workflow.id}',
-      stepId: stepId,
-    );
   }
 
   Future<void> _toolchain(String stepId) async {

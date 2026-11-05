@@ -30,6 +30,92 @@ class WorkflowConfig {
   final Map<String, dynamic> publishing;
   final Duration maxBuildDuration;
 
+  /// What the console would have written into apprelease.yaml for this app,
+  /// built from its settings and the team's credentials, for the repository
+  /// that has no such file. The app's own credential of a kind comes first,
+  /// then a shared one, then any.
+  static WorkflowConfig defaults({
+    required String platform,
+    required String track,
+    required Map<String, dynamic> app,
+    required List<Map<String, dynamic>> credentials,
+  }) {
+    Map<String, dynamic>? first(String kind) {
+      Map<String, dynamic>? shared, other;
+      for (final c in credentials) {
+        if (c['kind'] != kind) continue;
+        if (c['app_id'] == app['id']) return c;
+        if (c['app_id'] == null) {
+          shared ??= c;
+        } else {
+          other ??= c;
+        }
+      }
+      return shared ?? other;
+    }
+
+    final flutter = '${app['flutter_version'] ?? 'stable'}';
+    if (platform == 'android') {
+      final keystore = first('androidKeystore');
+      final play = first('googlePlayServiceAccount');
+      return WorkflowConfig(
+        id: 'console-android-$track',
+        name: '${app['name']} · Android',
+        flutter: flutter,
+        androidSigning: [if (keystore != null) '${keystore['name']}'],
+        iosSigning: const {},
+        groups: [if (play != null) '${play['name']}'],
+        vars: {'PACKAGE_NAME': '${app['android_package_name'] ?? ''}'},
+        versioningSource: play != null ? 'google_play' : 'manual',
+        scripts: const [
+          (
+            name: 'Build app bundle',
+            script:
+                r'flutter build appbundle --release --build-number=$AR_BUILD_NUMBER',
+          ),
+        ],
+        artifacts: const [
+          'build/**/outputs/**/*.aab',
+          'build/**/outputs/**/mapping.txt',
+        ],
+        publishing: {
+          if (play != null)
+            'google_play': {'track': track, 'submit_as_draft': false},
+        },
+      );
+    }
+    final asc = first('appStoreConnectKey');
+    return WorkflowConfig(
+      id: 'console-ios-$track',
+      name: '${app['name']} · iOS',
+      flutter: flutter,
+      androidSigning: const [],
+      iosSigning: {
+        'distribution_type': 'app_store',
+        'bundle_identifier': '${app['ios_bundle_id'] ?? ''}',
+      },
+      groups: const [],
+      vars: const {},
+      versioningSource: asc != null ? 'app_store_connect' : 'manual',
+      scripts: const [
+        (
+          name: 'Build ipa',
+          script:
+              r'flutter build ipa --release --build-number=$AR_BUILD_NUMBER --export-options-plist=$AR_EXPORT_OPTIONS',
+        ),
+      ],
+      artifacts: const ['build/ios/ipa/*.ipa'],
+      publishing: {
+        if (asc != null)
+          'app_store_connect': {
+            'submit_to_testflight': track == 'testflight',
+            'submit_to_app_store': track == 'appStore',
+          },
+      },
+      maxBuildDuration: const Duration(minutes: 90),
+    );
+  }
+
   /// Parses the file and picks the workflow for [platform] and [track]:
   /// first an exact id like `android-production`, then any workflow whose
   /// signing section matches the platform, then the first one.
