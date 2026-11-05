@@ -18,7 +18,7 @@ void main() {
     container.read(goRouterProvider).go('/apps/app-demo');
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Start release').first);
+    await tester.tap(find.widgetWithText(FilledButton, 'Publish').first);
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsOneWidget);
 
@@ -26,7 +26,7 @@ void main() {
     FilledButton start() => tester.widget<FilledButton>(
       find.descendant(
         of: find.byType(Dialog),
-        matching: find.widgetWithText(FilledButton, 'Start release'),
+        matching: find.widgetWithText(FilledButton, 'Publish'),
       ),
     );
     expect(start().onPressed, isNotNull);

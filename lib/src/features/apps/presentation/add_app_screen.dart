@@ -8,6 +8,7 @@ import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/page_body.dart';
 import '../../../core/widgets/page_header.dart';
+import '../../../core/preferences/preferences_service.dart';
 import '../../../routing/app_routes.dart';
 import '../domain/app_project.dart';
 import 'apps_controller.dart';
@@ -34,7 +35,12 @@ class _AddAppScreenState extends ConsumerState<AddAppScreen> {
   final _bundleId = TextEditingController();
   var _step = 0;
   var _projectType = ProjectType.flutter;
-  var _platforms = {Platform.android, Platform.ios};
+  // What the team said on the setup page; changeable here.
+  late Set<Platform> _platforms = {
+    for (final name in ref.read(preferencesServiceProvider).readStores())
+      if (Platform.values.any((p) => p.name == name))
+        Platform.values.byName(name),
+  };
 
   @override
   void dispose() {

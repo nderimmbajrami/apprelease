@@ -12,6 +12,7 @@ class PreferencesService {
   static const _setupKey = 'setup_dismissed';
   // v2: the first key was burnt by a tour that fired on the sign-in page.
   static const _tourKey = 'tour_seen_v2';
+  static const _storesKey = 'setup_stores';
 
   final SharedPreferences _prefs;
 
@@ -31,6 +32,14 @@ class PreferencesService {
 
   Future<void> writeSetupDismissed(bool value) =>
       _prefs.setBool(_setupKey, value);
+
+  /// The stores a new team said it publishes to, as platform names, before
+  /// it has an app. Both by default.
+  Set<String> readStores() =>
+      (_prefs.getStringList(_storesKey) ?? const ['android', 'ios']).toSet();
+
+  Future<void> writeStores(Set<String> names) =>
+      _prefs.setStringList(_storesKey, names.toList());
 
   /// Whether the guided tour ran (or was skipped) on this device.
   bool readTourSeen() => _prefs.getBool(_tourKey) ?? false;

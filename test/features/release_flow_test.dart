@@ -44,13 +44,13 @@ void main() {
     );
 
     // Start a release from the header button.
-    await tester.tap(find.widgetWithText(FilledButton, 'Start release').first);
+    await tester.tap(find.widgetWithText(FilledButton, 'Publish').first);
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, '1.0.0'),
       '1.4.0',
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Start release').last);
+    await tester.tap(find.widgetWithText(FilledButton, 'Publish').last);
     // No pumpAndSettle here: the running badge pulses until the release
     // ends, so settle would mean "wait for the whole pipeline".
     await pumpFrames(tester, const Duration(seconds: 1));
@@ -81,9 +81,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Acme Shop'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Start release').first);
+    await tester.tap(find.widgetWithText(FilledButton, 'Publish').first);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Start release').last);
+    await tester.tap(find.widgetWithText(FilledButton, 'Publish').last);
     await pumpFrames(tester, const Duration(milliseconds: 1500));
     expect(find.text('Running'), findsOneWidget);
 

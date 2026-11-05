@@ -16,7 +16,7 @@
   "signUpExplain": "Free plan, no credit card. We email you a code to confirm the address.",
   "demoHint": "Demo: demo@apprelease.store / demo1234",
   "fillDemo": "Fill demo account",
-  "authPitch": "Build, sign and publish Flutter apps to Google Play and the App Store from one apprelease.yaml.",
+  "authPitch": "Build, sign and publish Flutter apps to Google Play and the App Store straight from your Git repository. No pipeline to write.",
   "authPoint1": "Managed code signing for Android and iOS",
   "authPoint2": "Build numbers taken straight from the store",
   "authPoint3": "Live logs, release history, email when it is done",
@@ -80,7 +80,7 @@
   },
   "addApplication": "Add application",
   "noAppsTitle": "No applications yet",
-  "noAppsMessage": "Connect the repository that holds your Flutter project. AppRelease scans it for apprelease.yaml.",
+  "noAppsMessage": "Connect the repository that holds your Flutter project. No configuration file is needed; the settings here are the build.",
   "lastRelease": "Last release",
   "never": "never",
   "releasesCount": "{count, plural, =0{no releases} =1{1 release} other{{count} releases}}",
@@ -117,7 +117,7 @@
   "tabReleases": "Releases",
   "tabConfig": "Config",
   "tabSettings": "Settings",
-  "startRelease": "Start release",
+  "startRelease": "Publish",
   "noReleasesForApp": "This application has not been released yet.",
   "releaseNumber": "Release #{number}",
   "@releaseNumber": {
@@ -127,7 +127,7 @@
       }
     }
   },
-  "configExplain": "Commit this file as apprelease.yaml in the root of the repository. It is generated from the application's settings and the credentials you have added.",
+  "configExplain": "Optional. The runner builds with the settings of this application. Commit this file as apprelease.yaml in the root of the repository only if you want to change how it builds; it is generated from the settings and the credentials, so it is a correct starting point.",
   "configMissingCredentials": "Add credentials to fill in the signing and publishing sections.",
   "regenerate": "Regenerate",
   "appSettingsExplain": "The runner reads these when a release starts.",
@@ -284,7 +284,7 @@
   "expiredCode": "That code has expired. Request a new one.",
   "demoCodeHint": "Demo: the code is 123456",
   "setupTitle": "Set up your first release",
-  "setupSubtitle": "Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.",
+  "setupSubtitle": "Each step opens the form it needs and shows where to get the key. Do them now or later; nothing here is lost.",
   "setupItemApp": "Your application",
   "setupItemAppBody": "The Git URL of the Flutter project, the branch to build, and the package name or bundle identifier.",
   "setupItemKeystore": "Android upload keystore",
@@ -519,7 +519,7 @@
     }
   },
   "launchApp": "Add your application",
-  "launchAppBody": "The repository of your Flutter app, its package name and bundle identifier.",
+  "launchAppBody": "Tell us where the code is. Nothing is built yet.",
   "launchAppFix": "{app}: the repository address or a package name needs fixing before it can build.",
   "@launchAppFix": {
     "placeholders": {
@@ -528,9 +528,9 @@
       }
     }
   },
-  "launchKeystoreBody": "The .jks file your Android app is signed with, plus its passwords.",
-  "launchPlayBody": "A service account that may upload to Google Play. About 5 minutes, the form walks you through it.",
-  "launchAscBody": "An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.",
+  "launchKeystoreBody": "The key your Android app is signed with. Google accepts updates only when they are signed with the same key as the first version.",
+  "launchPlayBody": "Permission for AppRelease to upload to your Play Console, through a Google service account.",
+  "launchAscBody": "Permission for AppRelease to upload to App Store Connect, through an API key.",
   "launchFirstRelease": "Publish your first release",
   "launchFirstReleaseBody": "Pick a platform and a track. You watch the build live.",
   "launchFirstReleaseWaiting": "Opens once an app has everything a release needs.",
@@ -655,5 +655,40 @@
   "credentialSecurityTitle": "Encrypted and never shown again",
   "credentialSecurityBody": "Encrypted with AES before it is stored, with a key that is not in the database. Not even this console can read it back. Only the build machine decrypts it, for one release, then deletes it. Passwords never appear in logs.",
   "credentialSecurityMore": "How we protect it",
-  "playGuideEmailPending": "The email to invite appears here once you pick the JSON file."
+  "playGuideEmailPending": "The email to invite appears here once you pick the JSON file.",
+  "launchWhere": "Where do you publish?",
+  "launchWhereHint": "Pick the stores you use. The other one can be added any time.",
+  "storeGooglePlay": "Google Play",
+  "storeAppStore": "App Store",
+  "launchSectionApp": "Your app",
+  "launchSectionPlay": "Google Play",
+  "launchSectionAppStore": "App Store",
+  "launchAppNeeds": "You need: the Git address of your Flutter project, and the package name from Google Play or the bundle ID from App Store Connect.",
+  "launchKeystoreNeeds": "You need: the .jks file, its password, the key alias and the key password. New app? The form shows how to create one.",
+  "launchPlayNeeds": "You need: a Google account. The form walks you through Google Cloud and Play Console, click by click.",
+  "launchAscNeeds": "You need: the Account Holder or an Admin of your Apple developer account; only they can create the key. The form has the message to send them.",
+  "launchPublishPlay": "Publish to Google Play",
+  "launchPublishPlayBody": "We download your code, build it, sign it with your key and upload it to Internal testing in Play Console. You watch every step; nothing reaches your users until you promote it.",
+  "launchPublishAppStore": "Publish to App Store",
+  "launchPublishAppStoreBody": "We build and sign your app and upload it to TestFlight. You watch every step; nothing reaches your users until you submit it for review.",
+  "launchPublishWaiting": "Opens once the steps above are done.",
+  "launchMinutes": "~{n} min",
+  "@launchMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "releaseWhatHappens": "What happens next: we download your code, build it, sign it with your key and upload it to {where}. About {minutes} minutes; you can watch every step. Nothing reaches your users until you release it in the store.",
+  "@releaseWhatHappens": {
+    "placeholders": {
+      "where": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

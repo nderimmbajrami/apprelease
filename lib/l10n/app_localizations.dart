@@ -192,7 +192,7 @@ abstract class AppL10n {
   /// No description provided for @authPitch.
   ///
   /// In en, this message translates to:
-  /// **'Build, sign and publish Flutter apps to Google Play and the App Store from one apprelease.yaml.'**
+  /// **'Build, sign and publish Flutter apps to Google Play and the App Store straight from your Git repository. No pipeline to write.'**
   String get authPitch;
 
   /// No description provided for @authPoint1.
@@ -534,7 +534,7 @@ abstract class AppL10n {
   /// No description provided for @noAppsMessage.
   ///
   /// In en, this message translates to:
-  /// **'Connect the repository that holds your Flutter project. AppRelease scans it for apprelease.yaml.'**
+  /// **'Connect the repository that holds your Flutter project. No configuration file is needed; the settings here are the build.'**
   String get noAppsMessage;
 
   /// No description provided for @lastRelease.
@@ -714,7 +714,7 @@ abstract class AppL10n {
   /// No description provided for @startRelease.
   ///
   /// In en, this message translates to:
-  /// **'Start release'**
+  /// **'Publish'**
   String get startRelease;
 
   /// No description provided for @noReleasesForApp.
@@ -732,7 +732,7 @@ abstract class AppL10n {
   /// No description provided for @configExplain.
   ///
   /// In en, this message translates to:
-  /// **'Commit this file as apprelease.yaml in the root of the repository. It is generated from the application\'s settings and the credentials you have added.'**
+  /// **'Optional. The runner builds with the settings of this application. Commit this file as apprelease.yaml in the root of the repository only if you want to change how it builds; it is generated from the settings and the credentials, so it is a correct starting point.'**
   String get configExplain;
 
   /// No description provided for @configMissingCredentials.
@@ -1320,7 +1320,7 @@ abstract class AppL10n {
   /// No description provided for @setupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.'**
+  /// **'Each step opens the form it needs and shows where to get the key. Do them now or later; nothing here is lost.'**
   String get setupSubtitle;
 
   /// No description provided for @setupItemApp.
@@ -2076,7 +2076,7 @@ abstract class AppL10n {
   /// No description provided for @launchAppBody.
   ///
   /// In en, this message translates to:
-  /// **'The repository of your Flutter app, its package name and bundle identifier.'**
+  /// **'Tell us where the code is. Nothing is built yet.'**
   String get launchAppBody;
 
   /// No description provided for @launchAppFix.
@@ -2088,19 +2088,19 @@ abstract class AppL10n {
   /// No description provided for @launchKeystoreBody.
   ///
   /// In en, this message translates to:
-  /// **'The .jks file your Android app is signed with, plus its passwords.'**
+  /// **'The key your Android app is signed with. Google accepts updates only when they are signed with the same key as the first version.'**
   String get launchKeystoreBody;
 
   /// No description provided for @launchPlayBody.
   ///
   /// In en, this message translates to:
-  /// **'A service account that may upload to Google Play. About 5 minutes, the form walks you through it.'**
+  /// **'Permission for AppRelease to upload to your Play Console, through a Google service account.'**
   String get launchPlayBody;
 
   /// No description provided for @launchAscBody.
   ///
   /// In en, this message translates to:
-  /// **'An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.'**
+  /// **'Permission for AppRelease to upload to App Store Connect, through an API key.'**
   String get launchAscBody;
 
   /// No description provided for @launchFirstRelease.
@@ -2402,6 +2402,114 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'The email to invite appears here once you pick the JSON file.'**
   String get playGuideEmailPending;
+
+  /// No description provided for @launchWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you publish?'**
+  String get launchWhere;
+
+  /// No description provided for @launchWhereHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the stores you use. The other one can be added any time.'**
+  String get launchWhereHint;
+
+  /// No description provided for @storeGooglePlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get storeGooglePlay;
+
+  /// No description provided for @storeAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store'**
+  String get storeAppStore;
+
+  /// No description provided for @launchSectionApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your app'**
+  String get launchSectionApp;
+
+  /// No description provided for @launchSectionPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get launchSectionPlay;
+
+  /// No description provided for @launchSectionAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'App Store'**
+  String get launchSectionAppStore;
+
+  /// No description provided for @launchAppNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'You need: the Git address of your Flutter project, and the package name from Google Play or the bundle ID from App Store Connect.'**
+  String get launchAppNeeds;
+
+  /// No description provided for @launchKeystoreNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'You need: the .jks file, its password, the key alias and the key password. New app? The form shows how to create one.'**
+  String get launchKeystoreNeeds;
+
+  /// No description provided for @launchPlayNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'You need: a Google account. The form walks you through Google Cloud and Play Console, click by click.'**
+  String get launchPlayNeeds;
+
+  /// No description provided for @launchAscNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'You need: the Account Holder or an Admin of your Apple developer account; only they can create the key. The form has the message to send them.'**
+  String get launchAscNeeds;
+
+  /// No description provided for @launchPublishPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to Google Play'**
+  String get launchPublishPlay;
+
+  /// No description provided for @launchPublishPlayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We download your code, build it, sign it with your key and upload it to Internal testing in Play Console. You watch every step; nothing reaches your users until you promote it.'**
+  String get launchPublishPlayBody;
+
+  /// No description provided for @launchPublishAppStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish to App Store'**
+  String get launchPublishAppStore;
+
+  /// No description provided for @launchPublishAppStoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We build and sign your app and upload it to TestFlight. You watch every step; nothing reaches your users until you submit it for review.'**
+  String get launchPublishAppStoreBody;
+
+  /// No description provided for @launchPublishWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens once the steps above are done.'**
+  String get launchPublishWaiting;
+
+  /// No description provided for @launchMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'~{n} min'**
+  String launchMinutes(int n);
+
+  /// No description provided for @releaseWhatHappens.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next: we download your code, build it, sign it with your key and upload it to {where}. About {minutes} minutes; you can watch every step. Nothing reaches your users until you release it in the store.'**
+  String releaseWhatHappens(String where, int minutes);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

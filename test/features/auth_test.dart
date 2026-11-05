@@ -18,6 +18,11 @@ void main() {
 
     await signIn(tester);
     expect(find.text('Dashboard'), findsWidgets);
+    await tester.scrollUntilVisible(
+      find.text('Recent releases'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Recent releases'), findsOneWidget);
   });
 
@@ -48,7 +53,12 @@ void main() {
 
     // A new account lands on the checklist, then on an empty dashboard.
     expect(find.text('Set up your first release'), findsOneWidget);
-    expect(find.text('0 of 4 done'), findsOneWidget);
+    expect(find.text('0 of 6 done'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Skip for now'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Skip for now'));
     await tester.pumpAndSettle();
     expect(find.text('Launch checklist'), findsOneWidget);

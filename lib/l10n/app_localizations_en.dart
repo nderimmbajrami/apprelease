@@ -59,7 +59,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get authPitch =>
-      'Build, sign and publish Flutter apps to Google Play and the App Store from one apprelease.yaml.';
+      'Build, sign and publish Flutter apps to Google Play and the App Store straight from your Git repository. No pipeline to write.';
 
   @override
   String get authPoint1 => 'Managed code signing for Android and iOS';
@@ -248,7 +248,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get noAppsMessage =>
-      'Connect the repository that holds your Flutter project. AppRelease scans it for apprelease.yaml.';
+      'Connect the repository that holds your Flutter project. No configuration file is needed; the settings here are the build.';
 
   @override
   String get lastRelease => 'Last release';
@@ -349,7 +349,7 @@ class AppL10nEn extends AppL10n {
   String get tabSettings => 'Settings';
 
   @override
-  String get startRelease => 'Start release';
+  String get startRelease => 'Publish';
 
   @override
   String get noReleasesForApp => 'This application has not been released yet.';
@@ -361,7 +361,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get configExplain =>
-      'Commit this file as apprelease.yaml in the root of the repository. It is generated from the application\'s settings and the credentials you have added.';
+      'Optional. The runner builds with the settings of this application. Commit this file as apprelease.yaml in the root of the repository only if you want to change how it builds; it is generated from the settings and the credentials, so it is a correct starting point.';
 
   @override
   String get configMissingCredentials =>
@@ -684,7 +684,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get setupSubtitle =>
-      'Four things AppRelease needs before it can publish. Add them now or later; nothing here is lost.';
+      'Each step opens the form it needs and shows where to get the key. Do them now or later; nothing here is lost.';
 
   @override
   String get setupItemApp => 'Your application';
@@ -1137,7 +1137,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get launchAppBody =>
-      'The repository of your Flutter app, its package name and bundle identifier.';
+      'Tell us where the code is. Nothing is built yet.';
 
   @override
   String launchAppFix(String app) {
@@ -1146,15 +1146,15 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get launchKeystoreBody =>
-      'The .jks file your Android app is signed with, plus its passwords.';
+      'The key your Android app is signed with. Google accepts updates only when they are signed with the same key as the first version.';
 
   @override
   String get launchPlayBody =>
-      'A service account that may upload to Google Play. About 5 minutes, the form walks you through it.';
+      'Permission for AppRelease to upload to your Play Console, through a Google service account.';
 
   @override
   String get launchAscBody =>
-      'An API key from App Store Connect, so builds reach TestFlight and review. About 3 minutes.';
+      'Permission for AppRelease to upload to App Store Connect, through an API key.';
 
   @override
   String get launchFirstRelease => 'Publish your first release';
@@ -1377,4 +1377,69 @@ class AppL10nEn extends AppL10n {
   @override
   String get playGuideEmailPending =>
       'The email to invite appears here once you pick the JSON file.';
+
+  @override
+  String get launchWhere => 'Where do you publish?';
+
+  @override
+  String get launchWhereHint =>
+      'Pick the stores you use. The other one can be added any time.';
+
+  @override
+  String get storeGooglePlay => 'Google Play';
+
+  @override
+  String get storeAppStore => 'App Store';
+
+  @override
+  String get launchSectionApp => 'Your app';
+
+  @override
+  String get launchSectionPlay => 'Google Play';
+
+  @override
+  String get launchSectionAppStore => 'App Store';
+
+  @override
+  String get launchAppNeeds =>
+      'You need: the Git address of your Flutter project, and the package name from Google Play or the bundle ID from App Store Connect.';
+
+  @override
+  String get launchKeystoreNeeds =>
+      'You need: the .jks file, its password, the key alias and the key password. New app? The form shows how to create one.';
+
+  @override
+  String get launchPlayNeeds =>
+      'You need: a Google account. The form walks you through Google Cloud and Play Console, click by click.';
+
+  @override
+  String get launchAscNeeds =>
+      'You need: the Account Holder or an Admin of your Apple developer account; only they can create the key. The form has the message to send them.';
+
+  @override
+  String get launchPublishPlay => 'Publish to Google Play';
+
+  @override
+  String get launchPublishPlayBody =>
+      'We download your code, build it, sign it with your key and upload it to Internal testing in Play Console. You watch every step; nothing reaches your users until you promote it.';
+
+  @override
+  String get launchPublishAppStore => 'Publish to App Store';
+
+  @override
+  String get launchPublishAppStoreBody =>
+      'We build and sign your app and upload it to TestFlight. You watch every step; nothing reaches your users until you submit it for review.';
+
+  @override
+  String get launchPublishWaiting => 'Opens once the steps above are done.';
+
+  @override
+  String launchMinutes(int n) {
+    return '~$n min';
+  }
+
+  @override
+  String releaseWhatHappens(String where, int minutes) {
+    return 'What happens next: we download your code, build it, sign it with your key and upload it to $where. About $minutes minutes; you can watch every step. Nothing reaches your users until you release it in the store.';
+  }
 }

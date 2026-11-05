@@ -15,21 +15,28 @@ import 'widgets/readiness_list.dart';
 import 'widgets/status_pill.dart';
 
 /// Opens the release dialog and returns the new release's id, or null.
-Future<String?> showStartReleaseSheet(BuildContext context, AppProject app) {
+Future<String?> showStartReleaseSheet(
+  BuildContext context,
+  AppProject app, {
+  Platform? platform,
+}) {
   // A snackbar from the previous action would sit over the dialog.
   ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
   return showDialog<String>(
     context: context,
-    builder: (context) => _StartReleaseDialog(app: app),
+    builder: (context) => _StartReleaseDialog(app: app, platform: platform),
   );
 }
 
 /// Platform, then what the release needs (checked, with fixes), then where
 /// it goes and which version. Start stays off until every check is green.
 class _StartReleaseDialog extends ConsumerStatefulWidget {
-  const _StartReleaseDialog({required this.app});
+  const _StartReleaseDialog({required this.app, this.platform});
 
   final AppProject app;
+
+  /// Opened from a store's own Publish step: that store, preselected.
+  final Platform? platform;
 
   @override
   ConsumerState<_StartReleaseDialog> createState() =>
@@ -40,9 +47,9 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
   final _formKey = GlobalKey<FormState>();
   late final _version = TextEditingController(text: _lastVersion());
   final _buildNumber = TextEditingController();
-  late Platform _platform = widget.app.hasAndroid
-      ? Platform.android
-      : Platform.ios;
+  late Platform _platform =
+      widget.platform ??
+      (widget.app.hasAndroid ? Platform.android : Platform.ios);
   late ReleaseTrack _track = ReleaseTrack.forPlatform(_platform).first;
   String? _error;
 
@@ -277,6 +284,36 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
                       Text(
                         l10n.releaseBuildNumberHint,
                         style: theme.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: Gap.lg),
+                      // What pressing the button sets in motion, in one
+                      // breath, for whoever has never done this before.
+                      Container(
+                        padding: const EdgeInsets.all(Gap.md),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(Radii.md),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 18,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: Gap.sm),
+                            Expanded(
+                              child: Text(
+                                l10n.releaseWhatHappens(
+                                  '${_platform == Platform.android ? 'Google Play' : 'App Store Connect'} · ${trackLabel(context, _track)}',
+                                  _platform == Platform.android ? 10 : 15,
+                                ),
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
