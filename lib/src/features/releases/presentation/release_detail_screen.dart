@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -105,6 +107,8 @@ class _ReleaseView extends ConsumerWidget {
             follow: release.status.isActive,
           ),
         ),
+        if (release.status == ReleaseStatus.running)
+          _QuietHint(lastLineAt: log.value?.lastOrNull?.at),
       ],
     );
 
@@ -273,6 +277,70 @@ class _QueueCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(body, style: theme.textTheme.bodyMedium),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A build prints nothing for minutes while Gradle or Xcode compile. Said
+/// out loud after a short silence, so nobody thinks the page is stuck.
+class _QuietHint extends StatefulWidget {
+  const _QuietHint({required this.lastLineAt});
+
+  final DateTime? lastLineAt;
+
+  @override
+  State<_QuietHint> createState() => _QuietHintState();
+}
+
+class _QuietHintState extends State<_QuietHint> {
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final last = widget.lastLineAt;
+    if (last == null) return const SizedBox.shrink();
+    final quiet = DateTime.now().difference(last);
+    if (quiet < const Duration(seconds: 20)) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final since = quiet.inMinutes >= 1
+        ? '${quiet.inMinutes} min'
+        : '${quiet.inSeconds} s';
+    return Padding(
+      padding: const EdgeInsets.only(top: Gap.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: Gap.sm),
+          Expanded(
+            child: Text(
+              context.l10n.logQuiet(since),
+              style: theme.textTheme.bodySmall,
             ),
           ),
         ],

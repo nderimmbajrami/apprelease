@@ -12,13 +12,18 @@ import 'steps/signing.dart';
 import 'steps/versioning.dart';
 import 'stores/app_store_connect.dart';
 
-/// Streams a release's log to Supabase, with secrets masked.
+/// Streams a release's log to Supabase, with secrets masked. Lines are sent
+/// in batches a few times a second: one request per line made `pub get`
+/// crawl and flooded the console with one event per line.
 class LogSink {
   LogSink(this._api, this._releaseId);
 
   final SupabaseApi _api;
   final String _releaseId;
   final _secrets = <String>[];
+  final _pending = <Map<String, dynamic>>[];
+  Timer? _timer;
+  Future<void>? _inFlight;
   var _seq = 0;
 
   /// Anything added here is replaced by *** in every line that follows.
@@ -32,13 +37,41 @@ class LogSink {
       safe = safe.replaceAll(secret, '***');
     }
     stdout.writeln('[${level.padRight(7)}] $safe');
-    return _api.appendLog(
-      releaseId: _releaseId,
-      seq: _seq++,
-      text: safe,
-      stepId: stepId,
-      level: level,
-    );
+    _pending.add({
+      'release_id': _releaseId,
+      'seq': _seq++,
+      'step_id': stepId,
+      'level': level,
+      'text': safe,
+    });
+    if (_pending.length >= 50) {
+      unawaited(flush());
+    } else {
+      _timer ??= Timer(
+        const Duration(milliseconds: 250),
+        () => unawaited(flush()),
+      );
+    }
+    return Future.value();
+  }
+
+  /// Sends what is waiting, in order: one batch in flight at a time.
+  Future<void> flush() async {
+    _timer?.cancel();
+    _timer = null;
+    while (_pending.isNotEmpty) {
+      if (_inFlight != null) {
+        await _inFlight;
+        continue;
+      }
+      final batch = List.of(_pending);
+      _pending.clear();
+      _inFlight = _api.appendLogs(batch).catchError((Object error) {
+        stderr.writeln('log write failed: $error');
+      });
+      await _inFlight;
+      _inFlight = null;
+    }
   }
 }
 
@@ -150,6 +183,7 @@ class Pipeline {
       });
       await log('$error', level: 'error');
     } finally {
+      await log.flush();
       // Whatever happened, neither the keys nor the source stay on disk.
       await SigningFiles.cleanUp(env);
       try {
@@ -510,17 +544,36 @@ class Pipeline {
       environment: {...Platform.environment, ...env},
     );
     final out = StringBuffer();
+    var lastOutput = DateTime.now();
     Future<void> pipe(Stream<List<int>> stream, String level) => stream
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .forEach((line) async {
           out.writeln(line);
+          lastOutput = DateTime.now();
           if (!quiet) await log(line, stepId: stepId, level: level);
         });
-    await Future.wait([
-      pipe(process.stdout, 'info'),
-      pipe(process.stderr, 'warning'),
-    ]);
+    // Gradle and Xcode say nothing for minutes while they compile. A line a
+    // minute tells the reader the build is alive, not stuck.
+    final ticker = Timer.periodic(const Duration(seconds: 60), (_) {
+      final silent = DateTime.now().difference(lastOutput);
+      if (!quiet && silent >= const Duration(seconds: 55)) {
+        unawaited(
+          log(
+            '… still running, no output for ${silent.inMinutes} min',
+            stepId: stepId,
+          ),
+        );
+      }
+    });
+    try {
+      await Future.wait([
+        pipe(process.stdout, 'info'),
+        pipe(process.stderr, 'warning'),
+      ]);
+    } finally {
+      ticker.cancel();
+    }
     final code = await process.exitCode;
     if (code != 0) throw StepFailed('$executable exited with code $code');
     return out.toString();

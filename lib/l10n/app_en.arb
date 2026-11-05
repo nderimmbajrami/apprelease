@@ -700,5 +700,13 @@
   "guideFile1": "Pick the file from your project, for example android/app/google-services.json from Firebase.",
   "guideFile2": "Check the path: it is where the file sits in the repository, relative to its root. Common files are filled in for you.",
   "guideFile3": "Choose the application it belongs to, or leave it shared, and save. Every build of that app gets the file.",
-  "guideFileNote": "A build that fails with 'google-services.json is missing' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git."
+  "guideFileNote": "A build that fails with 'google-services.json is missing' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.",
+  "logQuiet": "Still running. No output for {since}: Gradle and Xcode print nothing while they compile, and this step usually takes 2 to 6 minutes.",
+  "@logQuiet": {
+    "placeholders": {
+      "since": {
+        "type": "String"
+      }
+    }
+  }
 }

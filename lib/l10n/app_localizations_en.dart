@@ -1479,4 +1479,9 @@ class AppL10nEn extends AppL10n {
   @override
   String get guideFileNote =>
       'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.';
+
+  @override
+  String logQuiet(String since) {
+    return 'Still running. No output for $since: Gradle and Xcode print nothing while they compile, and this step usually takes 2 to 6 minutes.';
+  }
 }

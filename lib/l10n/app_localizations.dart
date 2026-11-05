@@ -2570,6 +2570,12 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.'**
   String get guideFileNote;
+
+  /// No description provided for @logQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Still running. No output for {since}: Gradle and Xcode print nothing while they compile, and this step usually takes 2 to 6 minutes.'**
+  String logQuiet(String since);
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

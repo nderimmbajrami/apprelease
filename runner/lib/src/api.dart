@@ -245,6 +245,16 @@ class SupabaseApi {
     _check(response);
   }
 
+  /// Several log lines in one request, in the order given.
+  Future<void> appendLogs(List<Map<String, dynamic>> rows) async {
+    final response = await _client.post(
+      Uri.parse('$url/rest/v1/release_logs'),
+      headers: {..._headers, 'Prefer': 'return=minimal'},
+      body: jsonEncode(rows),
+    );
+    _check(response);
+  }
+
   Future<void> heartbeat({
     required String runnerId,
     required String name,

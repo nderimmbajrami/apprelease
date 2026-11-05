@@ -24,19 +24,30 @@ class LogView extends StatefulWidget {
 class _LogViewState extends State<LogView> {
   final _controller = ScrollController();
 
+  /// Whether the reader is at the end. Scrolled up to read something, new
+  /// lines must not pull the view away.
+  var _atEnd = true;
+
   @override
   void didUpdateWidget(LogView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.follow && widget.lines.length != oldWidget.lines.length) {
+    if (widget.follow &&
+        _atEnd &&
+        widget.lines.length != oldWidget.lines.length) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_controller.hasClients) return;
-        _controller.animateTo(
-          _controller.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
+        // A jump, not an animation: lines can arrive faster than 200 ms.
+        _controller.jumpTo(_controller.position.maxScrollExtent);
       });
     }
+  }
+
+  bool _onScroll(ScrollNotification n) {
+    if (n is ScrollUpdateNotification || n is ScrollEndNotification) {
+      final m = n.metrics;
+      _atEnd = m.pixels >= m.maxScrollExtent - 48;
+    }
+    return false;
   }
 
   @override
@@ -70,50 +81,53 @@ class _LogViewState extends State<LogView> {
                 ),
               ),
             )
-          : SelectionArea(
-              child: ListView.builder(
-                controller: _controller,
-                padding: const EdgeInsets.all(Gap.md),
-                itemCount: widget.lines.length,
-                itemBuilder: (context, index) {
-                  final line = widget.lines[index];
-                  final color = switch (line.level) {
-                    LogLevel.command => const Color(0xFFAFC3FF),
-                    LogLevel.warning => AppColors.amberDark,
-                    LogLevel.error => AppColors.dangerDark,
-                    LogLevel.success => AppColors.mintDark,
-                    LogLevel.info => AppColors.inkDark,
-                  };
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1.5),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          time.format(line.at.toLocal()),
-                          style: theme.textTheme.mono.copyWith(
-                            fontSize: 12,
-                            color: AppColors.mutedDark.withValues(alpha: .7),
-                          ),
-                        ),
-                        const SizedBox(width: Gap.md),
-                        Expanded(
-                          child: Text(
-                            (line.level == LogLevel.command ? '\$ ' : '') +
-                                line.text,
+          : NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
+              child: SelectionArea(
+                child: ListView.builder(
+                  controller: _controller,
+                  padding: const EdgeInsets.all(Gap.md),
+                  itemCount: widget.lines.length,
+                  itemBuilder: (context, index) {
+                    final line = widget.lines[index];
+                    final color = switch (line.level) {
+                      LogLevel.command => const Color(0xFFAFC3FF),
+                      LogLevel.warning => AppColors.amberDark,
+                      LogLevel.error => AppColors.dangerDark,
+                      LogLevel.success => AppColors.mintDark,
+                      LogLevel.info => AppColors.inkDark,
+                    };
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1.5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            time.format(line.at.toLocal()),
                             style: theme.textTheme.mono.copyWith(
-                              fontSize: 12.5,
-                              color: color,
-                              fontWeight: line.level == LogLevel.success
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              fontSize: 12,
+                              color: AppColors.mutedDark.withValues(alpha: .7),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                          const SizedBox(width: Gap.md),
+                          Expanded(
+                            child: Text(
+                              (line.level == LogLevel.command ? '\$ ' : '') +
+                                  line.text,
+                              style: theme.textTheme.mono.copyWith(
+                                fontSize: 12.5,
+                                color: color,
+                                fontWeight: line.level == LogLevel.success
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
     );

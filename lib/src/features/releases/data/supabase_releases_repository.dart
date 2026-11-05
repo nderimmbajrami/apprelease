@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -51,24 +52,79 @@ class SupabaseReleasesRepository implements ReleasesRepository {
   );
 
   @override
-  Stream<List<LogLine>> watchLog(String releaseId) => _client
-      .from('release_logs')
-      .stream(primaryKey: ['id'])
-      .eq('release_id', releaseId)
-      .order('seq', ascending: true)
-      .map(
-        (rows) => [
-          for (final row in rows)
-            LogLine(
-              at: DateTime.parse(row['at'] as String),
-              text: row['text'] as String,
-              stepId: row['step_id'] as String?,
-              level: LogLevel.values.byName(
-                (row['level'] as String?) ?? 'info',
+  /// Loaded once, then one line at a time as the runner writes it, and
+  /// handed out at most a few times a second. (Supabase's own `.stream()`
+  /// re-sends the whole log on every line: thousands of full rebuilds
+  /// during a build, which is what made this page crawl.)
+  Stream<List<LogLine>> watchLog(String releaseId) {
+    late final StreamController<List<LogLine>> controller;
+    RealtimeChannel? channel;
+    Timer? flush;
+    var closed = false;
+    // Keyed by seq, so a line that arrives live before the first load, or
+    // out of order, still ends up in its place.
+    final lines = SplayTreeMap<int, LogLine>();
+
+    LogLine parse(Map<String, dynamic> row) => LogLine(
+      at: DateTime.parse(row['at'] as String),
+      text: row['text'] as String,
+      stepId: row['step_id'] as String?,
+      level: LogLevel.values.byName((row['level'] as String?) ?? 'info'),
+    );
+    void emit() {
+      flush = null;
+      if (!closed) controller.add(List.unmodifiable(lines.values));
+    }
+
+    void schedule() => flush ??= Timer(const Duration(milliseconds: 200), emit);
+    Future<void> load() async {
+      final rows = await _client
+          .from('release_logs')
+          .select()
+          .eq('release_id', releaseId)
+          .order('seq', ascending: true);
+      for (final row in rows) {
+        lines[row['seq'] as int] = parse(row);
+      }
+      if (!closed) emit();
+    }
+
+    controller = StreamController<List<LogLine>>(
+      onListen: () {
+        unawaited(load());
+        channel =
+            _client.channel(
+              'log:$releaseId:${DateTime.now().microsecondsSinceEpoch}',
+            )..onPostgresChanges(
+              event: PostgresChangeEvent.insert,
+              schema: 'public',
+              table: 'release_logs',
+              filter: PostgresChangeFilter(
+                type: PostgresChangeFilterType.eq,
+                column: 'release_id',
+                value: releaseId,
               ),
-            ),
-        ],
-      );
+              callback: (payload) {
+                final row = payload.newRecord;
+                lines[row['seq'] as int] = parse(row);
+                schedule();
+              },
+            );
+        // A (re)connection may have missed lines: load again, by seq.
+        channel!.subscribe((status, _) {
+          if (status == RealtimeSubscribeStatus.subscribed) unawaited(load());
+        });
+      },
+      onCancel: () async {
+        closed = true;
+        flush?.cancel();
+        final open = channel;
+        channel = null;
+        if (open != null) await _client.removeChannel(open);
+      },
+    );
+    return controller.stream;
+  }
 
   @override
   Future<Release> startRelease(Release release) async {
