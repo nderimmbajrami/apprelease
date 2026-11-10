@@ -51,6 +51,16 @@ class Checkout {
     return (result.stdout as String).trim();
   }
 
+  /// The whole message of the commit that was checked out.
+  static Future<String> message(Directory dir) async {
+    final result = await Process.run('git', [
+      'log',
+      '-1',
+      '--format=%B',
+    ], workingDirectory: dir.path);
+    return result.exitCode == 0 ? (result.stdout as String).trim() : '';
+  }
+
   /// `https://token@github.com/…` → `https://***@github.com/…`
   static String _redact(String url) =>
       url.replaceAllMapped(RegExp(r'://([^@/]+)@'), (m) => '://***@');

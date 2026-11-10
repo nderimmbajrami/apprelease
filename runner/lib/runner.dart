@@ -10,7 +10,8 @@
 ///             ├─ signing             keystore / App Store Connect key → env
 ///             ├─ versioning          build number from the store
 ///             ├─ build               flutter build appbundle | ipa
-///             └─ publish             Google Play | App Store Connect
+///             ├─ publish             Google Play | App Store Connect
+///             └─ send to QA          QA builds only: Slack, then Jira
 /// ```
 ///
 /// Every step writes to `release_steps` and streams lines into
@@ -21,5 +22,6 @@ export 'src/api.dart';
 export 'src/config.dart';
 export 'src/pipeline.dart';
 export 'src/runner.dart';
+export 'src/steps/qa.dart';
 export 'src/stores/app_store_connect.dart';
 export 'src/stores/google_play.dart';

@@ -1428,7 +1428,7 @@ abstract class AppL10n {
   /// No description provided for @triggersExplain.
   ///
   /// In en, this message translates to:
-  /// **'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.'**
+  /// **'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review, ready-for-qa as a QA build to your testers in Slack. The version comes from pubspec.yaml.'**
   String get triggersExplain;
 
   /// No description provided for @triggerEnabled.
@@ -2576,6 +2576,252 @@ abstract class AppL10n {
   /// In en, this message translates to:
   /// **'Still running. No output for {since}: Gradle and Xcode print nothing while they compile, and this step usually takes 2 to 6 minutes.'**
   String logQuiet(String since);
+
+  /// No description provided for @trackQa.
+  ///
+  /// In en, this message translates to:
+  /// **'QA build (APK to Slack)'**
+  String get trackQa;
+
+  /// No description provided for @trackQaTestflight.
+  ///
+  /// In en, this message translates to:
+  /// **'QA build (TestFlight + Slack)'**
+  String get trackQaTestflight;
+
+  /// No description provided for @qaWhatHappensAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next: we download your code, build a signed APK and post it to your Slack channel with the version and build number. The Jira tickets named in the last commit message (like DAMA-123) move to your QA status. Nothing goes to Google Play. About 10 minutes.'**
+  String get qaWhatHappensAndroid;
+
+  /// No description provided for @qaWhatHappensIos.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next: we download your code, build it and upload it to TestFlight, then tell your Slack channel the version and build number. The Jira tickets named in the last commit message (like DAMA-123) move to your QA status. Nothing is sent to App Store review. About 15 minutes.'**
+  String get qaWhatHappensIos;
+
+  /// No description provided for @readySlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Slack channel for QA'**
+  String get readySlack;
+
+  /// No description provided for @readySlackOk.
+  ///
+  /// In en, this message translates to:
+  /// **'QA builds are posted to your channel.'**
+  String get readySlackOk;
+
+  /// No description provided for @readySlackMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a Slack connection: the bot token and the channel the build goes to.'**
+  String get readySlackMissing;
+
+  /// No description provided for @kindSlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Slack (QA builds)'**
+  String get kindSlack;
+
+  /// No description provided for @kindSlackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Where QA builds are announced: the Android APK is posted to this channel, an iOS build is announced once it is on TestFlight.'**
+  String get kindSlackBody;
+
+  /// No description provided for @kindJira.
+  ///
+  /// In en, this message translates to:
+  /// **'Jira (QA tickets)'**
+  String get kindJira;
+
+  /// No description provided for @kindJiraBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves the tickets named in the last commit message (like DAMA-123) to your QA status once a QA build went out.'**
+  String get kindJiraBody;
+
+  /// No description provided for @credentialAppHelperQa.
+  ///
+  /// In en, this message translates to:
+  /// **'The app whose QA builds use this. Leave it shared if every app goes to the same place.'**
+  String get credentialAppHelperQa;
+
+  /// No description provided for @slackToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot User OAuth Token'**
+  String get slackToken;
+
+  /// No description provided for @slackTokenHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Slack app → OAuth & Permissions. Starts with xoxb-.'**
+  String get slackTokenHelper;
+
+  /// No description provided for @slackTokenInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'A bot token starts with xoxb-.'**
+  String get slackTokenInvalid;
+
+  /// No description provided for @slackChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel ID'**
+  String get slackChannel;
+
+  /// No description provided for @slackChannelHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'In Slack, open the channel details: the ID is at the bottom. Not the #name.'**
+  String get slackChannelHelper;
+
+  /// No description provided for @slackChannelInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The channel ID looks like C0123ABCDEF. It is at the bottom of the channel details.'**
+  String get slackChannelInvalid;
+
+  /// No description provided for @jiraSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Jira site'**
+  String get jiraSite;
+
+  /// No description provided for @jiraSiteInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The address of your Jira, like https://your-team.atlassian.net'**
+  String get jiraSiteInvalid;
+
+  /// No description provided for @jiraEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Atlassian account email'**
+  String get jiraEmail;
+
+  /// No description provided for @jiraEmailHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The account the API token belongs to. It needs permission to move tickets.'**
+  String get jiraEmailHelper;
+
+  /// No description provided for @jiraToken.
+  ///
+  /// In en, this message translates to:
+  /// **'API token'**
+  String get jiraToken;
+
+  /// No description provided for @jiraStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status to move tickets to'**
+  String get jiraStatus;
+
+  /// No description provided for @jiraStatusHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The name of the status on your board, exactly as Jira shows it.'**
+  String get jiraStatusHelper;
+
+  /// No description provided for @jiraProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Project keys (optional)'**
+  String get jiraProjects;
+
+  /// No description provided for @jiraProjectsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Only tickets of these projects are moved. Empty: any key like ABC-123 that is a ticket in your Jira.'**
+  String get jiraProjectsHelper;
+
+  /// No description provided for @checkingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the connection…'**
+  String get checkingConnection;
+
+  /// No description provided for @checkResultTitleSlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Slack check'**
+  String get checkResultTitleSlack;
+
+  /// No description provided for @checkResultTitleJira.
+  ///
+  /// In en, this message translates to:
+  /// **'Jira check'**
+  String get checkResultTitleJira;
+
+  /// No description provided for @guideSlack1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open api.slack.com/apps → Create New App → From scratch. Name it (for example AppRelease) and pick your workspace.'**
+  String get guideSlack1;
+
+  /// No description provided for @guideSlack2.
+  ///
+  /// In en, this message translates to:
+  /// **'OAuth & Permissions → Bot Token Scopes: add chat:write and files:write.'**
+  String get guideSlack2;
+
+  /// No description provided for @guideSlack3.
+  ///
+  /// In en, this message translates to:
+  /// **'Install to Workspace, then copy the Bot User OAuth Token (starts with xoxb-).'**
+  String get guideSlack3;
+
+  /// No description provided for @guideSlack4.
+  ///
+  /// In en, this message translates to:
+  /// **'In Slack, open the QA channel and type /invite @AppRelease (the name you gave the app).'**
+  String get guideSlack4;
+
+  /// No description provided for @guideSlack5.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the channel details and copy the Channel ID from the bottom. Paste both below.'**
+  String get guideSlack5;
+
+  /// No description provided for @guideSlackNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Then add a branch under the application\'s settings, for example ready-for-qa, and choose QA build for Android and iOS.'**
+  String get guideSlackNote;
+
+  /// No description provided for @guideJira1.
+  ///
+  /// In en, this message translates to:
+  /// **'Open id.atlassian.com/manage-profile/security/api-tokens and create an API token.'**
+  String get guideJira1;
+
+  /// No description provided for @guideJira2.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste it below with your Jira address and the email of that Atlassian account.'**
+  String get guideJira2;
+
+  /// No description provided for @guideJira3.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the status tickets should move to, exactly as your board names it, for example Ready for QA.'**
+  String get guideJira3;
+
+  /// No description provided for @guideJira4.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the ticket key in the commit you push to the QA branch: \"DAMA-123 fix login\". Merging a branch named DAMA-123-login works too.'**
+  String get guideJira4;
+
+  /// No description provided for @guideJiraNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A ticket only moves if your Jira workflow allows that step from where the ticket is. If it cannot, the build still goes out and Slack says which ticket stayed.'**
+  String get guideJiraNote;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

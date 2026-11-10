@@ -32,6 +32,7 @@ const esc = (s: unknown) =>
 const TRACKS: Record<string, string> = {
   internal: "Internal testing", alpha: "Closed testing", beta: "Open testing",
   production: "Production", testflight: "TestFlight", appStore: "App Store review",
+  qa: "QA build (APK in Slack)", qaTestflight: "QA build (TestFlight)",
 };
 
 // Tells the team inbox that releases were queued, and loudly so when no

@@ -296,7 +296,10 @@ class SupabaseReleasesRepository implements ReleasesRepository {
       teamId: row['team_id'] as String,
       number: row['number'] as int,
       platform: Platform.values.byName(row['platform'] as String),
-      track: ReleaseTrack.values.byName(row['track'] as String),
+      track: ReleaseTrack.parse(
+        row['track'] as String?,
+        Platform.values.byName(row['platform'] as String),
+      ),
       versionName: row['version_name'] as String,
       buildNumber: row['build_number'] as int?,
       status: ReleaseStatus.values.byName(row['status'] as String),

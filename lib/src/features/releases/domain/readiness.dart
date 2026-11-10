@@ -1,6 +1,7 @@
 import '../../../core/utils/validators.dart';
 import '../../apps/domain/app_project.dart';
 import '../../credentials/domain/credential.dart';
+import 'release.dart';
 
 /// Something a release needs before the runner can do anything useful.
 enum ReadinessItem {
@@ -10,6 +11,9 @@ enum ReadinessItem {
   keystore,
   googlePlay,
   appStoreConnect,
+
+  /// QA builds only: the channel the build is posted to.
+  slack,
 }
 
 class ReadinessCheck {
@@ -23,12 +27,24 @@ class ReadinessCheck {
 /// the console before a release is queued, so a customer never waits for a
 /// build that was bound to fail at the first step.
 abstract final class Readiness {
+  ///
+  /// A QA build ([track]) needs Slack in place of Google Play: the APK goes
+  /// to the channel, and an app that is not on Google Play yet can still be
+  /// tested.
   static List<ReadinessCheck> checks(
     AppProject app,
     Platform platform,
-    List<Credential> credentials,
-  ) {
+    List<Credential> credentials, {
+    ReleaseTrack? track,
+  }) {
     bool has(CredentialKind kind) => credentials.any((c) => c.kind == kind);
+    final qa = track?.isQa ?? false;
+    // A channel linked to another app is that app's.
+    final slack = credentials.any(
+      (c) =>
+          c.kind == CredentialKind.slack &&
+          (c.appId == null || c.appId == app.id),
+    );
     // A keystore linked to another app does not sign this one.
     final keystore = credentials.any(
       (c) =>
@@ -49,10 +65,11 @@ abstract final class Readiness {
           ok: goodId(app.androidPackageName),
         ),
         ReadinessCheck(ReadinessItem.keystore, ok: keystore),
-        ReadinessCheck(
-          ReadinessItem.googlePlay,
-          ok: has(CredentialKind.googlePlayServiceAccount),
-        ),
+        if (!qa)
+          ReadinessCheck(
+            ReadinessItem.googlePlay,
+            ok: has(CredentialKind.googlePlayServiceAccount),
+          ),
       ] else ...[
         ReadinessCheck(ReadinessItem.iosBundle, ok: goodId(app.iosBundleId)),
         ReadinessCheck(
@@ -60,6 +77,7 @@ abstract final class Readiness {
           ok: has(CredentialKind.appStoreConnectKey),
         ),
       ],
+      if (qa) ReadinessCheck(ReadinessItem.slack, ok: slack),
     ];
   }
 

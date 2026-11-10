@@ -7,10 +7,32 @@ enum CredentialKind {
   /// A file the build needs that the repository leaves out
   /// (google-services.json, GoogleService-Info.plist, .env), with the path
   /// where the runner writes it before building.
-  buildFile;
+  buildFile,
+
+  /// A Slack bot and the channel QA builds are posted to.
+  slack,
+
+  /// A Jira site and the status tickets move to when a QA build went out.
+  jira;
 
   /// Kinds that belong to one app (or are shared), not to the team as such.
-  bool get isPerApp => this == androidKeystore || this == buildFile;
+  bool get isPerApp =>
+      this == androidKeystore || this == buildFile || isQaConnection;
+
+  /// Where a QA build is announced, not something that signs or uploads.
+  bool get isQaConnection => this == slack || this == jira;
+
+  /// Whether the secret is a file (the others are typed or pasted).
+  bool get needsFile =>
+      this == androidKeystore ||
+      this == appStoreConnectKey ||
+      this == buildFile;
+
+  /// Whether the console can test it against the service it belongs to.
+  bool get canCheck =>
+      this == googlePlayServiceAccount ||
+      this == appStoreConnectKey ||
+      isQaConnection;
 
   /// The yaml section the credential belongs under.
   String get yamlRole => switch (this) {
@@ -18,6 +40,8 @@ enum CredentialKind {
     CredentialKind.googlePlayServiceAccount => 'google_play',
     CredentialKind.appStoreConnectKey => 'app_store_connect',
     CredentialKind.buildFile => 'files',
+    CredentialKind.slack => 'slack',
+    CredentialKind.jira => 'jira',
   };
 }
 
@@ -70,6 +94,14 @@ class Credential {
     ].whereType<String>().join(' · '),
     CredentialKind.googlePlayServiceAccount => meta['email'] ?? '',
     CredentialKind.buildFile => meta['path'] ?? meta['fileName'] ?? '',
+    CredentialKind.slack => [
+      if ((meta['channel'] ?? '').isNotEmpty) 'channel ${meta['channel']}',
+    ].join(),
+    CredentialKind.jira => [
+      if ((meta['site'] ?? '').isNotEmpty)
+        meta['site']!.replaceFirst(RegExp(r'^https?://'), ''),
+      if ((meta['status'] ?? '').isNotEmpty) '→ ${meta['status']}',
+    ].join(' · '),
     CredentialKind.appStoreConnectKey => [
       if (meta['keyId'] != null) 'key ${meta['keyId']}',
       if (meta['issuerId'] != null) 'issuer ${_short(meta['issuerId']!)}',

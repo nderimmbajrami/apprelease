@@ -14,15 +14,22 @@ enum ReleaseStatus {
 
 enum StepStatus { pending, running, succeeded, failed, skipped }
 
-/// Where the build goes. The first four are Google Play tracks, the last two
-/// App Store Connect destinations.
+/// Where the build goes. The first four are Google Play tracks, then the
+/// two App Store Connect destinations, then the two QA builds: nothing is
+/// published, the testers get the build and are told in Slack.
 enum ReleaseTrack {
   internal(Platform.android),
   alpha(Platform.android),
   beta(Platform.android),
   production(Platform.android),
   testflight(Platform.ios),
-  appStore(Platform.ios);
+  appStore(Platform.ios),
+
+  /// A signed APK posted to the team's Slack channel.
+  qa(Platform.android),
+
+  /// A TestFlight build, announced in the team's Slack channel.
+  qaTestflight(Platform.ios);
 
   const ReleaseTrack(this.platform);
 
@@ -33,11 +40,22 @@ enum ReleaseTrack {
       if (track.platform == platform) track,
   ];
 
+  /// A build for the testers, not for a store.
+  bool get isQa => this == qa || this == qaTestflight;
+
   /// The value written to apprelease.yaml and the runner.
   String get yamlName => switch (this) {
     ReleaseTrack.appStore => 'app_store',
+    ReleaseTrack.qaTestflight => 'qa',
     _ => name,
   };
+
+  /// The row's `track`; a value this console does not know yet (written by
+  /// a newer one) reads as the platform's first track instead of failing
+  /// the whole list.
+  static ReleaseTrack parse(String? name, Platform platform) =>
+      values.where((t) => t.name == name).firstOrNull ??
+      forPlatform(platform).first;
 }
 
 /// One stage of the pipeline, as the runner reports it.
@@ -208,8 +226,34 @@ class Release {
 /// The steps a platform's pipeline goes through, in order. The runner uses
 /// the same list, so the console can draw the timeline before the runner
 /// has even picked the release up.
-List<ReleaseStep> pipelineSteps(Platform platform, String releaseId) {
+///
+/// A QA build ([track]) ends with "Send to QA": on Android in place of the
+/// upload to Google Play, on iOS after the upload to TestFlight.
+List<ReleaseStep> pipelineSteps(
+  Platform platform,
+  String releaseId, {
+  ReleaseTrack? track,
+}) {
   final names = switch (platform) {
+    Platform.android when track == ReleaseTrack.qa => const [
+      'Check out repository',
+      'Set up Flutter',
+      'Get packages',
+      'Fetch build number',
+      'Build APK',
+      'Sign with upload key',
+      'Send to QA',
+    ],
+    Platform.ios when track == ReleaseTrack.qaTestflight => const [
+      'Check out repository',
+      'Set up Flutter and Xcode',
+      'Get packages',
+      'Fetch signing files',
+      'Fetch build number from App Store Connect',
+      'Build ipa',
+      'Upload to TestFlight',
+      'Send to QA',
+    ],
     Platform.android => const [
       'Check out repository',
       'Set up Flutter',

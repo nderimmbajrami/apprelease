@@ -71,6 +71,12 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
   final _issuerId = TextEditingController();
   final _keyId = TextEditingController();
   final _path = TextEditingController();
+  final _token = TextEditingController();
+  final _channel = TextEditingController();
+  final _site = TextEditingController();
+  final _email = TextEditingController();
+  final _status = TextEditingController(text: 'Ready for QA');
+  final _projects = TextEditingController();
   PlatformFile? _file;
   String? _fileError;
 
@@ -85,6 +91,12 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       _issuerId,
       _keyId,
       _path,
+      _token,
+      _channel,
+      _site,
+      _email,
+      _status,
+      _projects,
     ]) {
       c.dispose();
     }
@@ -96,7 +108,9 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       CredentialKind.androidKeystore => ['jks', 'keystore'],
       CredentialKind.appStoreConnectKey => ['p8'],
       CredentialKind.googlePlayServiceAccount => ['json'],
-      CredentialKind.buildFile => null,
+      CredentialKind.buildFile ||
+      CredentialKind.slack ||
+      CredentialKind.jira => null,
     };
     final result = await FilePicker.platform.pickFiles(
       type: extensions == null ? FileType.any : FileType.custom,
@@ -123,8 +137,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final l10n = context.l10n;
-    final needsFile = _kind != CredentialKind.googlePlayServiceAccount;
-    if (needsFile && _file?.bytes == null) {
+    if (_kind.needsFile && _file?.bytes == null) {
       setState(() => _fileError = l10n.fileRequired);
       return;
     }
@@ -160,6 +173,15 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       case CredentialKind.buildFile:
         meta['fileName'] = _file!.name;
         meta['path'] = _path.text.trim();
+      case CredentialKind.slack:
+        meta['channel'] = _channel.text.trim();
+        fields['token'] = _token.text.trim();
+      case CredentialKind.jira:
+        meta['site'] = _site.text.trim();
+        meta['email'] = _email.text.trim();
+        meta['status'] = _status.text.trim();
+        meta['projects'] = _projects.text.trim().toUpperCase();
+        fields['token'] = _token.text.trim();
     }
 
     final ok = await ref
@@ -170,8 +192,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
           appId: _kind.isPerApp ? _appId : null,
           meta: meta,
           secret: CredentialSecret(
-            fileBytes: _file?.bytes,
-            fileName: _file?.name,
+            fileBytes: _kind.needsFile ? _file?.bytes : null,
+            fileName: _kind.needsFile ? _file?.name : null,
             fields: fields,
           ),
         );
@@ -229,41 +251,40 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // The three kinds as cards: what each one is for, at a glance.
+                  // The kinds as cards: what each one is for, at a glance.
+                  // One, two or three to a row, as the width allows.
                   LayoutBuilder(
                     builder: (context, c) {
-                      final narrow = c.maxWidth < 480;
-                      final cards = [
-                        for (final kind in CredentialKind.values)
-                          _KindCard(
-                            kind: kind,
-                            selected: kind == _kind,
-                            onTap: () => setState(() {
-                              _kind = kind;
-                              _file = null;
-                              _fileError = null;
-                              _suggestName();
-                            }),
-                          ),
-                      ];
-                      return narrow
-                          ? Column(
-                              children: [
-                                for (final card in cards) ...[
-                                  card,
-                                  const SizedBox(height: Gap.sm),
-                                ],
-                              ],
-                            )
-                          : Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (final (i, card) in cards.indexed) ...[
-                                  if (i > 0) const SizedBox(width: Gap.sm),
-                                  Expanded(child: card),
-                                ],
-                              ],
-                            );
+                      final columns = c.maxWidth < 360
+                          ? 1
+                          : c.maxWidth < 520
+                          ? 2
+                          : 3;
+                      final width =
+                          (c.maxWidth - Gap.sm * (columns - 1)) / columns;
+                      return Wrap(
+                        spacing: Gap.sm,
+                        runSpacing: Gap.sm,
+                        children: [
+                          for (final kind in CredentialKind.values)
+                            SizedBox(
+                              // A hair under the share, so rounding never
+                              // pushes the last card to the next row.
+                              width: width.floorToDouble(),
+                              child: _KindCard(
+                                kind: kind,
+                                selected: kind == _kind,
+                                onTap: () => setState(() {
+                                  _kind = kind;
+                                  _file = null;
+                                  _fileError = null;
+                                  _token.clear();
+                                  _suggestName();
+                                }),
+                              ),
+                            ),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: Gap.md),
@@ -290,7 +311,9 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
                       initialValue: _appId,
                       decoration: InputDecoration(
                         labelText: l10n.credentialApp,
-                        helperText: l10n.credentialAppHelper,
+                        helperText: _kind.isQaConnection
+                            ? l10n.credentialAppHelperQa
+                            : l10n.credentialAppHelper,
                       ),
                       items: [
                         DropdownMenuItem(
@@ -342,6 +365,8 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
       CredentialKind.googlePlayServiceAccount => 'google_play',
       CredentialKind.appStoreConnectKey => 'app_store_connect',
       CredentialKind.buildFile => '$prefix${_fileSlug()}',
+      CredentialKind.slack => '${prefix}slack_qa',
+      CredentialKind.jira => '${prefix}jira',
     };
     _suggesting = false;
   }
@@ -363,7 +388,9 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         CredentialKind.androidKeystore => '.jks / .keystore',
         CredentialKind.appStoreConnectKey => l10n.privateKeyP8,
         CredentialKind.googlePlayServiceAccount => '.json',
-        CredentialKind.buildFile => l10n.anyFile,
+        CredentialKind.buildFile ||
+        CredentialKind.slack ||
+        CredentialKind.jira => l10n.anyFile,
       },
       file: _file,
       error: _fileError,
@@ -435,6 +462,95 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         ),
         const SizedBox(height: Gap.md),
         filePicker,
+      ],
+      CredentialKind.slack => [
+        TextFormField(
+          controller: _token,
+          decoration: InputDecoration(
+            labelText: l10n.slackToken,
+            hintText: 'xoxb-…',
+            helperText: l10n.slackTokenHelper,
+          ),
+          obscureText: true,
+          validator: (v) {
+            final token = (v ?? '').trim();
+            if (token.isEmpty) return validators.required(token);
+            return token.startsWith('xoxb-') ? null : l10n.slackTokenInvalid;
+          },
+        ),
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _channel,
+          decoration: InputDecoration(
+            labelText: l10n.slackChannel,
+            hintText: 'C0123ABCDEF',
+            helperText: l10n.slackChannelHelper,
+          ),
+          style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12.5),
+          validator: (v) {
+            final channel = (v ?? '').trim();
+            if (channel.isEmpty) return validators.required(channel);
+            return RegExp(r'^[CG][A-Z0-9]{6,}$').hasMatch(channel)
+                ? null
+                : l10n.slackChannelInvalid;
+          },
+        ),
+      ],
+      CredentialKind.jira => [
+        TextFormField(
+          controller: _site,
+          decoration: InputDecoration(
+            labelText: l10n.jiraSite,
+            hintText: 'https://your-team.atlassian.net',
+          ),
+          keyboardType: TextInputType.url,
+          validator: (v) {
+            final site = (v ?? '').trim();
+            if (site.isEmpty) return validators.required(site);
+            final uri = Uri.tryParse(
+              site.contains('://') ? site : 'https://$site',
+            );
+            return uri != null && uri.host.contains('.')
+                ? null
+                : l10n.jiraSiteInvalid;
+          },
+        ),
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _email,
+          decoration: InputDecoration(
+            labelText: l10n.jiraEmail,
+            helperText: l10n.jiraEmailHelper,
+          ),
+          keyboardType: TextInputType.emailAddress,
+          validator: validators.email,
+        ),
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _token,
+          decoration: InputDecoration(labelText: l10n.jiraToken),
+          obscureText: true,
+          validator: validators.required,
+        ),
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _status,
+          decoration: InputDecoration(
+            labelText: l10n.jiraStatus,
+            helperText: l10n.jiraStatusHelper,
+          ),
+          validator: validators.required,
+        ),
+        const SizedBox(height: Gap.md),
+        TextFormField(
+          controller: _projects,
+          decoration: InputDecoration(
+            labelText: l10n.jiraProjects,
+            hintText: 'DAMA, APP',
+            helperText: l10n.jiraProjectsHelper,
+          ),
+          textCapitalization: TextCapitalization.characters,
+        ),
       ],
       CredentialKind.buildFile => [
         filePicker,

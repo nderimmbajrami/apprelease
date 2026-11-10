@@ -50,6 +50,12 @@ functions/    store-secret    · encrypts a credential's secret on the way in
 | console (anon key + user session) | its team's apps, releases, steps, logs, credentials (facts only) | apps, queued releases, cancel flag, credentials via `store-secret` |
 | runner (service role) | queued releases (`claim_release`), `read_credential_secret` | release status, steps, logs, artifacts |
 
+A push reaches `github-webhook`, which queues one release per platform the
+matching rule names. A rule's track may be `qa` / `qaTestflight`: a build
+for the testers (APK to Slack, TestFlight plus a Slack note, Jira tickets
+moved) with its own step list. Slack and Jira are `credentials` rows of the
+kinds `slack` and `jira`; `check-credential` tests them too.
+
 `credential_secrets` has RLS on and **no policies**, so no client token can
 select from it. The service role bypasses RLS; that is the runner.
 

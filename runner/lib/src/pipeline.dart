@@ -8,6 +8,7 @@ import 'api.dart';
 import 'config.dart';
 import 'steps/checkout.dart';
 import 'steps/publish.dart';
+import 'steps/qa.dart';
 import 'steps/signing.dart';
 import 'steps/versioning.dart';
 import 'stores/app_store_connect.dart';
@@ -128,14 +129,19 @@ class Pipeline {
 
   Future<void> run() async {
     final started = DateTime.now();
-    if (steps.length < 7) {
+    // A QA build ends with "Send to QA": on Android in place of the upload
+    // to Google Play, on iOS after the upload to TestFlight.
+    final qa = isQaTrack(release['track']);
+    final expected = qa && platform == 'ios' ? 8 : 7;
+    if (steps.length < expected) {
       await api.updateRelease(releaseId, {
         'status': 'failed',
         'finished_at': DateTime.now().toUtc().toIso8601String(),
-        'error_message': 'Release has ${steps.length} steps, expected 7',
+        'error_message':
+            'Release has ${steps.length} steps, expected $expected',
       });
       await log(
-        'Release has ${steps.length} steps, expected 7',
+        'Release has ${steps.length} steps, expected $expected',
         level: 'error',
       );
       return;
@@ -151,12 +157,13 @@ class Pipeline {
         await _step(3, _versioning);
         await _step(4, _buildScripts);
         await _step(5, _androidSigningCheck);
-        await _step(6, _publish);
+        await _step(6, qa ? _sendToQa : _publish);
       } else {
         await _step(3, _iosSigning);
         await _step(4, _versioning);
         await _step(5, _buildScripts);
         await _step(6, _publish);
+        if (qa) await _step(7, _sendToQa);
       }
       await api.updateRelease(releaseId, {
         'status': 'succeeded',
@@ -164,7 +171,7 @@ class Pipeline {
         'artifacts': [for (final a in artifacts) p.basename(a)],
       });
       await log(
-        'Released ${release['version_name']} (${env['AR_BUILD_NUMBER']}) · ${DateTime.now().difference(started).inSeconds}s',
+        '${qa ? 'Sent to QA:' : 'Released'} ${release['version_name']} (${env['AR_BUILD_NUMBER']}) · ${DateTime.now().difference(started).inSeconds}s',
         level: 'success',
       );
     } on Cancelled {
@@ -249,6 +256,7 @@ class Pipeline {
     env['AR_COMMIT'] = commit;
     env['AR_COMMIT_SHORT'] = commit.substring(0, 7);
     await api.updateRelease(releaseId, {'commit': commit.substring(0, 7)});
+    _commitMessage = await Checkout.message(buildDir);
     await _writeBuildFiles(stepId);
 
     // A pushed release has no version yet; pubspec.yaml knows it.
@@ -281,17 +289,31 @@ class Pipeline {
         platform: platform,
         track: track,
       );
-      if (selected == null) {
+      if (selected == null && track == 'qa') {
+        workflow = WorkflowConfig.defaults(
+          platform: platform,
+          track: track,
+          app: app,
+          credentials: await api.credentials(release['team_id'] as String),
+        );
+        await log(
+          'apprelease.yaml has no android-qa workflow: building the QA APK '
+          'with the settings from the console',
+          stepId: stepId,
+        );
+      } else if (selected == null) {
         throw StepFailed(
           'apprelease.yaml has no workflows. Remove the file to build with '
           'the settings from the console, or add a workflow to it.',
         );
       }
-      workflow = selected;
-      await log(
-        'apprelease.yaml found · workflow ${workflow.id}',
-        stepId: stepId,
-      );
+      if (selected != null) {
+        workflow = selected;
+        await log(
+          'apprelease.yaml found · workflow ${workflow.id}',
+          stepId: stepId,
+        );
+      }
     } else {
       workflow = WorkflowConfig.defaults(
         platform: platform,
@@ -502,6 +524,25 @@ class Pipeline {
       stepId: stepId,
       secretsKey: secretsKey,
     ).run(release: release, workflow: workflow, env: env, artifacts: artifacts);
+  }
+
+  /// The last commit's message, read at checkout: a QA build takes the
+  /// ticket keys from it.
+  var _commitMessage = '';
+
+  Future<void> _sendToQa(String stepId) async {
+    await SendToQa(
+      api: api,
+      log: log,
+      stepId: stepId,
+      secretsKey: secretsKey,
+    ).run(
+      release: release,
+      app: app,
+      env: env,
+      artifacts: artifacts,
+      commitMessage: _commitMessage,
+    );
   }
 
   /// A JVM crash leaves an hs_err file in the checkout; its head is worth

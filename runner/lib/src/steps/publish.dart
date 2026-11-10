@@ -146,10 +146,13 @@ class Publish {
     ], env);
 
     final track = release['track'] as String;
+    final qa = track == 'qaTestflight';
     final submitTestflight =
-        config['submit_to_testflight'] == true || track == 'testflight';
+        config['submit_to_testflight'] == true || track == 'testflight' || qa;
+    // A QA build never goes to App Store review, whatever the workflow it
+    // borrowed says.
     final submitAppStore =
-        config['submit_to_app_store'] == true || track == 'appStore';
+        !qa && (config['submit_to_app_store'] == true || track == 'appStore');
     if (!submitTestflight && !submitAppStore) {
       await log('Uploaded. Nothing else requested.', stepId: stepId);
       return;

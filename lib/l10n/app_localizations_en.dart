@@ -746,7 +746,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get triggersExplain =>
-      'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review. The version comes from pubspec.yaml.';
+      'Let GitHub start releases. Each rule says which branch goes where: for example develop to internal testing and TestFlight, main to production and App Store review, ready-for-qa as a QA build to your testers in Slack. The version comes from pubspec.yaml.';
 
   @override
   String get triggerEnabled => 'Release automatically on push';
@@ -1484,4 +1484,151 @@ class AppL10nEn extends AppL10n {
   String logQuiet(String since) {
     return 'Still running. No output for $since: Gradle and Xcode print nothing while they compile, and this step usually takes 2 to 6 minutes.';
   }
+
+  @override
+  String get trackQa => 'QA build (APK to Slack)';
+
+  @override
+  String get trackQaTestflight => 'QA build (TestFlight + Slack)';
+
+  @override
+  String get qaWhatHappensAndroid =>
+      'What happens next: we download your code, build a signed APK and post it to your Slack channel with the version and build number. The Jira tickets named in the last commit message (like DAMA-123) move to your QA status. Nothing goes to Google Play. About 10 minutes.';
+
+  @override
+  String get qaWhatHappensIos =>
+      'What happens next: we download your code, build it and upload it to TestFlight, then tell your Slack channel the version and build number. The Jira tickets named in the last commit message (like DAMA-123) move to your QA status. Nothing is sent to App Store review. About 15 minutes.';
+
+  @override
+  String get readySlack => 'Slack channel for QA';
+
+  @override
+  String get readySlackOk => 'QA builds are posted to your channel.';
+
+  @override
+  String get readySlackMissing =>
+      'Add a Slack connection: the bot token and the channel the build goes to.';
+
+  @override
+  String get kindSlack => 'Slack (QA builds)';
+
+  @override
+  String get kindSlackBody =>
+      'Where QA builds are announced: the Android APK is posted to this channel, an iOS build is announced once it is on TestFlight.';
+
+  @override
+  String get kindJira => 'Jira (QA tickets)';
+
+  @override
+  String get kindJiraBody =>
+      'Moves the tickets named in the last commit message (like DAMA-123) to your QA status once a QA build went out.';
+
+  @override
+  String get credentialAppHelperQa =>
+      'The app whose QA builds use this. Leave it shared if every app goes to the same place.';
+
+  @override
+  String get slackToken => 'Bot User OAuth Token';
+
+  @override
+  String get slackTokenHelper =>
+      'Slack app → OAuth & Permissions. Starts with xoxb-.';
+
+  @override
+  String get slackTokenInvalid => 'A bot token starts with xoxb-.';
+
+  @override
+  String get slackChannel => 'Channel ID';
+
+  @override
+  String get slackChannelHelper =>
+      'In Slack, open the channel details: the ID is at the bottom. Not the #name.';
+
+  @override
+  String get slackChannelInvalid =>
+      'The channel ID looks like C0123ABCDEF. It is at the bottom of the channel details.';
+
+  @override
+  String get jiraSite => 'Jira site';
+
+  @override
+  String get jiraSiteInvalid =>
+      'The address of your Jira, like https://your-team.atlassian.net';
+
+  @override
+  String get jiraEmail => 'Atlassian account email';
+
+  @override
+  String get jiraEmailHelper =>
+      'The account the API token belongs to. It needs permission to move tickets.';
+
+  @override
+  String get jiraToken => 'API token';
+
+  @override
+  String get jiraStatus => 'Status to move tickets to';
+
+  @override
+  String get jiraStatusHelper =>
+      'The name of the status on your board, exactly as Jira shows it.';
+
+  @override
+  String get jiraProjects => 'Project keys (optional)';
+
+  @override
+  String get jiraProjectsHelper =>
+      'Only tickets of these projects are moved. Empty: any key like ABC-123 that is a ticket in your Jira.';
+
+  @override
+  String get checkingConnection => 'Checking the connection…';
+
+  @override
+  String get checkResultTitleSlack => 'Slack check';
+
+  @override
+  String get checkResultTitleJira => 'Jira check';
+
+  @override
+  String get guideSlack1 =>
+      'Open api.slack.com/apps → Create New App → From scratch. Name it (for example AppRelease) and pick your workspace.';
+
+  @override
+  String get guideSlack2 =>
+      'OAuth & Permissions → Bot Token Scopes: add chat:write and files:write.';
+
+  @override
+  String get guideSlack3 =>
+      'Install to Workspace, then copy the Bot User OAuth Token (starts with xoxb-).';
+
+  @override
+  String get guideSlack4 =>
+      'In Slack, open the QA channel and type /invite @AppRelease (the name you gave the app).';
+
+  @override
+  String get guideSlack5 =>
+      'Open the channel details and copy the Channel ID from the bottom. Paste both below.';
+
+  @override
+  String get guideSlackNote =>
+      'Then add a branch under the application\'s settings, for example ready-for-qa, and choose QA build for Android and iOS.';
+
+  @override
+  String get guideJira1 =>
+      'Open id.atlassian.com/manage-profile/security/api-tokens and create an API token.';
+
+  @override
+  String get guideJira2 =>
+      'Paste it below with your Jira address and the email of that Atlassian account.';
+
+  @override
+  String get guideJira3 =>
+      'Type the status tickets should move to, exactly as your board names it, for example Ready for QA.';
+
+  @override
+  String get guideJira4 =>
+      'Put the ticket key in the commit you push to the QA branch: \"DAMA-123 fix login\". Merging a branch named DAMA-123-login works too.';
+
+  @override
+  String get guideJiraNote =>
+      'A ticket only moves if your Jira workflow allows that step from where the ticket is. If it cannot, the build still goes out and Slack says which ticket stayed.';
 }

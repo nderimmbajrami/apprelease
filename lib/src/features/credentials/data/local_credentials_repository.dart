@@ -56,13 +56,30 @@ class LocalCredentialsRepository implements CredentialsRepository {
   }
 
   @override
-  Future<List<CredentialCheck>> check(String id) async => const [
-    CredentialCheck(
-      package: 'com.acme.shop',
-      status: 'ok',
-      message: 'Google Play accepts uploads from this account.',
-    ),
-  ];
+  Future<List<CredentialCheck>> check(String id) async =>
+      switch (_table.find((row) => row.id == id)?.kind) {
+        CredentialKind.slack => const [
+          CredentialCheck(
+            package: 'Slack',
+            status: 'ok',
+            message: 'The bot can post to the channel.',
+          ),
+        ],
+        CredentialKind.jira => const [
+          CredentialCheck(
+            package: 'Jira',
+            status: 'ok',
+            message: 'Jira accepts the account.',
+          ),
+        ],
+        _ => const [
+          CredentialCheck(
+            package: 'com.acme.shop',
+            status: 'ok',
+            message: 'Google Play accepts uploads from this account.',
+          ),
+        ],
+      };
 
   @override
   void dispose() => _table.dispose();

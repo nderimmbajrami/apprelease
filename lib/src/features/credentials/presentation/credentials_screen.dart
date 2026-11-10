@@ -82,7 +82,7 @@ class CredentialsScreen extends ConsumerWidget {
                   ))
                     Padding(
                       padding: const EdgeInsets.only(bottom: Gap.sm),
-                      child: _CredentialRow(credential: credential),
+                      child: _CredentialRow(credential: credential, apps: apps),
                     ),
                 if (kind != CredentialKind.androidKeystore &&
                     credentials.every((c) => c.kind != kind))
@@ -257,8 +257,7 @@ class _CredentialRow extends ConsumerWidget {
               ],
             ),
           ),
-          if (credential.kind == CredentialKind.googlePlayServiceAccount ||
-              credential.kind == CredentialKind.appStoreConnectKey)
+          if (credential.kind.canCheck)
             OutlinedButton(
               onPressed: () => _check(context, ref),
               child: Text(l10n.checkCredential),
@@ -333,7 +332,15 @@ extension on _CredentialRow {
   Future<void> _check(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.checkingCredential)));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          credential.kind.isQaConnection
+              ? l10n.checkingConnection
+              : l10n.checkingCredential,
+        ),
+      ),
+    );
     final checks = await ref
         .read(credentialsControllerProvider.notifier)
         .check(credential.id);
@@ -365,9 +372,12 @@ class _CheckDialog extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final title = kind == CredentialKind.appStoreConnectKey
-        ? l10n.checkResultTitleAsc
-        : l10n.checkResultTitle;
+    final title = switch (kind) {
+      CredentialKind.appStoreConnectKey => l10n.checkResultTitleAsc,
+      CredentialKind.slack => l10n.checkResultTitleSlack,
+      CredentialKind.jira => l10n.checkResultTitleJira,
+      _ => l10n.checkResultTitle,
+    };
     return AlertDialog(
       title: Text(title),
       content: ConstrainedBox(
@@ -393,9 +403,7 @@ class _CheckDialog extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            c.package == '*'
-                                ? l10n.checkResultTitle
-                                : c.package,
+                            c.package == '*' ? title : c.package,
                             style: theme.textTheme.titleSmall,
                           ),
                           const SizedBox(height: 2),
@@ -434,6 +442,8 @@ String kindLabel(BuildContext context, CredentialKind kind) {
     CredentialKind.googlePlayServiceAccount => l10n.kindGooglePlay,
     CredentialKind.appStoreConnectKey => l10n.kindAppStoreConnect,
     CredentialKind.buildFile => l10n.kindBuildFile,
+    CredentialKind.slack => l10n.kindSlack,
+    CredentialKind.jira => l10n.kindJira,
   };
 }
 
@@ -444,6 +454,8 @@ String kindBody(BuildContext context, CredentialKind kind) {
     CredentialKind.googlePlayServiceAccount => l10n.kindGooglePlayBody,
     CredentialKind.appStoreConnectKey => l10n.kindAppStoreConnectBody,
     CredentialKind.buildFile => l10n.kindBuildFileBody,
+    CredentialKind.slack => l10n.kindSlackBody,
+    CredentialKind.jira => l10n.kindJiraBody,
   };
 }
 
@@ -452,4 +464,6 @@ IconData kindIcon(CredentialKind kind) => switch (kind) {
   CredentialKind.googlePlayServiceAccount => Icons.shop_outlined,
   CredentialKind.appStoreConnectKey => Icons.apple,
   CredentialKind.buildFile => Icons.description_outlined,
+  CredentialKind.slack => Icons.forum_outlined,
+  CredentialKind.jira => Icons.task_alt,
 };

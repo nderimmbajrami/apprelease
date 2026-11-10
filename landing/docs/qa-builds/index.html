@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QA builds with Slack and Jira – AppRelease Docs</title>
+<meta name="description" content="Push to a branch like ready-for-qa and AppRelease builds for your testers, posts the APK and the TestFlight build to Slack and moves the Jira tickets to Ready for QA.">
+<meta name="theme-color" content="#070B14">
+<link rel="canonical" href="https://apprelease.store/docs/qa-builds/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://apprelease.store/docs/qa-builds/">
+<meta property="og:title" content="QA builds with Slack and Jira – AppRelease Docs">
+<meta property="og:description" content="Push to a branch like ready-for-qa and AppRelease builds for your testers, posts the APK and the TestFlight build to Slack and moves the Jira tickets to Ready for QA.">
+<meta property="og:site_name" content="AppRelease">
+<meta property="og:image" content="https://apprelease.store/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="/styles.css?v=20261023">
+<link rel="stylesheet" href="/docs.css?v=20261023">
+</head>
+<body class="docs-page">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/" aria-label="AppRelease">
+      <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+      <span class="brand-name">apprelease<small>.store</small></span>
+    </a>
+    <div class="docs-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search the docs… ( / )" aria-label="Search the documentation" autocomplete="off">
+      <ul role="listbox"></ul>
+    </div>
+
+    <nav class="nav" aria-label="Main">
+      <a href="/how-it-works/" data-nav="how">How it works</a>
+      <a href="/docs/" data-nav="docs" class="is-active">Docs</a>
+      <a href="/pricing/" data-nav="pricing">Pricing</a>
+      <a href="/faq/" data-nav="faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <a class="signin" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu" id="burger">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="menu" id="menu">
+    <div class="wrap">
+      <a class="menu-link" href="/how-it-works/">How it works</a>
+      <a class="menu-link" href="/docs/">Docs</a>
+      <a class="menu-link" href="/pricing/">Pricing</a>
+      <a class="menu-link" href="/faq/">FAQ</a>
+      <div class="menu-foot">
+        <a class="btn btn-ghost" href="https://publish.apprelease.store/#/sign-in">Sign in</a>
+        <a class="btn btn-primary" href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main"><div class="wrap docs-layout"><div class="docs-side"><button type="button" class="docs-side-toggle">Documentation</button><nav class="docs-nav" aria-label="Documentation"><h4>Getting started</h4>
+<a href="/docs/">Welcome</a>
+<a href="/docs/flutter/#adding-the-app">Adding apps to AppRelease</a>
+<a href="/docs/flutter/#creating-apprelease-yaml">Creating apprelease.yaml</a>
+<h4>Quick start guides</h4>
+<a href="/docs/flutter/">Flutter apps</a>
+<a class="soon" href="#">React Native apps</a>
+<a class="soon" href="#">Android native apps</a>
+<a class="soon" href="#">iOS native apps</a>
+<h4>Code signing</h4>
+<a href="/docs/android-signing/">Android code signing</a>
+<a href="/docs/ios-signing/">iOS code signing</a>
+<h4>Publishing</h4>
+<a href="/docs/google-play/">Google Play</a>
+<a href="/docs/app-store/">App Store Connect</a>
+<a href="/docs/qa-builds/" class="is-active">QA builds: Slack and Jira</a>
+<h4>Reference</h4>
+<a href="/docs/yaml/">apprelease.yaml</a>
+<a href="/docs/yaml/#environment-variables">Environment variables</a>
+<a href="/faq/">FAQ</a>
+</nav></div><article class="docs-article"><nav class="crumbs" aria-label="Breadcrumb"><a href="/docs/">Docs</a> <span>›</span> <span>Publishing</span> <span>›</span> <span>QA builds</span></nav><h1>QA builds with Slack and Jira</h1>
+<p class="lead">A QA build goes to your testers, not to a store. Push to a branch such as <code>ready-for-qa</code>: the Android APK is posted to your Slack channel, the iOS build goes to TestFlight and is announced there, and the Jira tickets named in the last commit move to <strong>Ready for QA</strong>.</p>
+<h2 id="how-it-works">What happens on a push</h2>
+<ol class="docs-steps">
+ <li>GitHub tells AppRelease about the push. The branch matches a rule whose destination is <strong>QA build</strong>, so one build is queued per platform.</li>
+ <li><strong>Android:</strong> the app is built as a signed release APK (<code>flutter build apk --release</code>) and uploaded to the Slack channel with its version and build number. Nothing goes to Google Play.</li>
+ <li><strong>iOS:</strong> the app is built, uploaded to TestFlight and, once Apple has processed it, announced in the Slack channel with its version and build number. It is never sent to App Store review.</li>
+ <li>The ticket keys in the <strong>last commit message</strong> on the branch (for example <code>DAMA-123</code>) are looked up in Jira, listed in the Slack message with their titles, and moved to your QA status.</li>
+</ol>
+<div class="note">Slack comes first. A ticket moves only after the build it promises has reached the channel, so nothing says "Ready for QA" without something to test.</div>
+<h2 id="slack">Connecting Slack</h2>
+<ol class="docs-steps">
+ <li>Open <a href="https://api.slack.com/apps">api.slack.com/apps</a> → <strong>Create New App</strong> → <strong>From scratch</strong>. Name it, for example "AppRelease", and pick your workspace.</li>
+ <li>Under <strong>OAuth &amp; Permissions</strong> → <strong>Bot Token Scopes</strong>, add <code>chat:write</code> and <code>files:write</code>.</li>
+ <li>Click <strong>Install to Workspace</strong> and copy the <strong>Bot User OAuth Token</strong>. It starts with <code>xoxb-</code>.</li>
+ <li>In Slack, open the channel QA reads and type <code>/invite @AppRelease</code> (the name you gave the app).</li>
+ <li>Open the channel details and copy the <strong>Channel ID</strong> from the bottom. It looks like <code>C0123ABCDEF</code>; the <code>#name</code> does not work.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Slack (QA builds)</strong>, paste both and save. <strong>Check</strong> on the saved connection tells you if a scope is missing or the bot is not in the channel, without posting anything.</li>
+</ol>
+<p>Link the connection to one application if each app has its own channel, or leave it <strong>Shared</strong> for all of them.</p>
+<h2 id="jira">Connecting Jira</h2>
+<ol class="docs-steps">
+ <li>Create an API token at <a href="https://id.atlassian.com/manage-profile/security/api-tokens">id.atlassian.com → Security → API tokens</a>.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Jira (QA tickets)</strong>.</li>
+ <li>Enter your Jira address (<code>https://your-team.atlassian.net</code>), the email of the Atlassian account the token belongs to, and the token.</li>
+ <li>Type the <strong>status</strong> tickets should move to, exactly as your board names it. The default is <code>Ready for QA</code>.</li>
+ <li>Optionally list your <strong>project keys</strong> (<code>DAMA, APP</code>). Then only those tickets are touched, and a lower-case <code>dama-123</code> in a branch name counts too.</li>
+</ol>
+<p>Jira is optional. Without it the Slack message still lists the keys found in the commit; nothing is moved.</p>
+<h2 id="branch">Choosing the branch</h2>
+<ol class="docs-steps">
+ <li>Open the application → <strong>Settings</strong> → <strong>Release automatically on push</strong>.</li>
+ <li><strong>Add a branch</strong> and type <code>ready-for-qa</code> (or your own name; <code>qa/*</code> matches every branch with that prefix).</li>
+ <li>Tick Android and iOS and choose <strong>QA build</strong> as the destination of each.</li>
+ <li>If you have not done so yet, add the webhook shown on that page to the GitHub repository.</li>
+</ol>
+<p>Your other rules stay as they are: <code>staging</code> or <code>main</code> keep publishing to the stores. You can also start a QA build by hand: <strong>Publish</strong> → <strong>QA build</strong>.</p>
+<h2 id="tickets">How tickets are found</h2>
+<p>AppRelease reads the message of the last commit on the branch at the moment it builds. Any of these moves <code>DAMA-123</code>:</p>
+<div class="code"><pre data-lang="bash"><code>git commit <span class="k">-m</span> <span class="s">&quot;DAMA-123 fix the login button&quot;</span>
+git commit <span class="k">-m</span> <span class="s">&quot;Login fixes (DAMA-123, DAMA-130)&quot;</span>
+git merge DAMA-123-login-button        # &quot;Merge branch &#x27;DAMA-123-login-button&#x27; into ready-for-qa&quot;</code></pre></div>
+<ul>
+ <li>Several keys in one message are all moved.</li>
+ <li>A key that is not a ticket in your Jira (<code>UTF-8</code>, <code>SHA-256</code>) is ignored.</li>
+ <li>A ticket already in the QA status is left alone, so the Android and the iOS build of one push do not get in each other's way.</li>
+ <li>If the Jira workflow has no step from the ticket's status to the QA status, the build still goes out and a second Slack message names the tickets that stayed.</li>
+</ul>
+<h2 id="yaml">With an apprelease.yaml</h2>
+<p>No file is needed. If the repository has one, a QA build uses the workflow named <code>android-qa</code> (flavors, another entry point), and <code>ios-qa</code> or else your TestFlight workflow on iOS. Every <code>.apk</code> the workflow lists under <code>artifacts</code> is posted.</p>
+<div class="code"><pre data-lang="yaml"><code><span class="k">workflows</span>:
+  <span class="k">android-qa</span>:
+    <span class="k">environment</span>:
+      <span class="k">android_signing</span>:
+        - upload_keystore
+    <span class="k">scripts</span>:
+      - <span class="k">name</span>: Build QA APK
+        <span class="k">script</span>: |
+          flutter build apk --release --flavor qa \
+            --build-number=<span class="v">$AR_BUILD_NUMBER</span>
+    <span class="k">artifacts</span>:
+      - build/app/outputs/flutter-apk/*.apk</code></pre></div>
+<h2 id="common-errors">Common errors</h2>
+<table><thead><tr><th>Message</th><th>Usually means</th></tr></thead><tbody>
+ <tr><td>The APK has nowhere to go</td><td>No Slack connection for this application. Add one under Credentials, shared or linked to the app.</td></tr>
+ <tr><td>The Slack bot is not in the channel</td><td>Type <code>/invite @AppRelease</code> in the channel.</td></tr>
+ <tr><td>Slack has no such channel for this bot</td><td>The channel ID is wrong, or the channel is private and the bot was not invited.</td></tr>
+ <tr><td>The Slack bot lacks a permission</td><td>Add <code>chat:write</code> and <code>files:write</code>, then reinstall the app to the workspace.</td></tr>
+ <tr><td>The workflow has no step from "To Do" to "Ready for QA"</td><td>Jira only allows the moves its workflow draws. Add the transition in Jira, or move the ticket further before pushing.</td></tr>
+ <tr><td>Jira refused the email and API token</td><td>The email must be the Atlassian account that created the token.</td></tr>
+</tbody></table>
+<div class="docs-next">
+ <a href="/docs/app-store/"><small>Previous</small><b>App Store Connect publishing</b></a>
+ <a class="next" href="/docs/yaml/"><small>Next</small><b>apprelease.yaml reference</b></a>
+</div>
+</article><aside class="docs-toc"><h4>On this page</h4><ol></ol></aside></div></main>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="AppRelease">
+        <img class="brand-mark" src="/logo.svg" alt="" width="32" height="32">
+        <span class="brand-name">apprelease<small>.store</small></span>
+      </a>
+      <p>Build, sign and ship Flutter apps to Google Play and the App Store from one configuration file.</p>
+    </div>
+    <div class="footer-cols">
+      <div>
+        <h4>Product</h4>
+        <a href="/how-it-works/">How it works</a>
+        <a href="/#config">apprelease.yaml</a>
+        <a href="/pricing/">Pricing</a>
+        <a href="https://publish.apprelease.store/#/sign-up">Get started</a>
+      </div>
+      <div>
+        <h4>Docs</h4>
+        <a href="/docs/flutter/">Flutter quick start</a>
+        <a href="/docs/android-signing/">Android code signing</a>
+        <a href="/docs/ios-signing/">iOS code signing</a>
+        <a href="/docs/yaml/">YAML reference</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/faq/">FAQ</a>
+        <a href="/contact/">Contact</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/terms/">Terms</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap footer-foot">
+    <span>© 2026 AppRelease · apprelease.store</span>
+    <span>Flutter first. React Native next.</span>
+  </div>
+</footer>
+
+<script src="/app.js?v=20261023"></script>
+</body>
+</html>

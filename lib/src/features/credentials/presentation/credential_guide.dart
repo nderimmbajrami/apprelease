@@ -51,6 +51,26 @@ class CredentialGuide extends StatelessWidget {
         'flutter',
         'flutter firebase google-services.json android setup',
       ),
+      CredentialKind.slack => (
+        5,
+        [
+          l10n.guideSlack1,
+          l10n.guideSlack2,
+          l10n.guideSlack3,
+          l10n.guideSlack4,
+          l10n.guideSlack5,
+        ],
+        l10n.guideSlackNote,
+        'qa-builds',
+        'slack create app bot token oauth scopes chat:write files:write',
+      ),
+      CredentialKind.jira => (
+        3,
+        [l10n.guideJira1, l10n.guideJira2, l10n.guideJira3, l10n.guideJira4],
+        l10n.guideJiraNote,
+        'qa-builds',
+        'jira cloud create api token atlassian account',
+      ),
       CredentialKind.appStoreConnectKey => (
         5,
         [
@@ -66,11 +86,12 @@ class CredentialGuide extends StatelessWidget {
       ),
     };
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(Radii.md),
-      ),
+    // A Material, not a DecoratedBox: the tile inside draws its ink on the
+    // nearest Material, and a painted box in between would hide it.
+    return Material(
+      color: scheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(Radii.md),
+      clipBehavior: Clip.antiAlias,
       child: Theme(
         // No divider lines around the open tile.
         data: theme.copyWith(dividerColor: Colors.transparent),

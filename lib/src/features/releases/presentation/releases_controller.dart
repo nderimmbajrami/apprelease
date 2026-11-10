@@ -37,7 +37,7 @@ class ReleasesController extends _$ReleasesController {
       branch: app.branch,
       startedByName: user.name.isEmpty ? user.email : user.name,
       createdAt: DateTime.now(),
-      steps: pipelineSteps(track.platform, id),
+      steps: pipelineSteps(track.platform, id, track: track),
     );
     final ok = await _run(() async {
       await ref.read(releasesRepositoryProvider).startRelease(release);

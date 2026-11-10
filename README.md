@@ -123,6 +123,6 @@ Both need the same `SECRETS_KEY`; the console never sees it.
 | | done | next |
 | --- | --- | --- |
 | Landing + docs | home, pricing, FAQ, contact, legal, docs (Flutter quick start, Android/iOS signing, Google Play, App Store Connect, YAML reference) | screenshots of the console, blog |
-| Console | auth, apps, releases with live steps and log, credentials, generated `apprelease.yaml`, settings; widget tests | team invites, webhooks/triggers, email notifications, Stripe |
+| Console | auth, apps, releases with live steps and log, credentials, generated `apprelease.yaml`, settings; QA builds (push to a branch → APK in Slack, TestFlight, Jira tickets to Ready for QA); widget tests | team invites, webhooks/triggers, email notifications, Stripe |
 | Runner | claim → checkout → toolchain → packages → signing → versioning → build → publish; secrets masked; cleanup | FVM, caching, artifact upload to storage, Linux runner image |
 | React Native | — | quick start + runner steps |

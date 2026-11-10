@@ -40,24 +40,37 @@ class WorkflowConfig {
     required Map<String, dynamic> app,
     required List<Map<String, dynamic>> credentials,
   }) {
-    Map<String, dynamic>? first(String kind) {
-      Map<String, dynamic>? shared, other;
-      for (final c in credentials) {
-        if (c['kind'] != kind) continue;
-        if (c['app_id'] == app['id']) return c;
-        if (c['app_id'] == null) {
-          shared ??= c;
-        } else {
-          other ??= c;
-        }
-      }
-      return shared ?? other;
-    }
+    Map<String, dynamic>? first(String kind) =>
+        credentialFor(credentials, kind, app['id'], orAny: true);
 
     final flutter = '${app['flutter_version'] ?? 'stable'}';
     if (platform == 'android') {
       final keystore = first('androidKeystore');
       final play = first('googlePlayServiceAccount');
+      if (track == 'qa') {
+        // A QA build: one installable APK, signed like a release, handed
+        // to the testers in Slack. Nothing goes to Google Play; it is only
+        // asked for the build number, so QA's build sorts with the store's.
+        return WorkflowConfig(
+          id: 'console-android-qa',
+          name: '${app['name']} · Android · QA',
+          flutter: flutter,
+          androidSigning: [if (keystore != null) '${keystore['name']}'],
+          iosSigning: const {},
+          groups: [if (play != null) '${play['name']}'],
+          vars: {'PACKAGE_NAME': '${app['android_package_name'] ?? ''}'},
+          versioningSource: play != null ? 'google_play' : 'manual',
+          scripts: const [
+            (
+              name: 'Build APK',
+              script:
+                  r'flutter build apk --release --build-number=$AR_BUILD_NUMBER',
+            ),
+          ],
+          artifacts: const ['build/app/outputs/flutter-apk/*.apk'],
+          publishing: const {},
+        );
+      }
       return WorkflowConfig(
         id: 'console-android-$track',
         name: '${app['name']} · Android',
@@ -108,7 +121,8 @@ class WorkflowConfig {
       publishing: {
         if (asc != null)
           'app_store_connect': {
-            'submit_to_testflight': track == 'testflight',
+            'submit_to_testflight':
+                track == 'testflight' || track == 'qaTestflight',
             'submit_to_app_store': track == 'appStore',
           },
       },
@@ -119,6 +133,12 @@ class WorkflowConfig {
   /// Parses the file and picks the workflow for [platform] and [track]:
   /// first an exact id like `android-production`, then any workflow whose
   /// signing section matches the platform, then the first one.
+  ///
+  /// QA builds are named `android-qa` and `ios-qa`. An Android QA build
+  /// takes only `android-qa`: the other Android workflows build a bundle
+  /// for Google Play, which nobody can install. Without it the result is
+  /// null and the console settings build the APK. An iOS QA build is a
+  /// TestFlight build, so it falls back to the workflow TestFlight uses.
   static WorkflowConfig? select(
     String yaml, {
     required String platform,
@@ -129,8 +149,13 @@ class WorkflowConfig {
     final workflows = (doc['workflows'] as Map).cast<String, dynamic>();
     if (workflows.isEmpty) return null;
 
+    if (track == 'qa') {
+      final raw = workflows['android-qa'];
+      return raw is Map ? _parse('android-qa', raw.cast()) : null;
+    }
     String? chosen;
     for (final candidate in [
+      if (track == 'qaTestflight') ...['ios-qa', 'ios-testflight'],
       '$platform-$track',
       platform,
       '$platform-workflow',
@@ -185,4 +210,27 @@ class WorkflowConfig {
       ),
     );
   }
+}
+
+/// The credential of [kind] for an app: the app's own first, then a shared
+/// one. With [orAny], one linked to another app is better than none (store
+/// accounts usually cover every app of the team); without, it is not: a
+/// Slack channel or a Jira site linked to another app is someone else's.
+Map<String, dynamic>? credentialFor(
+  List<Map<String, dynamic>> credentials,
+  String kind,
+  Object? appId, {
+  bool orAny = false,
+}) {
+  Map<String, dynamic>? shared, other;
+  for (final c in credentials) {
+    if (c['kind'] != kind) continue;
+    if (c['app_id'] == appId) return c;
+    if (c['app_id'] == null) {
+      shared ??= c;
+    } else {
+      other ??= c;
+    }
+  }
+  return shared ?? (orAny ? other : null);
 }

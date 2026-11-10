@@ -46,6 +46,26 @@ every five seconds and runs one release at a time.
 
 No third-party CLI is involved anywhere.
 
+## QA builds
+
+A release whose track is `qa` (Android) or `qaTestflight` (iOS) is a build
+for the testers, not for a store (`lib/src/steps/qa.dart`):
+
+* **Android** builds a signed APK instead of a bundle and skips Google Play.
+  Its last step uploads the APK to the team's Slack channel.
+* **iOS** goes to TestFlight as usual, never to review, and gets one more
+  step that tells the Slack channel.
+* Both then read the ticket keys (`DAMA-123`) from the message of the
+  commit that was checked out and move those tickets in Jira to the
+  configured status. Slack first: a ticket only moves once the build is in
+  the channel. A ticket that cannot move is a warning and a second Slack
+  message, not a failed build.
+
+Slack and Jira are credentials of the kinds `slack` (bot token; meta
+`channel`) and `jira` (API token; meta `site`, `email`, `status`,
+`projects`). The app's own connection wins over a shared one; one linked
+to another app is never used.
+
 ## Secrets
 
 The runner reads a credential's secret by calling `read_credential_secret`

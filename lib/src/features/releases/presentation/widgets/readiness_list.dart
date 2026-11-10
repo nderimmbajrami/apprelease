@@ -98,6 +98,11 @@ class _Row extends StatelessWidget {
         l10n.readyAppStoreConnectOk,
         l10n.readyAppStoreConnectMissing,
       ),
+      ReadinessItem.slack => (
+        l10n.readySlack,
+        l10n.readySlackOk,
+        l10n.readySlackMissing,
+      ),
     };
     final isSetting = switch (check.item) {
       ReadinessItem.repository ||
@@ -171,6 +176,7 @@ class _Row extends StatelessWidget {
       kind: switch (check.item) {
         ReadinessItem.keystore => CredentialKind.androidKeystore,
         ReadinessItem.googlePlay => CredentialKind.googlePlayServiceAccount,
+        ReadinessItem.slack => CredentialKind.slack,
         _ => CredentialKind.appStoreConnectKey,
       },
       appId: check.item == ReadinessItem.keystore ? app.id : null,

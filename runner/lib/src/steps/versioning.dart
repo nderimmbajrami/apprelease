@@ -54,7 +54,22 @@ class Versioning {
           'Asking Google Play for the latest build number as ${play.clientEmail}',
           stepId: stepId,
         );
-        final latest = await play.latestBuildNumber(package);
+        final int latest;
+        try {
+          latest = await play.latestBuildNumber(package);
+        } on Object catch (error) {
+          // A QA build does not go to Google Play, so an app that is not
+          // there yet (or a key Google does not accept yet) is no reason
+          // to stop it.
+          if (release['track'] != 'qa') rethrow;
+          await log(
+            'Google Play gave no build number '
+            '(${'$error'.split('\n').first}); using the sequence number',
+            stepId: stepId,
+            level: 'warning',
+          );
+          break;
+        }
         await log(
           'Latest build number on Google Play: $latest',
           stepId: stepId,

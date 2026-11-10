@@ -10,6 +10,17 @@ import { alertQueued, send, shell, TEAM_INBOX } from "../_shared/mail.ts";
 
 // Must match pipelineSteps() in the console and the runner.
 const STEPS: Record<string, string[]> = {
+  // QA builds: an APK posted to Slack, a TestFlight build announced there.
+  "android:qa": [
+    "Check out repository", "Set up Flutter", "Get packages",
+    "Fetch build number", "Build APK",
+    "Sign with upload key", "Send to QA",
+  ],
+  "ios:qaTestflight": [
+    "Check out repository", "Set up Flutter and Xcode", "Get packages",
+    "Fetch signing files", "Fetch build number from App Store Connect",
+    "Build ipa", "Upload to TestFlight", "Send to QA",
+  ],
   android: [
     "Check out repository", "Set up Flutter", "Get packages",
     "Fetch build number from Google Play", "Build app bundle",
@@ -113,7 +124,8 @@ Deno.serve(async (req) => {
   const replaced: number[] = [];
   const isTag = ref.startsWith("refs/tags/");
   for (const { platform, track } of plan) {
-    if (!STEPS[platform]) continue;
+    const steps = STEPS[`${platform}:${track}`] ?? STEPS[platform];
+    if (!steps) continue;
     // A newer push to the same branch replaces an older release of this app
     // and platform that has not started yet: ten quick pushes are one build,
     // and other teams do not wait behind the nine stale ones. Only releases
@@ -152,7 +164,7 @@ Deno.serve(async (req) => {
     }
     if (error) return json(500, { error: error.message });
     await admin.from("release_steps").insert(
-      STEPS[platform].map((name, i) => ({ id: `${id}-${i}`, release_id: id, name, position: i, status: "pending" })),
+      steps.map((name, i) => ({ id: `${id}-${i}`, release_id: id, name, position: i, status: "pending" })),
     );
     queued.push(`${platform} #${number} → ${track}`);
     queuedIds.push(id);

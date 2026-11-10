@@ -1,5 +1,6 @@
 // check-credential — tests a stored Google Play service account against
 // Google and says exactly what is still missing, with the link to fix it.
+// The same for an App Store Connect key, a Slack bot and a Jira account.
 //
 // Called from the console with the user's token. Reads the secret with
 // SECRETS_KEY (service role), signs the service-account JWT with WebCrypto,
@@ -119,6 +120,92 @@ async function checkPackage(token: string, pkg: string, projectId: string): Prom
   return { package: pkg, status: "error", message: `${res.status}: ${message}` };
 }
 
+// ------------------------------------------------------------ Slack and Jira
+
+// The bot token, its two scopes, and that the bot sits in the channel.
+// Nothing is posted: a check must not put a message in front of QA.
+async function checkSlack(token: string, channel: string): Promise<Check[]> {
+  const call = async (method: string, params: Record<string, string>) => {
+    const res = await fetch(`https://slack.com/api/${method}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(params),
+    });
+    return { scopes: (res.headers.get("x-oauth-scopes") ?? "").split(",").map((s) => s.trim()), body: await res.json() };
+  };
+  const apps = "https://api.slack.com/apps";
+  const auth = await call("auth.test", {});
+  if (!auth.body.ok) {
+    return [{ package: "Slack", status: "invalid_key", message: `Slack refused the bot token (${auth.body.error}). Use the Bot User OAuth Token, the one that starts with xoxb-.`, link: apps }];
+  }
+  const checks: Check[] = [{ package: "Slack", status: "ok", message: `Connected to ${auth.body.team} as ${auth.body.user}.` }];
+  const missing = ["chat:write", "files:write"].filter((s) => !auth.scopes.includes(s));
+  if (missing.length) {
+    checks.push({ package: "Permissions", status: "not_invited", message: `The bot lacks ${missing.join(" and ")}. Add under OAuth & Permissions → Bot Token Scopes, then reinstall the app to the workspace.`, link: apps });
+  }
+  // Needs channels:read, which the bot does not have to have: only a clear
+  // answer counts, anything else is left to the first build.
+  const info = await call("conversations.info", { channel });
+  if (info.body.ok) {
+    checks.push(info.body.channel?.is_member
+      ? { package: `#${info.body.channel.name}`, status: "ok", message: "The bot is in the channel and can post there." }
+      : { package: `#${info.body.channel?.name ?? channel}`, status: "not_invited", message: `The bot is not in the channel. In the channel, type /invite @${auth.body.user}.` });
+  } else if (info.body.error === "channel_not_found") {
+    checks.push({ package: channel, status: "unknown_package", message: `Slack shows this bot no channel with that ID. Copy the Channel ID from the bottom of the channel details, and for a private channel invite the bot first: /invite @${auth.body.user}.` });
+  } else {
+    checks.push({ package: channel, status: "ok", message: `The channel is checked with the first build. Make sure the bot is in it: /invite @${auth.body.user}.` });
+  }
+  return checks;
+}
+
+// The account, and that the status exists in the projects it should move
+// tickets in.
+async function checkJira(meta: Record<string, string>, token: string): Promise<Check[]> {
+  let site = (meta.site ?? "").trim();
+  if (!site.includes("://")) site = `https://${site}`;
+  site = new URL(site).origin;
+  const headers = { Authorization: `Basic ${btoa(`${meta.email}:${token}`)}`, Accept: "application/json" };
+  const tokens = "https://id.atlassian.com/manage-profile/security/api-tokens";
+  let me: Response;
+  try {
+    me = await fetch(`${site}/rest/api/3/myself`, { headers });
+  } catch (e) {
+    return [{ package: "Jira", status: "error", message: `${site} did not answer: ${e}` }];
+  }
+  if (me.status === 401 || me.status === 403) {
+    return [{ package: "Jira", status: "invalid_key", message: "Jira refused the email and API token. The email must be the Atlassian account the token was created with.", link: tokens }];
+  }
+  if (!me.ok) return [{ package: "Jira", status: "error", message: `${site} answered ${me.status}. Check the site address.` }];
+  const who = await me.json();
+  const checks: Check[] = [{ package: "Jira", status: "ok", message: `Connected to ${site} as ${who.displayName ?? meta.email}.` }];
+
+  const wanted = (meta.status ?? "").trim().toLowerCase();
+  const projects = (meta.projects ?? "").split(/[,\s]+/).filter((p) => p);
+  for (const key of projects) {
+    const res = await fetch(`${site}/rest/api/3/project/${encodeURIComponent(key)}/statuses`, { headers });
+    if (res.status === 404) {
+      checks.push({ package: key, status: "unknown_package", message: `Jira has no project with the key ${key}, or this account cannot see it.` });
+      continue;
+    }
+    if (!res.ok) { checks.push({ package: key, status: "error", message: `Jira answered ${res.status}.` }); continue; }
+    const names = new Set<string>();
+    for (const type of await res.json()) for (const s of type.statuses ?? []) names.add(s.name);
+    checks.push([...names].some((n) => n.toLowerCase() === wanted)
+      ? { package: key, status: "ok", message: `Tickets can move to "${meta.status}".` }
+      : { package: key, status: "unknown_package", message: `${key} has no status named "${meta.status}". It has: ${[...names].join(", ")}.` });
+  }
+  if (!projects.length) {
+    const res = await fetch(`${site}/rest/api/3/status`, { headers });
+    if (res.ok) {
+      const names: string[] = [...new Set((await res.json()).map((s: { name: string }) => s.name))] as string[];
+      checks.push(names.some((n) => n.toLowerCase() === wanted)
+        ? { package: meta.status, status: "ok", message: "Jira has a status with this name." }
+        : { package: meta.status, status: "unknown_package", message: `Jira has no status named "${meta.status}". Use the name exactly as the board shows it.` });
+    }
+  }
+  return checks;
+}
+
 Deno.serve(async (req) => {
   const pre = preflight(req);
   if (pre) return pre;
@@ -134,14 +221,25 @@ Deno.serve(async (req) => {
   // RLS: the user only sees their team's credential.
   const { data: credential } = await userClient.from("credentials").select("*").eq("id", credential_id).maybeSingle();
   if (!credential) return reply(404, { error: "unknown credential" });
-  if (!["googlePlayServiceAccount", "appStoreConnectKey"].includes(credential.kind)) {
-    return reply(400, { error: "only store accounts can be checked" });
+  if (!["googlePlayServiceAccount", "appStoreConnectKey", "slack", "jira"].includes(credential.kind)) {
+    return reply(400, { error: "only store accounts and connections can be checked" });
   }
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: rows, error } = await admin.rpc("read_credential_secret", { p_credential_id: credential_id, p_key: Deno.env.get("SECRETS_KEY") });
   if (error || !rows?.length) return reply(500, { error: error?.message ?? "secret unreadable" });
   const fields = JSON.parse(rows[0].fields_json);
+
+  if (credential.kind === "slack") {
+    return reply(200, { checks: await checkSlack(fields.token, credential.meta?.channel ?? "") });
+  }
+  if (credential.kind === "jira") {
+    try {
+      return reply(200, { checks: await checkJira(credential.meta ?? {}, fields.token) });
+    } catch (e) {
+      return reply(200, { checks: [{ package: "Jira", status: "error", message: `${e}` }] });
+    }
+  }
 
   if (credential.kind === "appStoreConnectKey") {
     const hex: string = rows[0].file_bytes.startsWith("\\x") ? rows[0].file_bytes.slice(2) : rows[0].file_bytes;

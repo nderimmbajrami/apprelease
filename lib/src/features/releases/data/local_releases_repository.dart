@@ -327,7 +327,7 @@ class LocalReleasesRepository implements ReleasesRepository {
           finishedAt: DateTime.now(),
           artifacts: [
             release.platform == Platform.android
-                ? 'app-release.aab'
+                ? (release.track.isQa ? 'app-release.apk' : 'app-release.aab')
                 : 'Runner.ipa',
           ],
         ),
@@ -335,11 +335,14 @@ class LocalReleasesRepository implements ReleasesRepository {
       final where = switch (release.track) {
         ReleaseTrack.testflight => 'TestFlight',
         ReleaseTrack.appStore => 'App Store review',
+        ReleaseTrack.qa || ReleaseTrack.qaTestflight => 'QA',
         _ => 'Google Play · ${release.track.name}',
       };
       _log(
         release.id,
-        'Released ${current.versionLabel} to $where',
+        release.track.isQa
+            ? 'Sent to QA: ${current.versionLabel}'
+            : 'Released ${current.versionLabel} to $where',
         level: LogLevel.success,
       );
     });
@@ -347,6 +350,31 @@ class LocalReleasesRepository implements ReleasesRepository {
 
   List<(String, LogLevel)> _linesFor(Release release, ReleaseStep step) {
     final isAndroid = release.platform == Platform.android;
+    if (step.name == 'Send to QA') {
+      return [
+        ('Tickets in the last commit: DAMA-123', LogLevel.info),
+        (
+          isAndroid
+              ? 'APK posted to Slack channel C0QA'
+              : 'QA told in Slack channel C0QA',
+          LogLevel.info,
+        ),
+        ('DAMA-123 moved to "Ready for QA"', LogLevel.info),
+      ];
+    }
+    if (release.track == ReleaseTrack.qa && step.order == 4) {
+      return [
+        (
+          'flutter build apk --release --build-number=${56 + release.number}',
+          LogLevel.command,
+        ),
+        ('Running Gradle task \'assembleRelease\'…', LogLevel.info),
+        (
+          '✓ Built build/app/outputs/flutter-apk/app-release.apk (52.1MB)',
+          LogLevel.info,
+        ),
+      ];
+    }
     return switch (step.order) {
       0 => [
         ('git clone --depth 1 --branch ${release.branch} …', LogLevel.command),

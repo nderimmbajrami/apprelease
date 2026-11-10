@@ -108,7 +108,7 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
       if (app.hasAndroid) Platform.android,
       if (app.hasIos) Platform.ios,
     ];
-    final checks = Readiness.checks(app, _platform, credentials);
+    final checks = Readiness.checks(app, _platform, credentials, track: _track);
     final missing = checks.where((c) => !c.ok).length;
     final ready = missing == 0;
     final usage = ref.watch(releaseUsageProvider).value;
@@ -304,13 +304,15 @@ class _StartReleaseDialogState extends ConsumerState<_StartReleaseDialog> {
                             ),
                             const SizedBox(width: Gap.sm),
                             Expanded(
-                              child: Text(
-                                l10n.releaseWhatHappens(
+                              child: Text(switch (_track) {
+                                ReleaseTrack.qa => l10n.qaWhatHappensAndroid,
+                                ReleaseTrack.qaTestflight =>
+                                  l10n.qaWhatHappensIos,
+                                _ => l10n.releaseWhatHappens(
                                   '${_platform == Platform.android ? 'Google Play' : 'App Store Connect'} · ${trackLabel(context, _track)}',
                                   _platform == Platform.android ? 10 : 15,
                                 ),
-                                style: theme.textTheme.bodySmall,
-                              ),
+                              }, style: theme.textTheme.bodySmall),
                             ),
                           ],
                         ),
