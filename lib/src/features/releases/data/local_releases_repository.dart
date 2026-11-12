@@ -309,7 +309,7 @@ class LocalReleasesRepository implements ReleasesRepository {
         stepEnd,
         () => _setStep(release.id, step.id, StepStatus.succeeded),
       );
-      if (step.order == 3) {
+      if (step.order == 3 && !release.track.isPreview) {
         // Build number arrives with the versioning step.
         schedule(stepEnd, () {
           final build = 56 + release.number;
@@ -325,13 +325,24 @@ class LocalReleasesRepository implements ReleasesRepository {
         current.copyWith(
           status: ReleaseStatus.succeeded,
           finishedAt: DateTime.now(),
-          artifacts: [
-            release.platform == Platform.android
-                ? (release.track.isQa ? 'app-release.apk' : 'app-release.aab')
-                : 'Runner.ipa',
-          ],
+          artifacts: release.track.isPreview
+              ? const ['my-app.apk', 'web']
+              : [
+                  release.platform == Platform.android
+                      ? (release.track.isQa
+                            ? 'app-release.apk'
+                            : 'app-release.aab')
+                      : 'Runner.ipa',
+                ],
+          previewUrl: release.track.isPreview
+              ? 'https://preview.apprelease.store/${release.id}/'
+              : null,
         ),
       );
+      if (release.track.isPreview) {
+        _log(release.id, 'Preview is ready', level: LogLevel.success);
+        return;
+      }
       final where = switch (release.track) {
         ReleaseTrack.testflight => 'TestFlight',
         ReleaseTrack.appStore => 'App Store review',
@@ -350,6 +361,36 @@ class LocalReleasesRepository implements ReleasesRepository {
 
   List<(String, LogLevel)> _linesFor(Release release, ReleaseStep step) {
     final isAndroid = release.platform == Platform.android;
+    if (release.track.isPreview) {
+      return switch (step.order) {
+        0 => [
+          ('Downloaded the project (4.2 MB)', LogLevel.info),
+          ('Project found in my_app', LogLevel.info),
+          ('Version 1.0.0 from pubspec.yaml', LogLevel.info),
+        ],
+        1 => [('Flutter 3.41.2 · stable · Dart 3.11.0', LogLevel.info)],
+        2 => [
+          ('flutter pub get', LogLevel.command),
+          ('Got dependencies', LogLevel.info),
+        ],
+        3 => [
+          ('flutter build apk --release', LogLevel.command),
+          ('Running Gradle task \'assembleRelease\'…', LogLevel.info),
+          (
+            '✓ Built build/app/outputs/flutter-apk/app-release.apk (21.4MB)',
+            LogLevel.info,
+          ),
+        ],
+        4 => [
+          ('flutter build web --release', LogLevel.command),
+          ('✓ Built build/web', LogLevel.info),
+        ],
+        _ => [
+          ('Android app published', LogLevel.success),
+          ('iPhone link published', LogLevel.success),
+        ],
+      };
+    }
     if (step.name == 'Send to QA') {
       return [
         ('Tickets in the last commit: DAMA-123', LogLevel.info),

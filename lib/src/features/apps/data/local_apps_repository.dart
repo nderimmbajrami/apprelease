@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../../core/data/in_memory_table.dart';
 import '../domain/app_project.dart';
 import 'apps_repository.dart';
@@ -42,6 +44,11 @@ class LocalAppsRepository implements AppsRepository {
   @override
   Future<void> deleteApp(String appId) async =>
       _table.delete((row) => row.id == appId);
+
+  /// The demo keeps no file: the simulated build needs none.
+  @override
+  Future<String> uploadSource(AppProject app, Uint8List zip) async =>
+      '${app.teamId}/${app.id}.zip';
 
   @override
   void dispose() => _table.dispose();

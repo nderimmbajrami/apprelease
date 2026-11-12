@@ -63,6 +63,7 @@ app.*.map.json
 # Runner secrets and workspaces.
 /runner/.env
 /runner/workspace/
+/runner/previews/
 
 # Per-machine runner identity.
 /runner/.runner-id

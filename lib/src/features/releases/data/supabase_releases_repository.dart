@@ -134,6 +134,9 @@ class SupabaseReleasesRepository implements ReleasesRepository {
       if (e.message.contains('release_limit_reached')) {
         throw const ReleaseLimitReached();
       }
+      if (e.message.contains('previews_not_enabled')) {
+        throw const PreviewsNotEnabled();
+      }
       rethrow;
     }
     // Mails the team that someone is releasing. Never holds up the release.
@@ -314,6 +317,7 @@ class SupabaseReleasesRepository implements ReleasesRepository {
         for (final a in (row['artifacts'] as List? ?? const [])) a as String,
       ],
       errorMessage: row['error_message'] as String?,
+      previewUrl: row['preview_url'] as String?,
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -90,6 +91,51 @@ class SupabaseApi {
       fields: (jsonDecode(row['fields_json'] as String) as Map)
           .cast<String, String>(),
     );
+  }
+
+  /// Saves an uploaded project zip from the `sources` bucket to [into].
+  /// Returns its size in bytes.
+  Future<int> downloadSource(String path, File into) async {
+    final request =
+        http.Request(
+            'GET',
+            Uri.parse('$url/storage/v1/object/sources/${Uri.encodeFull(path)}'),
+          )
+          ..headers.addAll({
+            'apikey': serviceRoleKey,
+            'Authorization': 'Bearer $serviceRoleKey',
+          });
+    final response = await _client.send(request);
+    if (response.statusCode >= 300) {
+      throw ApiException(
+        response.statusCode,
+        await response.stream.bytesToString(),
+      );
+    }
+    final sink = into.openWrite();
+    try {
+      await response.stream.pipe(sink);
+    } finally {
+      await sink.close();
+    }
+    return into.lengthSync();
+  }
+
+  /// Removes an uploaded project zip from the `sources` bucket. One that
+  /// is already gone is not an error.
+  Future<void> deleteSource(String path) async {
+    final response = await _client.delete(
+      Uri.parse('$url/storage/v1/object/sources/${Uri.encodeFull(path)}'),
+      headers: {
+        'apikey': serviceRoleKey,
+        'Authorization': 'Bearer $serviceRoleKey',
+      },
+    );
+    if (response.statusCode >= 300 &&
+        response.statusCode != 400 &&
+        response.statusCode != 404) {
+      throw ApiException(response.statusCode, response.body);
+    }
   }
 
   Future<void> updateRelease(String id, Map<String, dynamic> patch) async {

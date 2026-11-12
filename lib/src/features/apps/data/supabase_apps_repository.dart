@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -64,8 +65,45 @@ class SupabaseAppsRepository implements AppsRepository {
 
   @override
   Future<void> deleteApp(String appId) async {
+    // An uploaded app takes its zip with it, if a build has not already.
+    String? zip;
+    try {
+      final row = await _client
+          .from(_table)
+          .select('source_zip')
+          .eq('id', appId)
+          .maybeSingle();
+      zip = row?['source_zip'] as String?;
+    } on PostgrestException {
+      // A database without the column has no zips either.
+    }
     await _client.from(_table).delete().eq('id', appId);
+    if (zip != null && zip.isNotEmpty) {
+      try {
+        await _client.storage.from('sources').remove([zip]);
+      } on Object {
+        // The app is gone; a leftover file must not bring the error back.
+      }
+    }
     _touch();
+  }
+
+  /// One zip per app in the private `sources` bucket, under the team's
+  /// folder, which is what its policies allow.
+  @override
+  Future<String> uploadSource(AppProject app, Uint8List zip) async {
+    final path = '${app.teamId}/${app.id}.zip';
+    await _client.storage
+        .from('sources')
+        .uploadBinary(
+          path,
+          zip,
+          fileOptions: const FileOptions(
+            upsert: true,
+            contentType: 'application/zip',
+          ),
+        );
+    return path;
   }
 
   @override
@@ -102,6 +140,7 @@ class SupabaseAppsRepository implements AppsRepository {
     pushRules: _rulesFromRow(row),
     triggerTags: (row['trigger_tags'] as bool?) ?? false,
     webhookSecret: (row['webhook_secret'] as String?) ?? '',
+    sourceZip: row['source_zip'] as String?,
   );
 
   static Map<String, dynamic> _toRow(AppProject app) => {
@@ -127,6 +166,9 @@ class SupabaseAppsRepository implements AppsRepository {
       'trigger_track_ios': app.pushRules.first.trackIos,
     },
     'trigger_tags': app.triggerTags,
+    // Only for an uploaded app, so a database without the column still
+    // saves every other app.
+    if (app.sourceZip != null) 'source_zip': app.sourceZip,
   };
 
   /// `trigger_rules`, or one rule from the old single-branch columns.

@@ -23,6 +23,7 @@ import 'releases_controller.dart';
 import 'start_release_sheet.dart';
 import 'widgets/log_view.dart';
 import 'widgets/platform_icon.dart';
+import 'widgets/preview_links.dart';
 import 'widgets/status_pill.dart';
 import 'widgets/step_timeline.dart';
 
@@ -120,7 +121,9 @@ class _ReleaseView extends ConsumerWidget {
             AppRoute.appDetail.name,
             pathParameters: {'appId': release.appId},
           ),
-          leading: PlatformIcon(release.platform, size: 40),
+          leading: release.track.isPreview
+              ? const Icon(Icons.phone_iphone, size: 40)
+              : PlatformIcon(release.platform, size: 40),
           title: Text('$appName · ${release.versionLabel}'),
           subtitle: Text(
             [
@@ -139,6 +142,15 @@ class _ReleaseView extends ConsumerWidget {
                     .cancelRelease(release.id),
                 icon: const Icon(Icons.stop_circle_outlined, size: 18),
                 label: Text(l10n.cancelRelease),
+              )
+            else if (app != null && release.track.isPreview)
+              FilledButton.icon(
+                onPressed: () => context.goNamed(
+                  AppRoute.preview.name,
+                  queryParameters: {'app': app.id},
+                ),
+                icon: const Icon(Icons.upload_file_outlined, size: 18),
+                label: Text(l10n.previewUploadNew),
               )
             else if (app != null)
               FilledButton.icon(
@@ -182,6 +194,12 @@ class _ReleaseView extends ConsumerWidget {
               ),
           ],
         ),
+        if (release.track.isPreview &&
+            release.status == ReleaseStatus.succeeded &&
+            release.previewUrl != null) ...[
+          const SizedBox(height: Gap.lg),
+          PreviewLinks(release: release),
+        ],
         if (release.status == ReleaseStatus.queued && queue != null) ...[
           const SizedBox(height: Gap.lg),
           _QueueCard(info: queue, platform: release.platform),

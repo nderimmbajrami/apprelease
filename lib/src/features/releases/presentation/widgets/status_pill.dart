@@ -55,5 +55,6 @@ String trackLabel(BuildContext context, ReleaseTrack track) {
     ReleaseTrack.appStore => l10n.trackAppStore,
     ReleaseTrack.qa => l10n.trackQa,
     ReleaseTrack.qaTestflight => l10n.trackQaTestflight,
+    ReleaseTrack.preview => l10n.trackPreview,
   };
 }

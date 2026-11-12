@@ -31,6 +31,7 @@ Future<void> main(List<String> args) async {
     // handed to tools from there.
     workspace: Directory(env['RUNNER_WORKSPACE'] ?? 'workspace').absolute,
     idFile: env['RUNNER_ID_FILE'] ?? '.runner-id',
+    preview: PreviewSettings.fromEnv(env),
   );
 
   if (args.contains('--once')) {

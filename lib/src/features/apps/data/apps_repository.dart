@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/data/backend.dart';
@@ -14,6 +16,10 @@ abstract interface class AppsRepository {
   Future<AppProject> addApp(AppProject app);
   Future<void> updateApp(AppProject app);
   Future<void> deleteApp(String appId);
+
+  /// Stores the project zip of an uploaded app, replacing the one before.
+  /// Returns where it is kept, for [AppProject.sourceZip].
+  Future<String> uploadSource(AppProject app, Uint8List zip);
   void dispose();
 }
 
