@@ -47,7 +47,9 @@ class AppTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      '${app.repoShortName} · ${app.branch}',
+                      app.isUpload
+                          ? context.l10n.previewUploadedProject
+                          : '${app.repoShortName} · ${app.branch}',
                       style: theme.textTheme.bodySmall,
                       overflow: TextOverflow.ellipsis,
                     ),

@@ -19,22 +19,39 @@ priority: 0.7
 <div class="note">Slack comes first. A ticket moves only after the build it promises has reached the channel, so nothing says "Ready for QA" without something to test.</div>
 <h2 id="slack">Connecting Slack</h2>
 <ol class="docs-steps">
- <li>Open <a href="https://api.slack.com/apps">api.slack.com/apps</a> → <strong>Create New App</strong> → <strong>From scratch</strong>. Name it, for example "AppRelease", and pick your workspace.</li>
- <li>Under <strong>OAuth &amp; Permissions</strong> → <strong>Bot Token Scopes</strong>, add <code>chat:write</code> and <code>files:write</code>.</li>
- <li>Click <strong>Install to Workspace</strong> and copy the <strong>Bot User OAuth Token</strong>. It starts with <code>xoxb-</code>.</li>
- <li>In Slack, open the channel QA reads and type <code>/invite @AppRelease</code> (the name you gave the app).</li>
- <li>Open the channel details and copy the <strong>Channel ID</strong> from the bottom. It looks like <code>C0123ABCDEF</code>; the <code>#name</code> does not work.</li>
+ <li>Open <a href="https://api.slack.com/apps" target="_blank" rel="noopener">api.slack.com/apps</a>. On the page <strong>Your Apps</strong>, click <strong>Create New App</strong>.</li>
+ <li>Window <strong>Create new app</strong>: under <strong>From scratch</strong>, click <strong>Paste a manifest</strong>, then <strong>Continue</strong>. Do not pick <em>AI agent</em> or <em>Starter app</em>: they add code this does not need.</li>
+ <li>Window <strong>Create from a manifest</strong>: on the <strong>JSON</strong> tab, select everything in the box and replace it with this text:
+<div class="code"><pre>
+{
+  "display_information": { "name": "AppRelease" },
+  "features": { "bot_user": { "display_name": "AppRelease" } },
+  "oauth_config": { "scopes": { "bot": ["chat:write", "files:write"] } }
+}
+</pre></div>
+It names the app AppRelease and gives it two permissions: <code>chat:write</code> to send messages and <code>files:write</code> to upload the APK.</li>
+ <li>Same window: under <strong>Workspace</strong>, choose your workspace. Click <strong>Next</strong>, then <strong>Create</strong>.</li>
+ <li>Page <strong>Allow AppRelease to access Slack</strong>: it lists two actions, send messages and upload files. Click <strong>Allow</strong>.</li>
+ <li>Window <strong>AppRelease is ready!</strong>: click the copy icon next to <strong>Bot token</strong>. It starts with <code>xoxb-</code>. Ignore the <strong>App token</strong> and the steps under it (Install Slack CLI, Log in, Create your project, Run your app): they are for writing your own bot code. Close the window. Should you need the token again, it is in the app's settings under <strong>OAuth &amp; Permissions</strong> as <strong>Bot User OAuth Token</strong>.</li>
+ <li>In Slack, in the channel where QA should get builds: send <code>/invite @AppRelease</code>. AppRelease is a bot, not a channel: it posts only in channels it is invited to and cannot read messages.</li>
+ <li>Same channel: click its name at the top. In the window that opens, the <strong>Channel ID</strong> is at the bottom. It looks like <code>C0123ABCDEF</code>; the <code>#name</code> does not work.</li>
  <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Slack (QA builds)</strong>, paste both and save. <strong>Check</strong> on the saved connection tells you if a scope is missing or the bot is not in the channel, without posting anything.</li>
 </ol>
 <p>Link the connection to one application if each app has its own channel, or leave it <strong>Shared</strong> for all of them.</p>
 <h2 id="jira">Connecting Jira</h2>
 <ol class="docs-steps">
- <li>Create an API token at <a href="https://id.atlassian.com/manage-profile/security/api-tokens">id.atlassian.com → Security → API tokens</a>.</li>
- <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Jira (QA tickets)</strong>.</li>
- <li>Enter your Jira address (<code>https://your-team.atlassian.net</code>), the email of the Atlassian account the token belongs to, and the token.</li>
- <li>Type the <strong>status</strong> tickets should move to, exactly as your board names it. The default is <code>Ready for QA</code>.</li>
- <li>Optionally list your <strong>project keys</strong> (<code>DAMA, APP</code>). Then only those tickets are touched, and a lower-case <code>dama-123</code> in a branch name counts too.</li>
+ <li>Open <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" rel="noopener">id.atlassian.com/manage-profile/security/api-tokens</a>. On the page <strong>API Tokens</strong>, click <strong>Create API token</strong>: the left button, not <em>Create API token with scopes</em>. A token with scopes is refused at your Jira address.</li>
+ <li>Window <strong>Create an API token</strong>: type a name, for example <code>AppRelease</code>. Under <strong>Expires on</strong>, pick the latest date allowed, one year from today; it starts at one week. Click <strong>Create</strong>.</li>
+ <li>The next window shows the token. Copy it now: Atlassian shows it only once.</li>
+ <li>In the console open <strong>Credentials</strong> → <strong>Add credential</strong> → <strong>Jira (QA tickets)</strong> and paste the token under <strong>API token</strong>.</li>
+ <li><strong>Jira site:</strong> open your Jira in the browser and copy the start of the address, up to <code>.atlassian.net</code>. It looks like <code>https://your-team.atlassian.net</code>.</li>
+ <li><strong>Atlassian account email:</strong> the email you sign in to Jira with, on the same account that made the token. You can read it at <a href="https://id.atlassian.com/manage-profile/email" target="_blank" rel="noopener">id.atlassian.com/manage-profile/email</a>. That account needs permission to move tickets.</li>
+ <li><strong>Status to move tickets to:</strong> in Jira, open any ticket and click its status to see the list. Type the one QA tickets should get, exactly as written there. The default is <code>Ready for QA</code>.</li>
+ <li><strong>Project keys</strong> (optional): the letters before the number of a ticket on your board; for <code>DAMA-123</code> the key is <code>DAMA</code>. Jira also lists it under <strong>Projects</strong>, in the <strong>Key</strong> column. Separate several with commas (<code>DAMA, APP</code>). Then only those tickets are touched, and a lower-case <code>dama-123</code> in a branch name counts too.</li>
+ <li>Save, then click <strong>Check</strong> on the saved connection. It confirms the account and the status without moving a ticket.</li>
 </ol>
+<p>There is no board to pick. A ticket is found by the key in your commit, and its status is changed on the ticket itself, so it moves to that column on whichever board shows it. Project keys only narrow which tickets may be moved; leave them empty and every ticket named in a commit is moved.</p>
+<p>The token stops working on its expiry date. Create a new one before then and save it on the same connection.</p>
 <p>Jira is optional. Without it the Slack message still lists the keys found in the commit; nothing is moved.</p>
 <h2 id="branch">Choosing the branch</h2>
 <ol class="docs-steps">

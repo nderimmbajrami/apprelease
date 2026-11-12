@@ -61,6 +61,13 @@ class AppShell extends ConsumerWidget {
         matches: const ['/apps'],
       ),
       NavItem(
+        icon: Icons.phone_iphone_outlined,
+        selectedIcon: Icons.phone_iphone,
+        label: l10n.navPreview,
+        route: AppRoute.preview,
+        matches: const ['/preview'],
+      ),
+      NavItem(
         icon: Icons.key_outlined,
         selectedIcon: Icons.key,
         label: l10n.navCredentials,

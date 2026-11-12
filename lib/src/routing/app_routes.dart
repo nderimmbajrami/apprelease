@@ -12,6 +12,7 @@ enum AppRoute {
   appDetail(':appId'),
   release('releases/:releaseId'),
   credentials('/credentials'),
+  preview('/preview'),
   settings('/settings');
 
   const AppRoute(this.path);

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'api.dart';
 import 'pipeline.dart';
+import 'steps/preview.dart';
 
 /// Polls the queue and runs releases one after another.
 class Runner {
@@ -14,6 +15,7 @@ class Runner {
     required this.workspace,
     this.pollInterval = const Duration(seconds: 5),
     this.idFile = '.runner-id',
+    this.preview,
   });
 
   final SupabaseApi api;
@@ -22,6 +24,10 @@ class Runner {
   final List<String> platforms;
   final Directory workspace;
   final Duration pollInterval;
+
+  /// Where previews are published; null when this machine has no such
+  /// folder, and a preview it claims fails with that reason.
+  final PreviewSettings? preview;
 
   /// Where the stable id is kept. One file per process when a machine runs
   /// several (`.runner-id-android`, `.runner-id-ios`).
@@ -113,6 +119,7 @@ class Runner {
       app: app,
       secretsKey: secretsKey,
       workspace: workspace,
+      preview: preview,
     );
     await pipeline.run();
     return true;

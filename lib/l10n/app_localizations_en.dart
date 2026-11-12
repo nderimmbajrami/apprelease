@@ -1444,11 +1444,11 @@ class AppL10nEn extends AppL10n {
   }
 
   @override
-  String get kindBuildFile => 'Build file';
+  String get kindBuildFile => 'Build file (optional)';
 
   @override
   String get kindBuildFileBody =>
-      'A file the build needs that is not in the repository: google-services.json, GoogleService-Info.plist, a .env. Kept encrypted; written into the checkout right before the build and deleted with it.';
+      'Optional. Only for a build that needs a file the repository leaves out, for example google-services.json if the app uses Firebase, GoogleService-Info.plist, or a .env. Kept encrypted; written into the checkout right before the build and deleted with it.';
 
   @override
   String get anyFile => 'Any file';
@@ -1466,7 +1466,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get guideFile1 =>
-      'Pick the file from your project, for example android/app/google-services.json from Firebase.';
+      'Skip this if every file the build needs is in Git. Otherwise pick the file from your project, for example android/app/google-services.json if the app uses Firebase.';
 
   @override
   String get guideFile2 =>
@@ -1478,7 +1478,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get guideFileNote =>
-      'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.';
+      'Apps without Firebase build fine without any file here. A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.';
 
   @override
   String logQuiet(String since) {
@@ -1552,6 +1552,14 @@ class AppL10nEn extends AppL10n {
   String get jiraSite => 'Jira site';
 
   @override
+  String get jiraSiteHelper =>
+      'The start of the address in your browser when Jira is open, up to .atlassian.net.';
+
+  @override
+  String get jiraTokenHelper =>
+      'From id.atlassian.com → Security → API tokens → Create API token (without scopes).';
+
+  @override
   String get jiraSiteInvalid =>
       'The address of your Jira, like https://your-team.atlassian.net';
 
@@ -1560,7 +1568,7 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get jiraEmailHelper =>
-      'The account the API token belongs to. It needs permission to move tickets.';
+      'The email you sign in to Jira with, on the account that made the token. That account needs permission to move tickets.';
 
   @override
   String get jiraToken => 'API token';
@@ -1570,14 +1578,14 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get jiraStatusHelper =>
-      'The name of the status on your board, exactly as Jira shows it.';
+      'Open a ticket in Jira and click its status: type the name exactly as that list shows it.';
 
   @override
   String get jiraProjects => 'Project keys (optional)';
 
   @override
   String get jiraProjectsHelper =>
-      'Only tickets of these projects are moved. Empty: any key like ABC-123 that is a ticket in your Jira.';
+      'The letters before a ticket\'s number on your board: DAMA for DAMA-123. Only tickets of these projects are moved. Empty: any ticket named in a commit.';
 
   @override
   String get checkingConnection => 'Checking the connection…';
@@ -1590,23 +1598,35 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get guideSlack1 =>
-      'Open api.slack.com/apps → Create New App → From scratch. Name it (for example AppRelease) and pick your workspace.';
+      'Open api.slack.com/apps. On the page Your Apps, click Create New App.';
 
   @override
   String get guideSlack2 =>
-      'OAuth & Permissions → Bot Token Scopes: add chat:write and files:write.';
+      'Window “Create new app”: under From scratch, click Paste a manifest, then Continue. Do not pick AI agent or Starter app: they add code this does not need.';
 
   @override
   String get guideSlack3 =>
-      'Install to Workspace, then copy the Bot User OAuth Token (starts with xoxb-).';
+      'Window “Create from a manifest”: on the JSON tab, select everything in the box and replace it with this text:';
 
   @override
   String get guideSlack4 =>
-      'In Slack, open the QA channel and type /invite @AppRelease (the name you gave the app).';
+      'Same window: under Workspace, choose your workspace. Click Next, then Create.';
 
   @override
   String get guideSlack5 =>
-      'Open the channel details and copy the Channel ID from the bottom. Paste both below.';
+      'Page “Allow AppRelease to access Slack”: it lists two actions, send messages and upload files. Click Allow.';
+
+  @override
+  String get guideSlack6 =>
+      'Window “AppRelease is ready!”: click the copy icon next to Bot token (starts with xoxb-) and paste it below. Ignore the App token and the steps under it (Install Slack CLI and so on), then close the window.';
+
+  @override
+  String get guideSlack7 =>
+      'In Slack, in the channel where QA should get builds: send /invite @AppRelease. The bot posts only in channels it is invited to and cannot read messages.';
+
+  @override
+  String get guideSlack8 =>
+      'Same channel: click its name at the top. In the window that opens, the Channel ID is at the bottom (like C0123ABCDEF). Paste it below.';
 
   @override
   String get guideSlackNote =>
@@ -1614,21 +1634,162 @@ class AppL10nEn extends AppL10n {
 
   @override
   String get guideJira1 =>
-      'Open id.atlassian.com/manage-profile/security/api-tokens and create an API token.';
+      'Open id.atlassian.com/manage-profile/security/api-tokens. On the page API Tokens, click Create API token: the left button, not the one with scopes.';
 
   @override
   String get guideJira2 =>
-      'Paste it below with your Jira address and the email of that Atlassian account.';
+      'Window “Create an API token”: as Name type AppRelease. As Expires on pick the latest date allowed, one year from today. Click Create.';
 
   @override
   String get guideJira3 =>
-      'Type the status tickets should move to, exactly as your board names it, for example Ready for QA.';
+      'The next window shows the token. Copy it, Atlassian shows it only once, and paste it below under API token.';
 
   @override
   String get guideJira4 =>
-      'Put the ticket key in the commit you push to the QA branch: \"DAMA-123 fix login\". Merging a branch named DAMA-123-login works too.';
+      'Jira site: the start of the address in your browser when Jira is open, like https://your-team.atlassian.net.';
+
+  @override
+  String get guideJira5 =>
+      'Atlassian account email: the email you sign in to Jira with. You can read it at id.atlassian.com/manage-profile/email.';
+
+  @override
+  String get guideJira6 =>
+      'Status to move tickets to: open any ticket in Jira and click its status. Type the one QA tickets should get exactly as written there, for example Ready for QA.';
+
+  @override
+  String get guideJira7 =>
+      'Project keys (optional): the letters before a ticket\'s number, DAMA for DAMA-123. Fill it in to move tickets of that project only. Empty: any ticket named in a commit is moved.';
+
+  @override
+  String get guideJira8 =>
+      'Save, then click Check on the saved connection. It confirms the account and the status without moving a ticket.';
 
   @override
   String get guideJiraNote =>
-      'A ticket only moves if your Jira workflow allows that step from where the ticket is. If it cannot, the build still goes out and Slack says which ticket stayed.';
+      'To use it, put the ticket key in the commit you push to the QA branch, like \"DAMA-123 fix login\". The ticket moves once the build is in Slack. The token stops working on its expiry date: create a new one before then and save it here.';
+
+  @override
+  String get navPreview => 'On my phone';
+
+  @override
+  String get trackPreview => 'Preview on a phone';
+
+  @override
+  String get previewTitle => 'See your app on your phone';
+
+  @override
+  String previewNewVersionTitle(String name) {
+    return 'New version of $name';
+  }
+
+  @override
+  String get previewSubtitle =>
+      'Upload your Flutter project as a zip. You get two QR codes back: one installs the app on an Android phone, one opens it on an iPhone.';
+
+  @override
+  String get previewHowTitle => 'How to make the zip';
+
+  @override
+  String get previewHow1 =>
+      'Find your project folder on your computer: the one that has a file named pubspec.yaml in it.';
+
+  @override
+  String get previewHow2 =>
+      'If there is a folder named build inside it, delete that folder. It is large and gets made again.';
+
+  @override
+  String get previewHow3 =>
+      'Zip the project folder. On a Mac: right-click it and choose Compress. On Windows: right-click it, Send to, Compressed (zipped) folder.';
+
+  @override
+  String get previewHow4 =>
+      'Choose the zip below and click Build my app. It takes about ten minutes; you can watch it happen.';
+
+  @override
+  String get previewName => 'Name of your app';
+
+  @override
+  String get previewNameHelper =>
+      'Only for this console. Filled in from the zip\'s name.';
+
+  @override
+  String get previewChoose => 'Choose the zip';
+
+  @override
+  String get previewNoFile => 'No file chosen yet';
+
+  @override
+  String get previewBuild => 'Build my app';
+
+  @override
+  String get previewUploading => 'Uploading…';
+
+  @override
+  String get previewChooseFirst => 'Choose the zip of your project first.';
+
+  @override
+  String get previewNotZip =>
+      'That is not a zip file. Compress the project folder and choose the file that ends in .zip.';
+
+  @override
+  String previewTooLarge(int mb) {
+    return 'The zip is $mb MB; the limit is 50 MB. Delete the folder named build inside your project, zip it again and choose the new file.';
+  }
+
+  @override
+  String get previewNotEnabled =>
+      'Previews are switched on per account while they are new. Write to publish@apprelease.store and we switch yours on.';
+
+  @override
+  String get previewUploadFailed =>
+      'The zip could not be uploaded. Check your connection and try again.';
+
+  @override
+  String get previewFailed =>
+      'The build could not be started. Try again in a moment.';
+
+  @override
+  String get releaseLimitReached =>
+      'You have used all of this month\'s builds.';
+
+  @override
+  String get previewNote =>
+      'Flutter projects only. On Android the real app is installed. Apple does not allow installing an app outside the App Store, so on an iPhone the app opens in the browser; a few features that need the phone itself, like the camera or notifications, may not work there. Both links stay online for 7 days.';
+
+  @override
+  String get previewUploadNew => 'Upload a new version';
+
+  @override
+  String get previewUploadedProject => 'Uploaded project';
+
+  @override
+  String get previewReadyTitle => 'Your app is ready';
+
+  @override
+  String get previewReadyBody =>
+      'Point your phone\'s camera at the code that matches your phone.';
+
+  @override
+  String get previewAndroidTitle => 'Android';
+
+  @override
+  String get previewAndroidBody =>
+      'Scan, download the file and open it. Android asks once to allow installing from your browser: allow it, then tap Install.';
+
+  @override
+  String get previewIphoneTitle => 'iPhone';
+
+  @override
+  String get previewIphoneBody =>
+      'Scan and the app opens in Safari. To keep it on the home screen: Share, then Add to Home Screen.';
+
+  @override
+  String get previewNoWeb =>
+      'The iPhone link could not be made: this project uses something that does not run in a browser. The log says what.';
+
+  @override
+  String get previewCopyLink => 'Copy link';
+
+  @override
+  String get previewOpenLink => 'Open';
 }

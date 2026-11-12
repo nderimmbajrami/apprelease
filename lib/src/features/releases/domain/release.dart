@@ -16,7 +16,8 @@ enum StepStatus { pending, running, succeeded, failed, skipped }
 
 /// Where the build goes. The first four are Google Play tracks, then the
 /// two App Store Connect destinations, then the two QA builds: nothing is
-/// published, the testers get the build and are told in Slack.
+/// published, the testers get the build and are told in Slack. Last, the
+/// preview of an uploaded project.
 enum ReleaseTrack {
   internal(Platform.android),
   alpha(Platform.android),
@@ -29,16 +30,25 @@ enum ReleaseTrack {
   qa(Platform.android),
 
   /// A TestFlight build, announced in the team's Slack channel.
-  qaTestflight(Platform.ios);
+  qaTestflight(Platform.ios),
+
+  /// "See it on my phone": an APK and a web version, each behind a link.
+  /// One build makes both; it is filed under Android because that is the
+  /// machine that builds it.
+  preview(Platform.android);
 
   const ReleaseTrack(this.platform);
 
   final Platform platform;
 
+  /// The destinations a release can be sent to. A preview is not one: it
+  /// starts from its own page.
   static List<ReleaseTrack> forPlatform(Platform platform) => [
     for (final track in values)
-      if (track.platform == platform) track,
+      if (track.platform == platform && track != preview) track,
   ];
+
+  bool get isPreview => this == preview;
 
   /// A build for the testers, not for a store.
   bool get isQa => this == qa || this == qaTestflight;
@@ -132,6 +142,7 @@ class Release {
     this.steps = const [],
     this.artifacts = const [],
     this.errorMessage,
+    this.previewUrl,
   });
 
   final String id;
@@ -168,6 +179,22 @@ class Release {
   /// Why it failed, in one line.
   final String? errorMessage;
 
+  /// The folder a preview was published to, with a trailing slash. Null
+  /// for every other release and until the preview is out.
+  final String? previewUrl;
+
+  /// The link that downloads the Android app of a preview.
+  String? get previewApkUrl {
+    final apk = artifacts.where((a) => a.endsWith('.apk')).firstOrNull;
+    return previewUrl == null || apk == null ? null : '$previewUrl$apk';
+  }
+
+  /// The link that opens a preview in a browser: the one for an iPhone.
+  /// Null when the project could not be built for the web.
+  String? get previewWebUrl => previewUrl == null || !artifacts.contains('web')
+      ? null
+      : '${previewUrl}web/';
+
   /// Pushed releases carry this until the runner has read pubspec.yaml.
   static const autoVersion = 'auto';
 
@@ -201,6 +228,7 @@ class Release {
     List<ReleaseStep>? steps,
     List<String>? artifacts,
     String? errorMessage,
+    String? previewUrl,
   }) => Release(
     id: id,
     appId: appId,
@@ -220,6 +248,7 @@ class Release {
     steps: steps ?? this.steps,
     artifacts: artifacts ?? this.artifacts,
     errorMessage: errorMessage ?? this.errorMessage,
+    previewUrl: previewUrl ?? this.previewUrl,
   );
 }
 
@@ -235,6 +264,14 @@ List<ReleaseStep> pipelineSteps(
   ReleaseTrack? track,
 }) {
   final names = switch (platform) {
+    _ when track == ReleaseTrack.preview => const [
+      'Unpack the project',
+      'Set up Flutter',
+      'Get packages',
+      'Build the Android app',
+      'Build the web version',
+      'Publish the preview',
+    ],
     Platform.android when track == ReleaseTrack.qa => const [
       'Check out repository',
       'Set up Flutter',
@@ -372,4 +409,9 @@ class ReleaseUsage {
 /// The database refused a release: the team used its monthly allowance.
 class ReleaseLimitReached implements Exception {
   const ReleaseLimitReached();
+}
+
+/// The database refused a preview: they are switched on per account.
+class PreviewsNotEnabled implements Exception {
+  const PreviewsNotEnabled();
 }

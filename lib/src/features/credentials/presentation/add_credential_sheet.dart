@@ -502,6 +502,7 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
           decoration: InputDecoration(
             labelText: l10n.jiraSite,
             hintText: 'https://your-team.atlassian.net',
+            helperText: l10n.jiraSiteHelper,
           ),
           keyboardType: TextInputType.url,
           validator: (v) {
@@ -528,7 +529,10 @@ class _AddCredentialSheetState extends ConsumerState<_AddCredentialSheet> {
         const SizedBox(height: Gap.md),
         TextFormField(
           controller: _token,
-          decoration: InputDecoration(labelText: l10n.jiraToken),
+          decoration: InputDecoration(
+            labelText: l10n.jiraToken,
+            helperText: l10n.jiraTokenHelper,
+          ),
           obscureText: true,
           validator: validators.required,
         ),

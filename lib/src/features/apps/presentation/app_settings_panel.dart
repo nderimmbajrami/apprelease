@@ -200,7 +200,7 @@ class _AppSettingsPanelState extends ConsumerState<AppSettingsPanel> {
                   TextFormField(
                     controller: _repoUrl,
                     decoration: InputDecoration(labelText: l10n.repoUrl),
-                    validator: validators.repoUrl,
+                    validator: widget.app.isUpload ? null : validators.repoUrl,
                   ),
                   const SizedBox(height: Gap.md),
                   Row(

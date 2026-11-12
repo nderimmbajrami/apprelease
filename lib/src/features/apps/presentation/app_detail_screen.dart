@@ -68,7 +68,11 @@ class AppDetailScreen extends ConsumerWidget {
             PageHeader(
               onBack: () => context.goNamed(AppRoute.apps.name),
               title: Text(app.name),
-              subtitle: Text('${app.repoUrl} · ${app.branch}'),
+              subtitle: Text(
+                app.isUpload
+                    ? l10n.previewUploadedProject
+                    : '${app.repoUrl} · ${app.branch}',
+              ),
               actions: [
                 if (app.hasAndroid)
                   AppPill(label: Platform.android.label, icon: Icons.android),
@@ -76,8 +80,15 @@ class AppDetailScreen extends ConsumerWidget {
                   AppPill(label: Platform.ios.label, icon: Icons.apple),
                 FilledButton.icon(
                   onPressed: () => _startRelease(context, app),
-                  icon: const Icon(Icons.rocket_launch_outlined, size: 18),
-                  label: Text(l10n.startRelease),
+                  icon: Icon(
+                    app.isUpload
+                        ? Icons.upload_file_outlined
+                        : Icons.rocket_launch_outlined,
+                    size: 18,
+                  ),
+                  label: Text(
+                    app.isUpload ? l10n.previewUploadNew : l10n.startRelease,
+                  ),
                 ),
               ],
             ),
@@ -121,6 +132,12 @@ class AppDetailScreen extends ConsumerWidget {
     BuildContext context,
     AppProject app,
   ) async {
+    // An uploaded project has no repository to publish from: its next
+    // build starts with a new zip.
+    if (app.isUpload) {
+      context.goNamed(AppRoute.preview.name, queryParameters: {'app': app.id});
+      return;
+    }
     final id = await showStartReleaseSheet(context, app);
     if (id == null || !context.mounted) return;
     ScaffoldMessenger.of(

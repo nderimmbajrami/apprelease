@@ -10,7 +10,7 @@ bin/runner.dart          the process: poll → claim → Pipeline.run()
 lib/src/api.dart         the four Supabase calls it needs (REST, service role)
 lib/src/config.dart      apprelease.yaml → WorkflowConfig
 lib/src/pipeline.dart    the seven steps, the log sink, secret masking
-lib/src/steps/           checkout · signing · versioning · publish
+lib/src/steps/           checkout · signing · versioning · publish · qa · preview
 lib/src/stores/          our own Google Play and App Store Connect clients
 ```
 
@@ -65,6 +65,55 @@ Slack and Jira are credentials of the kinds `slack` (bot token; meta
 `channel`) and `jira` (API token; meta `site`, `email`, `status`,
 `projects`). The app's own connection wins over a shared one; one linked
 to another app is never used.
+
+## Previews ("see it on my phone")
+
+A release whose track is `preview` builds an uploaded project, for people
+who made an app with AI and have no Git (`lib/src/steps/preview.dart`):
+
+1. The zip is downloaded from the private `sources` bucket and unpacked.
+   The project is the shallowest folder with a `pubspec.yaml`; its `build`
+   and `.dart_tool` folders are thrown away.
+2. `flutter build apk --release`. A project whose release build wants a
+   `key.properties` that was not uploaded is built as debug instead.
+3. `flutter build web`, with the base href of the address it will have. A
+   project that cannot run in a browser loses the iPhone link, not the
+   build.
+4. Both are copied to `PREVIEW_DIR/<release id>/` and the release gets
+   `preview_url`. The console draws the two QR codes from it. Folders older
+   than `PREVIEW_KEEP_DAYS` are removed at the next publish.
+
+A missing `android` or `web` folder is added with `flutter create`.
+
+When the build is over, passed or failed, the zip is deleted from the
+`sources` bucket: the next build of that app starts with a new upload.
+
+The runner only writes files. Something has to serve `PREVIEW_DIR` at
+`PREVIEW_BASE_URL`, over https (an iPhone will not open the app otherwise):
+
+```bash
+dart run bin/serve_previews.dart                 # serves PREVIEW_DIR on PREVIEW_PORT (8787)
+cloudflared tunnel --url http://localhost:8787   # gives it a public https address
+```
+
+Put the address the tunnel prints into `PREVIEW_BASE_URL` and restart the
+runner. A quick tunnel gets a new address every time it starts, and links
+already handed out stop working; a named tunnel on your own domain
+(`preview.apprelease.store`) keeps one address. A web host works as well:
+sync `PREVIEW_DIR` to it and point `PREVIEW_BASE_URL` there.
+
+Without `PREVIEW_DIR` and `PREVIEW_BASE_URL` a preview fails in its first
+step and says so.
+
+To try a zip without the console or Supabase:
+
+```bash
+dart run tool/preview_local.dart ~/Downloads/my_app.zip "My App"
+```
+
+Previews run a stranger's code on this machine. They are off for every
+team until switched on (`teams.previews_enabled`, see the `previews`
+migration).
 
 ## Secrets
 

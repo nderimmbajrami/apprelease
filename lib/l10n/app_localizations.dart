@@ -2514,13 +2514,13 @@ abstract class AppL10n {
   /// No description provided for @kindBuildFile.
   ///
   /// In en, this message translates to:
-  /// **'Build file'**
+  /// **'Build file (optional)'**
   String get kindBuildFile;
 
   /// No description provided for @kindBuildFileBody.
   ///
   /// In en, this message translates to:
-  /// **'A file the build needs that is not in the repository: google-services.json, GoogleService-Info.plist, a .env. Kept encrypted; written into the checkout right before the build and deleted with it.'**
+  /// **'Optional. Only for a build that needs a file the repository leaves out, for example google-services.json if the app uses Firebase, GoogleService-Info.plist, or a .env. Kept encrypted; written into the checkout right before the build and deleted with it.'**
   String get kindBuildFileBody;
 
   /// No description provided for @anyFile.
@@ -2550,7 +2550,7 @@ abstract class AppL10n {
   /// No description provided for @guideFile1.
   ///
   /// In en, this message translates to:
-  /// **'Pick the file from your project, for example android/app/google-services.json from Firebase.'**
+  /// **'Skip this if every file the build needs is in Git. Otherwise pick the file from your project, for example android/app/google-services.json if the app uses Firebase.'**
   String get guideFile1;
 
   /// No description provided for @guideFile2.
@@ -2568,7 +2568,7 @@ abstract class AppL10n {
   /// No description provided for @guideFileNote.
   ///
   /// In en, this message translates to:
-  /// **'A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.'**
+  /// **'Apps without Firebase build fine without any file here. A build that fails with \'google-services.json is missing\' needs exactly this: the file is in your .gitignore, so the build machine never gets it from Git.'**
   String get guideFileNote;
 
   /// No description provided for @logQuiet.
@@ -2691,6 +2691,18 @@ abstract class AppL10n {
   /// **'Jira site'**
   String get jiraSite;
 
+  /// No description provided for @jiraSiteHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The start of the address in your browser when Jira is open, up to .atlassian.net.'**
+  String get jiraSiteHelper;
+
+  /// No description provided for @jiraTokenHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'From id.atlassian.com → Security → API tokens → Create API token (without scopes).'**
+  String get jiraTokenHelper;
+
   /// No description provided for @jiraSiteInvalid.
   ///
   /// In en, this message translates to:
@@ -2706,7 +2718,7 @@ abstract class AppL10n {
   /// No description provided for @jiraEmailHelper.
   ///
   /// In en, this message translates to:
-  /// **'The account the API token belongs to. It needs permission to move tickets.'**
+  /// **'The email you sign in to Jira with, on the account that made the token. That account needs permission to move tickets.'**
   String get jiraEmailHelper;
 
   /// No description provided for @jiraToken.
@@ -2724,7 +2736,7 @@ abstract class AppL10n {
   /// No description provided for @jiraStatusHelper.
   ///
   /// In en, this message translates to:
-  /// **'The name of the status on your board, exactly as Jira shows it.'**
+  /// **'Open a ticket in Jira and click its status: type the name exactly as that list shows it.'**
   String get jiraStatusHelper;
 
   /// No description provided for @jiraProjects.
@@ -2736,7 +2748,7 @@ abstract class AppL10n {
   /// No description provided for @jiraProjectsHelper.
   ///
   /// In en, this message translates to:
-  /// **'Only tickets of these projects are moved. Empty: any key like ABC-123 that is a ticket in your Jira.'**
+  /// **'The letters before a ticket\'s number on your board: DAMA for DAMA-123. Only tickets of these projects are moved. Empty: any ticket named in a commit.'**
   String get jiraProjectsHelper;
 
   /// No description provided for @checkingConnection.
@@ -2760,32 +2772,50 @@ abstract class AppL10n {
   /// No description provided for @guideSlack1.
   ///
   /// In en, this message translates to:
-  /// **'Open api.slack.com/apps → Create New App → From scratch. Name it (for example AppRelease) and pick your workspace.'**
+  /// **'Open api.slack.com/apps. On the page Your Apps, click Create New App.'**
   String get guideSlack1;
 
   /// No description provided for @guideSlack2.
   ///
   /// In en, this message translates to:
-  /// **'OAuth & Permissions → Bot Token Scopes: add chat:write and files:write.'**
+  /// **'Window “Create new app”: under From scratch, click Paste a manifest, then Continue. Do not pick AI agent or Starter app: they add code this does not need.'**
   String get guideSlack2;
 
   /// No description provided for @guideSlack3.
   ///
   /// In en, this message translates to:
-  /// **'Install to Workspace, then copy the Bot User OAuth Token (starts with xoxb-).'**
+  /// **'Window “Create from a manifest”: on the JSON tab, select everything in the box and replace it with this text:'**
   String get guideSlack3;
 
   /// No description provided for @guideSlack4.
   ///
   /// In en, this message translates to:
-  /// **'In Slack, open the QA channel and type /invite @AppRelease (the name you gave the app).'**
+  /// **'Same window: under Workspace, choose your workspace. Click Next, then Create.'**
   String get guideSlack4;
 
   /// No description provided for @guideSlack5.
   ///
   /// In en, this message translates to:
-  /// **'Open the channel details and copy the Channel ID from the bottom. Paste both below.'**
+  /// **'Page “Allow AppRelease to access Slack”: it lists two actions, send messages and upload files. Click Allow.'**
   String get guideSlack5;
+
+  /// No description provided for @guideSlack6.
+  ///
+  /// In en, this message translates to:
+  /// **'Window “AppRelease is ready!”: click the copy icon next to Bot token (starts with xoxb-) and paste it below. Ignore the App token and the steps under it (Install Slack CLI and so on), then close the window.'**
+  String get guideSlack6;
+
+  /// No description provided for @guideSlack7.
+  ///
+  /// In en, this message translates to:
+  /// **'In Slack, in the channel where QA should get builds: send /invite @AppRelease. The bot posts only in channels it is invited to and cannot read messages.'**
+  String get guideSlack7;
+
+  /// No description provided for @guideSlack8.
+  ///
+  /// In en, this message translates to:
+  /// **'Same channel: click its name at the top. In the window that opens, the Channel ID is at the bottom (like C0123ABCDEF). Paste it below.'**
+  String get guideSlack8;
 
   /// No description provided for @guideSlackNote.
   ///
@@ -2796,32 +2826,266 @@ abstract class AppL10n {
   /// No description provided for @guideJira1.
   ///
   /// In en, this message translates to:
-  /// **'Open id.atlassian.com/manage-profile/security/api-tokens and create an API token.'**
+  /// **'Open id.atlassian.com/manage-profile/security/api-tokens. On the page API Tokens, click Create API token: the left button, not the one with scopes.'**
   String get guideJira1;
 
   /// No description provided for @guideJira2.
   ///
   /// In en, this message translates to:
-  /// **'Paste it below with your Jira address and the email of that Atlassian account.'**
+  /// **'Window “Create an API token”: as Name type AppRelease. As Expires on pick the latest date allowed, one year from today. Click Create.'**
   String get guideJira2;
 
   /// No description provided for @guideJira3.
   ///
   /// In en, this message translates to:
-  /// **'Type the status tickets should move to, exactly as your board names it, for example Ready for QA.'**
+  /// **'The next window shows the token. Copy it, Atlassian shows it only once, and paste it below under API token.'**
   String get guideJira3;
 
   /// No description provided for @guideJira4.
   ///
   /// In en, this message translates to:
-  /// **'Put the ticket key in the commit you push to the QA branch: \"DAMA-123 fix login\". Merging a branch named DAMA-123-login works too.'**
+  /// **'Jira site: the start of the address in your browser when Jira is open, like https://your-team.atlassian.net.'**
   String get guideJira4;
+
+  /// No description provided for @guideJira5.
+  ///
+  /// In en, this message translates to:
+  /// **'Atlassian account email: the email you sign in to Jira with. You can read it at id.atlassian.com/manage-profile/email.'**
+  String get guideJira5;
+
+  /// No description provided for @guideJira6.
+  ///
+  /// In en, this message translates to:
+  /// **'Status to move tickets to: open any ticket in Jira and click its status. Type the one QA tickets should get exactly as written there, for example Ready for QA.'**
+  String get guideJira6;
+
+  /// No description provided for @guideJira7.
+  ///
+  /// In en, this message translates to:
+  /// **'Project keys (optional): the letters before a ticket\'s number, DAMA for DAMA-123. Fill it in to move tickets of that project only. Empty: any ticket named in a commit is moved.'**
+  String get guideJira7;
+
+  /// No description provided for @guideJira8.
+  ///
+  /// In en, this message translates to:
+  /// **'Save, then click Check on the saved connection. It confirms the account and the status without moving a ticket.'**
+  String get guideJira8;
 
   /// No description provided for @guideJiraNote.
   ///
   /// In en, this message translates to:
-  /// **'A ticket only moves if your Jira workflow allows that step from where the ticket is. If it cannot, the build still goes out and Slack says which ticket stayed.'**
+  /// **'To use it, put the ticket key in the commit you push to the QA branch, like \"DAMA-123 fix login\". The ticket moves once the build is in Slack. The token stops working on its expiry date: create a new one before then and save it here.'**
   String get guideJiraNote;
+
+  /// No description provided for @navPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'On my phone'**
+  String get navPreview;
+
+  /// No description provided for @trackPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview on a phone'**
+  String get trackPreview;
+
+  /// No description provided for @previewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See your app on your phone'**
+  String get previewTitle;
+
+  /// No description provided for @previewNewVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New version of {name}'**
+  String previewNewVersionTitle(String name);
+
+  /// No description provided for @previewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload your Flutter project as a zip. You get two QR codes back: one installs the app on an Android phone, one opens it on an iPhone.'**
+  String get previewSubtitle;
+
+  /// No description provided for @previewHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to make the zip'**
+  String get previewHowTitle;
+
+  /// No description provided for @previewHow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Find your project folder on your computer: the one that has a file named pubspec.yaml in it.'**
+  String get previewHow1;
+
+  /// No description provided for @previewHow2.
+  ///
+  /// In en, this message translates to:
+  /// **'If there is a folder named build inside it, delete that folder. It is large and gets made again.'**
+  String get previewHow2;
+
+  /// No description provided for @previewHow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Zip the project folder. On a Mac: right-click it and choose Compress. On Windows: right-click it, Send to, Compressed (zipped) folder.'**
+  String get previewHow3;
+
+  /// No description provided for @previewHow4.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the zip below and click Build my app. It takes about ten minutes; you can watch it happen.'**
+  String get previewHow4;
+
+  /// No description provided for @previewName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of your app'**
+  String get previewName;
+
+  /// No description provided for @previewNameHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Only for this console. Filled in from the zip\'s name.'**
+  String get previewNameHelper;
+
+  /// No description provided for @previewChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the zip'**
+  String get previewChoose;
+
+  /// No description provided for @previewNoFile.
+  ///
+  /// In en, this message translates to:
+  /// **'No file chosen yet'**
+  String get previewNoFile;
+
+  /// No description provided for @previewBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Build my app'**
+  String get previewBuild;
+
+  /// No description provided for @previewUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get previewUploading;
+
+  /// No description provided for @previewChooseFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the zip of your project first.'**
+  String get previewChooseFirst;
+
+  /// No description provided for @previewNotZip.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a zip file. Compress the project folder and choose the file that ends in .zip.'**
+  String get previewNotZip;
+
+  /// No description provided for @previewTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The zip is {mb} MB; the limit is 50 MB. Delete the folder named build inside your project, zip it again and choose the new file.'**
+  String previewTooLarge(int mb);
+
+  /// No description provided for @previewNotEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Previews are switched on per account while they are new. Write to publish@apprelease.store and we switch yours on.'**
+  String get previewNotEnabled;
+
+  /// No description provided for @previewUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The zip could not be uploaded. Check your connection and try again.'**
+  String get previewUploadFailed;
+
+  /// No description provided for @previewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The build could not be started. Try again in a moment.'**
+  String get previewFailed;
+
+  /// No description provided for @releaseLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You have used all of this month\'s builds.'**
+  String get releaseLimitReached;
+
+  /// No description provided for @previewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Flutter projects only. On Android the real app is installed. Apple does not allow installing an app outside the App Store, so on an iPhone the app opens in the browser; a few features that need the phone itself, like the camera or notifications, may not work there. Both links stay online for 7 days.'**
+  String get previewNote;
+
+  /// No description provided for @previewUploadNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a new version'**
+  String get previewUploadNew;
+
+  /// No description provided for @previewUploadedProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded project'**
+  String get previewUploadedProject;
+
+  /// No description provided for @previewReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your app is ready'**
+  String get previewReadyTitle;
+
+  /// No description provided for @previewReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your phone\'s camera at the code that matches your phone.'**
+  String get previewReadyBody;
+
+  /// No description provided for @previewAndroidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android'**
+  String get previewAndroidTitle;
+
+  /// No description provided for @previewAndroidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan, download the file and open it. Android asks once to allow installing from your browser: allow it, then tap Install.'**
+  String get previewAndroidBody;
+
+  /// No description provided for @previewIphoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone'**
+  String get previewIphoneTitle;
+
+  /// No description provided for @previewIphoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan and the app opens in Safari. To keep it on the home screen: Share, then Add to Home Screen.'**
+  String get previewIphoneBody;
+
+  /// No description provided for @previewNoWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'The iPhone link could not be made: this project uses something that does not run in a browser. The log says what.'**
+  String get previewNoWeb;
+
+  /// No description provided for @previewCopyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get previewCopyLink;
+
+  /// No description provided for @previewOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get previewOpenLink;
 }
 
 class _AppL10nDelegate extends LocalizationsDelegate<AppL10n> {

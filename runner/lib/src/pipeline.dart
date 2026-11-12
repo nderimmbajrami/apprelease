@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 import 'api.dart';
 import 'config.dart';
 import 'steps/checkout.dart';
+import 'steps/ios_version.dart';
+import 'steps/preview.dart';
 import 'steps/publish.dart';
 import 'steps/qa.dart';
 import 'steps/signing.dart';
@@ -95,6 +97,7 @@ class Pipeline {
     required this.app,
     required this.secretsKey,
     required this.workspace,
+    this.preview,
   }) : log = LogSink(api, release['id'] as String);
 
   final SupabaseApi api;
@@ -103,6 +106,9 @@ class Pipeline {
   final String secretsKey;
   final Directory workspace;
   final LogSink log;
+
+  /// Where previews are published; null on a machine not set up for them.
+  final PreviewSettings? preview;
 
   String get releaseId => release['id'] as String;
   String get platform => release['platform'] as String;
@@ -132,7 +138,12 @@ class Pipeline {
     // A QA build ends with "Send to QA": on Android in place of the upload
     // to Google Play, on iOS after the upload to TestFlight.
     final qa = isQaTrack(release['track']);
-    final expected = qa && platform == 'ios' ? 8 : 7;
+    final isPreview = isPreviewTrack(release['track']);
+    final expected = isPreview
+        ? 6
+        : qa && platform == 'ios'
+        ? 8
+        : 7;
     if (steps.length < expected) {
       await api.updateRelease(releaseId, {
         'status': 'failed',
@@ -150,20 +161,29 @@ class Pipeline {
       'Runner claimed release #${release['number']} · ${app['name']} · $platform',
     );
     try {
-      await _step(0, _checkout);
-      await _step(1, _toolchain);
-      await _step(2, _packages);
-      if (platform == 'android') {
-        await _step(3, _versioning);
-        await _step(4, _buildScripts);
-        await _step(5, _androidSigningCheck);
-        await _step(6, qa ? _sendToQa : _publish);
+      if (isPreview) {
+        await _step(0, _previewUnpack);
+        await _step(1, _toolchain);
+        await _step(2, _packages);
+        await _step(3, _previewAndroid);
+        await _step(4, _previewWeb);
+        await _step(5, _previewPublish);
       } else {
-        await _step(3, _iosSigning);
-        await _step(4, _versioning);
-        await _step(5, _buildScripts);
-        await _step(6, _publish);
-        if (qa) await _step(7, _sendToQa);
+        await _step(0, _checkout);
+        await _step(1, _toolchain);
+        await _step(2, _packages);
+        if (platform == 'android') {
+          await _step(3, _versioning);
+          await _step(4, _buildScripts);
+          await _step(5, _androidSigningCheck);
+          await _step(6, qa ? _sendToQa : _publish);
+        } else {
+          await _step(3, _iosSigning);
+          await _step(4, _versioning);
+          await _step(5, _buildScripts);
+          await _step(6, _publish);
+          if (qa) await _step(7, _sendToQa);
+        }
       }
       await api.updateRelease(releaseId, {
         'status': 'succeeded',
@@ -171,7 +191,9 @@ class Pipeline {
         'artifacts': [for (final a in artifacts) p.basename(a)],
       });
       await log(
-        '${qa ? 'Sent to QA:' : 'Released'} ${release['version_name']} (${env['AR_BUILD_NUMBER']}) · ${DateTime.now().difference(started).inSeconds}s',
+        isPreview
+            ? 'Preview of ${release['version_name']} is ready · ${DateTime.now().difference(started).inSeconds}s'
+            : '${qa ? 'Sent to QA:' : 'Released'} ${release['version_name']} (${env['AR_BUILD_NUMBER']}) · ${DateTime.now().difference(started).inSeconds}s',
         level: 'success',
       );
     } on Cancelled {
@@ -193,6 +215,16 @@ class Pipeline {
       await log.flush();
       // Whatever happened, neither the keys nor the source stay on disk.
       await SigningFiles.cleanUp(env);
+      // Nor does an uploaded zip stay in storage: built or not, the next
+      // build starts with a new upload.
+      final source = '${app['source_zip'] ?? ''}';
+      if (isPreview && source.isNotEmpty) {
+        try {
+          await api.deleteSource(source);
+        } catch (error) {
+          stderr.writeln('could not remove the uploaded zip: $error');
+        }
+      }
       try {
         final dir = Directory(p.join(workspace.path, releaseId));
         await _keepCrashLogs(dir);
@@ -258,21 +290,7 @@ class Pipeline {
     await api.updateRelease(releaseId, {'commit': commit.substring(0, 7)});
     _commitMessage = await Checkout.message(buildDir);
     await _writeBuildFiles(stepId);
-
-    // A pushed release has no version yet; pubspec.yaml knows it.
-    if (release['version_name'] == 'auto') {
-      final pubspec = File(p.join(buildDir.path, 'pubspec.yaml'));
-      final match = pubspec.existsSync()
-          ? RegExp(
-              r'^version:\s*(\d+\.\d+\.\d+)',
-              multiLine: true,
-            ).firstMatch(pubspec.readAsStringSync())
-          : null;
-      final version = match?.group(1) ?? '0.0.0';
-      release['version_name'] = version;
-      await api.updateRelease(releaseId, {'version_name': version});
-      await log('Version $version from pubspec.yaml', stepId: stepId);
-    }
+    await _readVersion(stepId);
     if (env['AR_BRANCH']!.startsWith('v') &&
         RegExp(r'^v?\d+\.\d+\.\d+').hasMatch(env['AR_BRANCH']!)) {
       env['AR_TAG'] = env['AR_BRANCH']!;
@@ -331,6 +349,84 @@ class Pipeline {
     env.addAll(workflow.vars);
   }
 
+  /// A pushed release or a preview has no version yet; pubspec.yaml knows
+  /// it.
+  Future<void> _readVersion(String stepId) async {
+    if (release['version_name'] != 'auto') return;
+    final pubspec = File(p.join(buildDir.path, 'pubspec.yaml'));
+    final match = pubspec.existsSync()
+        ? RegExp(
+            r'^version:\s*(\d+\.\d+\.\d+)',
+            multiLine: true,
+          ).firstMatch(pubspec.readAsStringSync())
+        : null;
+    final version = match?.group(1) ?? '0.0.0';
+    release['version_name'] = version;
+    await api.updateRelease(releaseId, {'version_name': version});
+    await log('Version $version from pubspec.yaml', stepId: stepId);
+  }
+
+  // ---------------------------------------------------------------- preview
+
+  late final Preview _preview = Preview(
+    api: api,
+    log: log,
+    settings: preview!,
+    exec: exec,
+  );
+  File? _previewApk;
+  Directory? _previewWebDir;
+
+  /// The uploaded zip, or the repository of an app that has one: either
+  /// can be previewed.
+  Future<void> _previewUnpack(String stepId) async {
+    if (preview == null) {
+      throw StepFailed(
+        'This build machine is not set up for previews: PREVIEW_DIR and '
+        'PREVIEW_BASE_URL are missing from its settings.',
+      );
+    }
+    final source = '${app['source_zip'] ?? ''}';
+    if (source.isNotEmpty) {
+      buildDir = await _preview.unpack(
+        sourcePath: source,
+        into: Directory(p.join(workspace.path, releaseId)),
+        stepId: stepId,
+      );
+    } else {
+      buildDir = await Checkout(log: log, stepId: stepId).run(
+        workspace: workspace,
+        repoUrl: app['repo_url'] as String,
+        branch: release['branch'] as String,
+        releaseId: releaseId,
+      );
+    }
+    env['AR_BUILD_DIR'] = buildDir.path;
+    env['AR_BUILD_ID'] = releaseId;
+    await _writeBuildFiles(stepId);
+    await _readVersion(stepId);
+  }
+
+  Future<void> _previewAndroid(String stepId) async {
+    _previewApk = await _preview.buildAndroid(buildDir, stepId);
+  }
+
+  Future<void> _previewWeb(String stepId) async {
+    _previewWebDir = await _preview.buildWeb(buildDir, releaseId, stepId);
+  }
+
+  Future<void> _previewPublish(String stepId) async {
+    artifacts.addAll(
+      await _preview.publish(
+        releaseId: releaseId,
+        appName: '${app['name']}',
+        apk: _previewApk!,
+        web: _previewWebDir,
+        stepId: stepId,
+      ),
+    );
+  }
+
   /// Files the build needs that the repository leaves out
   /// (google-services.json, .env): kept encrypted under Credentials and
   /// written into the checkout here. They go when the checkout goes.
@@ -363,7 +459,11 @@ class Pipeline {
   }
 
   Future<void> _toolchain(String stepId) async {
-    if (workflow.flutter != 'stable' && workflow.flutter != 'fvm') {
+    // A preview has no workflow: it builds with the installed Flutter.
+    final isPreview = isPreviewTrack(release['track']);
+    if (!isPreview &&
+        workflow.flutter != 'stable' &&
+        workflow.flutter != 'fvm') {
       await log(
         'flutter version ${workflow.flutter} requested; using the installed one',
         stepId: stepId,
@@ -415,7 +515,47 @@ class Pipeline {
     env['AR_BUILD_NUMBER'] = '$next';
     await api.updateRelease(releaseId, {'build_number': next});
     await log('AR_BUILD_NUMBER=$next', stepId: stepId, level: 'command');
+    if (platform == 'ios') await _writeXcodeVersion(stepId, next);
     await _writeVersion(stepId, release['version_name'] as String, next);
+  }
+
+  /// A project with its version typed into Xcode builds that version, not
+  /// the one in pubspec.yaml: a release moved past an approved version
+  /// would still upload the approved one and be refused. The fixed number
+  /// is treated like the project's own version (never lowered) and then
+  /// set to what is being released.
+  Future<void> _writeXcodeVersion(String stepId, int build) async {
+    final pbxproj = File(
+      p.join(buildDir.path, 'ios', 'Runner.xcodeproj', 'project.pbxproj'),
+    );
+    final plist = File(p.join(buildDir.path, 'ios', 'Runner', 'Info.plist'));
+    final pbxText = pbxproj.existsSync() ? pbxproj.readAsStringSync() : null;
+    final plistText = plist.existsSync() ? plist.readAsStringSync() : null;
+    final fixed = xcodeFixedVersion(pbxproj: pbxText, plist: plistText);
+    if (fixed == null) return;
+
+    var version = release['version_name'] as String;
+    if (compareVersions(fixed, version) > 0) {
+      await log(
+        'The Xcode project has version $fixed, above $version; releasing '
+        'as $fixed',
+        stepId: stepId,
+      );
+      version = fixed;
+      release['version_name'] = fixed;
+      await api.updateRelease(releaseId, {'version_name': fixed});
+    }
+    if (pbxText != null) {
+      pbxproj.writeAsStringSync(setPbxprojVersion(pbxText, version, build));
+    }
+    if (plistText != null) {
+      plist.writeAsStringSync(setPlistVersion(plistText, version, build));
+    }
+    await log(
+      'The version is fixed in the Xcode project ($fixed) instead of coming '
+      'from pubspec.yaml; set to $version ($build) for this build',
+      stepId: stepId,
+    );
   }
 
   /// `flutter build` takes the version from pubspec.yaml; the release's own

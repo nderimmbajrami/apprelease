@@ -13,6 +13,7 @@ import '../features/auth/presentation/sign_up_screen.dart';
 import '../features/credentials/presentation/credentials_screen.dart';
 import '../features/home/presentation/dashboard_screen.dart';
 import '../features/onboarding/presentation/setup_screen.dart';
+import '../features/preview/presentation/preview_screen.dart';
 import '../features/releases/presentation/release_detail_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import 'app_routes.dart';
@@ -162,6 +163,14 @@ GoRouter goRouter(Ref ref) {
                 ],
               ),
             ],
+          ),
+          GoRoute(
+            path: AppRoute.preview.path,
+            name: AppRoute.preview.name,
+            pageBuilder: (context, state) => _instant(
+              state,
+              PreviewScreen(appId: state.uri.queryParameters['app']),
+            ),
           ),
           GoRoute(
             path: AppRoute.credentials.path,
